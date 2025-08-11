@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_11_191002) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_11_191041) do
   create_table "categories", force: :cascade do |t|
     t.string "name", null: false
     t.text "description"
@@ -25,6 +25,23 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_11_191002) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["manager_id"], name: "index_locations_on_manager_id"
+  end
+
+  create_table "products", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "sku", null: false
+    t.text "description"
+    t.decimal "unit_cost", precision: 10, scale: 2
+    t.decimal "selling_price", precision: 10, scale: 2
+    t.integer "reorder_point", default: 10
+    t.integer "lead_time_days", default: 7
+    t.integer "category_id", null: false
+    t.integer "supplier_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["category_id"], name: "index_products_on_category_id"
+    t.index ["sku"], name: "index_products_on_sku", unique: true
+    t.index ["supplier_id"], name: "index_products_on_supplier_id"
   end
 
   create_table "suppliers", force: :cascade do |t|
@@ -50,5 +67,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_11_191002) do
   end
 
   add_foreign_key "locations", "users", column: "manager_id"
+  add_foreign_key "products", "categories"
+  add_foreign_key "products", "suppliers"
   add_foreign_key "users", "locations"
 end
