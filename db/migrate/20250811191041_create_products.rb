@@ -13,7 +13,7 @@ class CreateProducts < ActiveRecord::Migration[7.0]
 
       t.timestamps
     end
-    
+
     add_index :products, :sku, unique: true
   end
 end

@@ -11,7 +11,7 @@ class CreatePurchaseOrders < ActiveRecord::Migration[7.0]
 
       t.timestamps
     end
-    
+
     add_index :purchase_orders, :order_number, unique: true
   end
 end

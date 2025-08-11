@@ -10,8 +10,8 @@ class CreateDemandForecasts < ActiveRecord::Migration[7.0]
 
       t.timestamps
     end
-    
-    add_index :demand_forecasts, [:product_id, :location_id, :forecast_date, :period_type], 
+
+    add_index :demand_forecasts, [ :product_id, :location_id, :forecast_date, :period_type ],
               unique: true, name: 'index_demand_forecasts_unique'
   end
 end

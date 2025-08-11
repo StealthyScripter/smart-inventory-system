@@ -14,7 +14,7 @@ class CreateStockMovements < ActiveRecord::Migration[7.0]
 
       t.timestamps
     end
-    
-    add_index :stock_movements, [:reference_type, :reference_id]
+
+    add_index :stock_movements, [ :reference_type, :reference_id ]
   end
 end

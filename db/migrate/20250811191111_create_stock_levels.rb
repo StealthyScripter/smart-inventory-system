@@ -8,7 +8,7 @@ class CreateStockLevels < ActiveRecord::Migration[7.0]
 
       t.timestamps
     end
-    
-    add_index :stock_levels, [:product_id, :location_id], unique: true
+
+    add_index :stock_levels, [ :product_id, :location_id ], unique: true
   end
 end
