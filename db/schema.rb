@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_11_191224) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_11_191243) do
   create_table "categories", force: :cascade do |t|
     t.string "name", null: false
     t.text "description"
@@ -99,6 +99,26 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_11_191224) do
     t.index ["product_id"], name: "index_stock_levels_on_product_id"
   end
 
+  create_table "stock_movements", force: :cascade do |t|
+    t.integer "product_id", null: false
+    t.integer "source_location_id"
+    t.integer "destination_location_id"
+    t.string "movement_type", null: false
+    t.integer "quantity", null: false
+    t.integer "reference_id"
+    t.string "reference_type"
+    t.integer "user_id", null: false
+    t.text "notes"
+    t.datetime "movement_date", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["destination_location_id"], name: "index_stock_movements_on_destination_location_id"
+    t.index ["product_id"], name: "index_stock_movements_on_product_id"
+    t.index ["reference_type", "reference_id"], name: "index_stock_movements_on_reference_type_and_reference_id"
+    t.index ["source_location_id"], name: "index_stock_movements_on_source_location_id"
+    t.index ["user_id"], name: "index_stock_movements_on_user_id"
+  end
+
   create_table "suppliers", force: :cascade do |t|
     t.string "name", null: false
     t.string "contact_email"
@@ -133,5 +153,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_11_191224) do
   add_foreign_key "sales_transactions", "users"
   add_foreign_key "stock_levels", "locations"
   add_foreign_key "stock_levels", "products"
+  add_foreign_key "stock_movements", "locations", column: "destination_location_id"
+  add_foreign_key "stock_movements", "locations", column: "source_location_id"
+  add_foreign_key "stock_movements", "products"
+  add_foreign_key "stock_movements", "users"
   add_foreign_key "users", "locations"
 end
