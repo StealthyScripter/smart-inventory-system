@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_11_191111) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_11_191138) do
   create_table "categories", force: :cascade do |t|
     t.string "name", null: false
     t.text "description"
@@ -42,6 +42,21 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_11_191111) do
     t.index ["category_id"], name: "index_products_on_category_id"
     t.index ["sku"], name: "index_products_on_sku", unique: true
     t.index ["supplier_id"], name: "index_products_on_supplier_id"
+  end
+
+  create_table "purchase_orders", force: :cascade do |t|
+    t.integer "supplier_id", null: false
+    t.integer "user_id", null: false
+    t.string "order_number", null: false
+    t.string "status", default: "pending"
+    t.date "order_date", null: false
+    t.date "expected_delivery_date"
+    t.decimal "total_amount", precision: 10, scale: 2, default: "0.0"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["order_number"], name: "index_purchase_orders_on_order_number", unique: true
+    t.index ["supplier_id"], name: "index_purchase_orders_on_supplier_id"
+    t.index ["user_id"], name: "index_purchase_orders_on_user_id"
   end
 
   create_table "stock_levels", force: :cascade do |t|
@@ -81,6 +96,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_11_191111) do
   add_foreign_key "locations", "users", column: "manager_id"
   add_foreign_key "products", "categories"
   add_foreign_key "products", "suppliers"
+  add_foreign_key "purchase_orders", "suppliers"
+  add_foreign_key "purchase_orders", "users"
   add_foreign_key "stock_levels", "locations"
   add_foreign_key "stock_levels", "products"
   add_foreign_key "users", "locations"
