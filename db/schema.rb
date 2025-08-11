@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_11_191138) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_11_191224) do
   create_table "categories", force: :cascade do |t|
     t.string "name", null: false
     t.text "description"
@@ -44,6 +44,18 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_11_191138) do
     t.index ["supplier_id"], name: "index_products_on_supplier_id"
   end
 
+  create_table "purchase_order_items", force: :cascade do |t|
+    t.integer "purchase_order_id", null: false
+    t.integer "product_id", null: false
+    t.integer "quantity", null: false
+    t.decimal "unit_cost", precision: 10, scale: 2
+    t.decimal "total_cost", precision: 10, scale: 2
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["product_id"], name: "index_purchase_order_items_on_product_id"
+    t.index ["purchase_order_id"], name: "index_purchase_order_items_on_purchase_order_id"
+  end
+
   create_table "purchase_orders", force: :cascade do |t|
     t.integer "supplier_id", null: false
     t.integer "user_id", null: false
@@ -57,6 +69,22 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_11_191138) do
     t.index ["order_number"], name: "index_purchase_orders_on_order_number", unique: true
     t.index ["supplier_id"], name: "index_purchase_orders_on_supplier_id"
     t.index ["user_id"], name: "index_purchase_orders_on_user_id"
+  end
+
+  create_table "sales_transactions", force: :cascade do |t|
+    t.integer "product_id", null: false
+    t.integer "location_id", null: false
+    t.integer "user_id", null: false
+    t.string "customer_name"
+    t.integer "quantity", null: false
+    t.decimal "unit_price", precision: 10, scale: 2
+    t.decimal "total_amount", precision: 10, scale: 2
+    t.datetime "transaction_date", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["location_id"], name: "index_sales_transactions_on_location_id"
+    t.index ["product_id"], name: "index_sales_transactions_on_product_id"
+    t.index ["user_id"], name: "index_sales_transactions_on_user_id"
   end
 
   create_table "stock_levels", force: :cascade do |t|
@@ -96,8 +124,13 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_11_191138) do
   add_foreign_key "locations", "users", column: "manager_id"
   add_foreign_key "products", "categories"
   add_foreign_key "products", "suppliers"
+  add_foreign_key "purchase_order_items", "products"
+  add_foreign_key "purchase_order_items", "purchase_orders"
   add_foreign_key "purchase_orders", "suppliers"
   add_foreign_key "purchase_orders", "users"
+  add_foreign_key "sales_transactions", "locations"
+  add_foreign_key "sales_transactions", "products"
+  add_foreign_key "sales_transactions", "users"
   add_foreign_key "stock_levels", "locations"
   add_foreign_key "stock_levels", "products"
   add_foreign_key "users", "locations"
