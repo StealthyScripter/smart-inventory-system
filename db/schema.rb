@@ -10,12 +10,21 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_11_190851) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_11_190937) do
   create_table "categories", force: :cascade do |t|
     t.string "name", null: false
     t.text "description"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "locations", force: :cascade do |t|
+    t.string "name", null: false
+    t.text "address"
+    t.integer "manager_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["manager_id"], name: "index_locations_on_manager_id"
   end
 
   create_table "suppliers", force: :cascade do |t|
@@ -27,4 +36,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_11_190851) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
+
+  add_foreign_key "locations", "users", column: "manager_id"
 end
