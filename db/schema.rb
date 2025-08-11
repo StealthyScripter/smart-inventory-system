@@ -10,12 +10,26 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_11_191243) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_11_191311) do
   create_table "categories", force: :cascade do |t|
     t.string "name", null: false
     t.text "description"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "demand_forecasts", force: :cascade do |t|
+    t.integer "product_id", null: false
+    t.integer "location_id", null: false
+    t.date "forecast_date", null: false
+    t.string "period_type", null: false
+    t.decimal "predicted_demand", precision: 10, scale: 2
+    t.decimal "confidence_score", precision: 5, scale: 4
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["location_id"], name: "index_demand_forecasts_on_location_id"
+    t.index ["product_id", "location_id", "forecast_date", "period_type"], name: "index_demand_forecasts_unique", unique: true
+    t.index ["product_id"], name: "index_demand_forecasts_on_product_id"
   end
 
   create_table "locations", force: :cascade do |t|
@@ -141,6 +155,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_11_191243) do
     t.index ["location_id"], name: "index_users_on_location_id"
   end
 
+  add_foreign_key "demand_forecasts", "locations"
+  add_foreign_key "demand_forecasts", "products"
   add_foreign_key "locations", "users", column: "manager_id"
   add_foreign_key "products", "categories"
   add_foreign_key "products", "suppliers"
