@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_11_191041) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_11_191111) do
   create_table "categories", force: :cascade do |t|
     t.string "name", null: false
     t.text "description"
@@ -44,6 +44,18 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_11_191041) do
     t.index ["supplier_id"], name: "index_products_on_supplier_id"
   end
 
+  create_table "stock_levels", force: :cascade do |t|
+    t.integer "product_id", null: false
+    t.integer "location_id", null: false
+    t.integer "current_quantity", default: 0
+    t.integer "reserved_quantity", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["location_id"], name: "index_stock_levels_on_location_id"
+    t.index ["product_id", "location_id"], name: "index_stock_levels_on_product_id_and_location_id", unique: true
+    t.index ["product_id"], name: "index_stock_levels_on_product_id"
+  end
+
   create_table "suppliers", force: :cascade do |t|
     t.string "name", null: false
     t.string "contact_email"
@@ -69,5 +81,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_11_191041) do
   add_foreign_key "locations", "users", column: "manager_id"
   add_foreign_key "products", "categories"
   add_foreign_key "products", "suppliers"
+  add_foreign_key "stock_levels", "locations"
+  add_foreign_key "stock_levels", "products"
   add_foreign_key "users", "locations"
 end
