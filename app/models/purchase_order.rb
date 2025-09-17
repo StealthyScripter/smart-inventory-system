@@ -7,5 +7,5 @@ class PurchaseOrder < ApplicationRecord
   validates :status, :order_date, presence: true
   validates :total_amount, numericality: { greater_than_or_equal_to: 0 }
 
-  enum status: { pending: "pending", ordered: "ordered", received: "received", cancelled: "cancelled" }
+  enum :status, { pending: "pending", ordered: "ordered", received: "received", cancelled: "cancelled" }
 end
