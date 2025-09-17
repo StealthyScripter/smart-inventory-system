@@ -1,0 +1,49 @@
+<% content_for :page_title, "Products" %>
+
+<div class="table-container">
+  <div class="table-header">
+    <h3 class="table-title">Product Catalog</h3>
+    <div style="display: flex; gap: 1rem;">
+      <input type="search" placeholder="Search products..." class="form-input" style="width: 300px;">
+      <select class="form-select" style="width: 200px;">
+        <option>All Categories</option>
+        <% Category.all.each do |category| %>
+          <option value="<%= category.id %>"><%= category.name %></option>
+        <% end %>
+      </select>
+      <%= link_to "Add Product", "#", class: "btn btn-primary" %>
+    </div>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>SKU</th>
+        <th>Name</th>
+        <th>Category</th>
+        <th>Unit Cost</th>
+        <th>Selling Price</th>
+        <th>Stock</th>
+        <th>Reorder Point</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @products.each do |product| %>
+        <tr>
+          <td><%= product.sku %></td>
+          <td><%= link_to product.name, product_path(product) %></td>
+          <td><%= product.category.name %></td>
+          <td>$<%= product.unit_cost %></td>
+          <td>$<%= product.selling_price %></td>
+          <td class="<%= product.total_stock < product.reorder_point ? 'stock-low' : 'stock-ok' %>">
+            <%= product.total_stock %>
+          </td>
+          <td><%= product.reorder_point %></td>
+          <td>
+            <%= link_to "Edit", "#", class: "btn btn-secondary", style: "padding: 0.25rem 0.5rem; font-size: 0.875rem;" %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

@@ -1,0 +1,29 @@
+<% content_for :page_title, "Purchase Order #{@purchase_order.order_number}" %>
+
+<div class="table-container">
+  <div class="table-header">
+    <h3 class="table-title">Purchase Order Details</h3>
+    <%= link_to "Back to Orders", purchase_orders_path, class: "btn btn-secondary" %>
+  </div>
+  <div style="padding: 1.5rem;">
+    <div class="grid-2">
+      <div>
+        <h4>Order Information</h4>
+        <p><strong>Order Number:</strong> <%= @purchase_order.order_number %></p>
+        <p><strong>Supplier:</strong> <%= @purchase_order.supplier.name %></p>
+        <p><strong>Created by:</strong> <%= @purchase_order.user.full_name %></p>
+        <p><strong>Status:</strong>
+          <span class="badge badge-<%= @purchase_order.status == 'pending' ? 'info' : @purchase_order.status == 'ordered' ? 'warning' : 'success' %>">
+            <%= @purchase_order.status.titleize %>
+          </span>
+        </p>
+      </div>
+      <div>
+        <h4>Dates & Amount</h4>
+        <p><strong>Order Date:</strong> <%= @purchase_order.order_date.strftime("%B %d, %Y") %></p>
+        <p><strong>Expected Delivery:</strong> <%= @purchase_order.expected_delivery_date&.strftime("%B %d, %Y") || "TBD" %></p>
+        <p><strong>Total Amount:</strong> $<%= number_with_delimiter(@purchase_order.total_amount) %></p>
+      </div>
+    </div>
+  </div>
+</div>

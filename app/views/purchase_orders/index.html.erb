@@ -1,0 +1,55 @@
+<% content_for :page_title, "Purchase Orders" %>
+
+<div class="table-container">
+  <div class="table-header">
+    <h3 class="table-title">Purchase Orders</h3>
+    <div style="display: flex; gap: 1rem;">
+      <select class="form-select" style="width: 200px;">
+        <option>All Status</option>
+        <option value="pending">Pending</option>
+        <option value="ordered">Ordered</option>
+        <option value="received">Received</option>
+        <option value="cancelled">Cancelled</option>
+      </select>
+      <%= link_to "Create Order", "#", class: "btn btn-primary" %>
+    </div>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Order #</th>
+        <th>Supplier</th>
+        <th>Order Date</th>
+        <th>Expected Delivery</th>
+        <th>Total Amount</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @purchase_orders.each do |order| %>
+        <tr>
+          <td><%= link_to order.order_number, purchase_order_path(order) %></td>
+          <td><%= order.supplier.name %></td>
+          <td><%= order.order_date.strftime("%b %d, %Y") %></td>
+          <td><%= order.expected_delivery_date&.strftime("%b %d, %Y") || "TBD" %></td>
+          <td>$<%= number_with_delimiter(order.total_amount) %></td>
+          <td>
+            <span class="badge badge-<%= order.status == 'pending' ? 'info' : order.status == 'ordered' ? 'warning' : 'success' %>">
+              <%= order.status.titleize %>
+            </span>
+          </td>
+          <td>
+            <% if order.pending? %>
+              <%= link_to "Send", "#", class: "btn btn-primary", style: "padding: 0.25rem 0.5rem; font-size: 0.875rem;" %>
+            <% elsif order.ordered? %>
+              <%= link_to "Receive", "#", class: "btn btn-success", style: "padding: 0.25rem 0.5rem; font-size: 0.875rem;" %>
+            <% else %>
+              <%= link_to "View", purchase_order_path(order), class: "btn btn-secondary", style: "padding: 0.25rem 0.5rem; font-size: 0.875rem;" %>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

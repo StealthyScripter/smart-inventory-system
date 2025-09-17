@@ -1,0 +1,55 @@
+<% content_for :page_title, "Demand Forecasting" %>
+
+<div class="chart-container forecast-chart">
+  <div>
+    <h3 style="margin-bottom: 1rem;">Demand Forecasting Analytics</h3>
+    <p>Advanced ML-powered demand prediction charts would appear here</p>
+    <p>Showing 30-day demand forecast for top 10 products</p>
+  </div>
+</div>
+
+<div class="table-container">
+  <div class="table-header">
+    <h3 class="table-title">Demand Forecast Summary</h3>
+    <div style="display: flex; gap: 1rem;">
+      <select class="form-select" style="width: 200px;">
+        <option>Next 30 Days</option>
+        <option>Next 7 Days</option>
+        <option>Next 90 Days</option>
+      </select>
+    </div>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Product</th>
+        <th>Location</th>
+        <th>Predicted Demand</th>
+        <th>Confidence</th>
+        <th>Forecast Date</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @forecasts.each do |forecast| %>
+        <tr>
+          <td><%= forecast.product.name %></td>
+          <td><%= forecast.location.name %></td>
+          <td><%= forecast.predicted_demand %> units</td>
+          <td><%= number_to_percentage((forecast.confidence_score || 0) * 100, precision: 0) %></td>
+          <td><%= forecast.forecast_date.strftime("%b %d, %Y") %></td>
+          <td>
+            <% current_stock = forecast.product.stock_levels.where(location: forecast.location).sum(:current_quantity) %>
+            <% if current_stock >= forecast.predicted_demand %>
+              <span class="badge badge-success">Sufficient</span>
+            <% elsif current_stock >= (forecast.predicted_demand * 0.5) %>
+              <span class="badge badge-info">Monitor</span>
+            <% else %>
+              <span class="badge badge-warning">Order Soon</span>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
