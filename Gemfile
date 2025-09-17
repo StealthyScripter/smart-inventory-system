@@ -49,4 +49,5 @@ group :development, :test do
   gem "brakeman", require: false
   gem "rubocop-rails-omakase", require: false
   gem "rspec-rails", "~> 8.0.0"
+  gem "rails-controller-testing"  # Add this line
 end
