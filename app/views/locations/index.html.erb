@@ -1,0 +1,32 @@
+<% content_for :page_title, "Locations" %>
+
+<div class="table-container">
+  <div class="table-header">
+    <h3 class="table-title">Locations</h3>
+    <%= link_to "Add Location", "#", class: "btn btn-primary" %>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Address</th>
+        <th>Manager</th>
+        <th>Total Products</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @locations.each do |location| %>
+        <tr>
+          <td><%= link_to location.name, location_path(location) %></td>
+          <td><%= location.address %></td>
+          <td><%= location.manager&.full_name || "Unassigned" %></td>
+          <td><%= location.stock_levels.sum(:current_quantity) %></td>
+          <td>
+            <%= link_to "Edit", "#", class: "btn btn-secondary", style: "padding: 0.25rem 0.5rem; font-size: 0.875rem;" %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

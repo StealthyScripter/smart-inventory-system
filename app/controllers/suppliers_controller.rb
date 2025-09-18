@@ -1,6 +1,9 @@
-def index
-  @suppliers = Supplier.all
+class SuppliersController < ApplicationController
+  def index
+    @suppliers = Supplier.includes(:purchase_orders).order(:name)
+  end
 
-  # Temporary plain text response to verify data
-  render plain: "Found #{@suppliers.count} suppliers"
+  def show
+    @supplier = Supplier.find(params[:id])
+  end
 end

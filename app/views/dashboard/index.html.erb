@@ -1,0 +1,111 @@
+<% content_for :page_title, "Dashboard" %>
+
+<!-- Alerts -->
+<% if @low_stock_items.any? %>
+  <div class="alert alert-warning">
+    <strong>⚠️ Low Stock Alert:</strong> <%= @low_stock_items.count %> products are below reorder point
+  </div>
+<% end %>
+
+<% if @out_of_stock_count > 0 %>
+  <div class="alert alert-danger">
+    <strong>🚨 Critical:</strong> <%= @out_of_stock_count %> products are out of stock
+  </div>
+<% end %>
+
+<!-- Stats Grid -->
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-header">
+      <span class="stat-title">Total Products</span>
+      <span class="stat-change positive">+12%</span>
+    </div>
+    <div class="stat-value"><%= @total_products %></div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-header">
+      <span class="stat-title">Total Value</span>
+      <span class="stat-change positive">+8.5%</span>
+    </div>
+    <div class="stat-value">$<%= number_with_delimiter(@total_value.round(2)) %></div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-header">
+      <span class="stat-title">Low Stock Items</span>
+      <span class="stat-change negative">+3</span>
+    </div>
+    <div class="stat-value"><%= @low_stock_items.count %></div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-header">
+      <span class="stat-title">Pending Orders</span>
+      <span class="stat-change positive">-2</span>
+    </div>
+    <div class="stat-value"><%= @pending_orders %></div>
+  </div>
+</div>
+
+<div class="grid-2">
+  <!-- Recent Sales -->
+  <div class="table-container">
+    <div class="table-header">
+      <h3 class="table-title">Recent Sales</h3>
+      <%= link_to "View All", sales_path, class: "btn btn-secondary" %>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Quantity</th>
+          <th>Amount</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @recent_sales.limit(5).each do |sale| %>
+          <tr>
+            <td><%= sale.product.name %></td>
+            <td><%= sale.quantity %></td>
+            <td>$<%= sale.total_amount %></td>
+            <td><%= time_ago_in_words(sale.transaction_date) %> ago</td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Low Stock Alerts -->
+  <div class="table-container">
+    <div class="table-header">
+      <h3 class="table-title">Low Stock Alerts</h3>
+      <%= link_to "Reorder", purchase_orders_path, class: "btn btn-primary" %>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Current</th>
+          <th>Reorder Point</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @low_stock_items.each do |product| %>
+          <tr>
+            <td><%= product.name %></td>
+            <td class="stock-low"><%= product.total_stock %></td>
+            <td><%= product.reorder_point %></td>
+            <td>
+              <span class="badge <%= product.total_stock == 0 ? 'badge-danger' : 'badge-warning' %>">
+                <%= product.total_stock == 0 ? 'Critical' : 'Low' %>
+              </span>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>
