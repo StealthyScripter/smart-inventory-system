@@ -1,0 +1,25 @@
+<% content_for :page_title, @supplier.name %>
+
+<div class="table-container">
+  <div class="table-header">
+    <h3 class="table-title">Supplier Details</h3>
+    <%= link_to "Back to Suppliers", suppliers_path, class: "btn btn-secondary" %>
+  </div>
+  <div style="padding: 1.5rem;">
+    <div class="grid-2">
+      <div>
+        <h4>Contact Information</h4>
+        <p><strong>Name:</strong> <%= @supplier.name %></p>
+        <p><strong>Email:</strong> <%= @supplier.contact_email %></p>
+        <p><strong>Phone:</strong> <%= @supplier.contact_phone %></p>
+        <p><strong>Address:</strong> <%= @supplier.address %></p>
+      </div>
+      <div>
+        <h4>Business Details</h4>
+        <p><strong>Default Lead Time:</strong> <%= @supplier.default_lead_time_days %> days</p>
+        <p><strong>Active Products:</strong> <%= @supplier.products.count %></p>
+        <p><strong>Total Orders:</strong> <%= @supplier.purchase_orders.count %></p>
+      </div>
+    </div>
+  </div>
+</div>

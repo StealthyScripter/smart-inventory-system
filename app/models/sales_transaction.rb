@@ -8,6 +8,9 @@ class SalesTransaction < ApplicationRecord
   validates :unit_price, :total_amount, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
   validates :transaction_date, presence: true
 
+  scope :recent, -> { order(transaction_date: :desc) }
+  scope :today, -> { where("DATE(transaction_date) = ?", Date.current) }
+
   before_save :calculate_total_amount
 
   private

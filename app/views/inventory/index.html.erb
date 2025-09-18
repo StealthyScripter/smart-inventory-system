@@ -1,0 +1,57 @@
+<% content_for :page_title, "Inventory Management" %>
+
+<div class="grid-2">
+  <div>
+    <h3 style="margin-bottom: 1rem;">Stock Levels by Location</h3>
+    <div class="form-group">
+      <select class="form-select">
+        <option>All Locations</option>
+        <% @locations.each do |location| %>
+          <option value="<%= location.id %>"><%= location.name %></option>
+        <% end %>
+      </select>
+    </div>
+  </div>
+  <div style="text-align: right;">
+    <%= link_to "Stock Transfer", "#", class: "btn btn-primary" %>
+    <%= link_to "Adjustment", "#", class: "btn btn-secondary" %>
+  </div>
+</div>
+
+<div class="table-container">
+  <div class="table-header">
+    <h3 class="table-title">Current Stock Levels</h3>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Product</th>
+        <th>Location</th>
+        <th>Current Stock</th>
+        <th>Reserved</th>
+        <th>Available</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @stock_levels.each do |stock_level| %>
+        <tr>
+          <td><%= stock_level.product.name %></td>
+          <td><%= stock_level.location.name %></td>
+          <td><%= stock_level.current_quantity %></td>
+          <td><%= stock_level.reserved_quantity %></td>
+          <td><%= stock_level.available_quantity %></td>
+          <td>
+            <% if stock_level.current_quantity <= 0 %>
+              <span class="badge badge-danger">Out of Stock</span>
+            <% elsif stock_level.current_quantity < stock_level.product.reorder_point %>
+              <span class="badge badge-warning">Low</span>
+            <% else %>
+              <span class="badge badge-success">Good</span>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

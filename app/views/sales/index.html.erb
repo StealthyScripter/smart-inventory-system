@@ -1,0 +1,64 @@
+<% content_for :page_title, "Sales & Transactions" %>
+
+<div class="grid-2">
+  <!-- Quick Sale Form -->
+  <div class="table-container">
+    <div class="table-header">
+      <h3 class="table-title">Quick Sale</h3>
+    </div>
+    <div style="padding: 1.5rem;">
+      <%= form_with url: "#", local: true do |form| %>
+        <div class="form-group">
+          <label class="form-label">Product</label>
+          <%= form.select :product_id, options_from_collection_for_select(@products, :id, :name, nil),
+                          { prompt: "Select product..." }, { class: "form-select" } %>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Location</label>
+          <%= form.select :location_id, options_from_collection_for_select(@locations, :id, :name),
+                          {}, { class: "form-select" } %>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Customer Name</label>
+          <%= form.text_field :customer_name, placeholder: "Enter customer name", class: "form-input" %>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Quantity</label>
+          <%= form.number_field :quantity, value: 1, min: 1, class: "form-input" %>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Unit Price</label>
+          <%= form.number_field :unit_price, placeholder: "0.00", step: 0.01, class: "form-input" %>
+        </div>
+        <%= form.submit "Process Sale", class: "btn btn-primary", style: "width: 100%;" %>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Recent Transactions -->
+  <div class="table-container">
+    <div class="table-header">
+      <h3 class="table-title">Today's Sales</h3>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Product</th>
+          <th>Qty</th>
+          <th>Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @recent_transactions.limit(10).each do |transaction| %>
+          <tr>
+            <td><%= transaction.transaction_date.strftime("%H:%M") %></td>
+            <td><%= transaction.product.name %></td>
+            <td><%= transaction.quantity %></td>
+            <td>$<%= transaction.total_amount %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>
