@@ -1,0 +1,64 @@
+<!-- app/views/suppliers/new.html.erb -->
+<% content_for :page_title, "Add New Supplier" %>
+
+<div class="table-container">
+  <div class="table-header">
+    <h3 class="table-title">Add New Supplier</h3>
+    <%= link_to "Back to Suppliers", suppliers_path, class: "btn btn-secondary" %>
+  </div>
+
+  <div style="padding: 2rem;">
+    <%= form_with model: @supplier, local: true do |form| %>
+      <% if @supplier.errors.any? %>
+        <div class="alert alert-danger">
+          <strong><%= pluralize(@supplier.errors.count, "error") %> prohibited this supplier from being saved:</strong>
+          <ul style="margin-top: 0.5rem;">
+            <% @supplier.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div class="grid-2" style="gap: 2rem;">
+        <div>
+          <h4 style="margin-bottom: 1rem;">Supplier Information</h4>
+
+          <div class="form-group">
+            <%= form.label :name, class: "form-label" %>
+            <%= form.text_field :name, class: "form-input", required: true %>
+          </div>
+
+          <div class="form-group">
+            <%= form.label :contact_email, "Contact Email", class: "form-label" %>
+            <%= form.email_field :contact_email, class: "form-input" %>
+          </div>
+
+          <div class="form-group">
+            <%= form.label :contact_phone, "Contact Phone", class: "form-label" %>
+            <%= form.telephone_field :contact_phone, class: "form-input" %>
+          </div>
+        </div>
+
+        <div>
+          <h4 style="margin-bottom: 1rem;">Business Details</h4>
+
+          <div class="form-group">
+            <%= form.label :address, class: "form-label" %>
+            <%= form.text_area :address, rows: 3, class: "form-input" %>
+          </div>
+
+          <div class="form-group">
+            <%= form.label :default_lead_time_days, "Default Lead Time (Days)", class: "form-label" %>
+            <%= form.number_field :default_lead_time_days, min: 1, value: 7, class: "form-input", required: true %>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+        <%= form.submit "Create Supplier", class: "btn btn-primary" %>
+        <%= link_to "Cancel", suppliers_path, class: "btn btn-secondary" %>
+      </div>
+    <% end %>
+  </div>
+</div>

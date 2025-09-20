@@ -1,0 +1,85 @@
+<% content_for :page_title, "Add New Product" %>
+
+<div class="table-container">
+  <div class="table-header">
+    <h3 class="table-title">Add New Product</h3>
+    <%= link_to "Back to Products", products_path, class: "btn btn-secondary" %>
+  </div>
+
+  <div style="padding: 2rem;">
+    <%= form_with model: @product, local: true do |form| %>
+      <% if @product.errors.any? %>
+        <div class="alert alert-danger">
+          <strong><%= pluralize(@product.errors.count, "error") %> prohibited this product from being saved:</strong>
+          <ul style="margin-top: 0.5rem;">
+            <% @product.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div class="grid-2" style="gap: 2rem;">
+        <div>
+          <h4 style="margin-bottom: 1rem;">Basic Information</h4>
+
+          <div class="form-group">
+            <%= form.label :name, class: "form-label" %>
+            <%= form.text_field :name, class: "form-input", required: true %>
+          </div>
+
+          <div class="form-group">
+            <%= form.label :sku, "SKU", class: "form-label" %>
+            <%= form.text_field :sku, class: "form-input", required: true %>
+          </div>
+
+          <div class="form-group">
+            <%= form.label :description, class: "form-label" %>
+            <%= form.text_area :description, rows: 3, class: "form-input" %>
+          </div>
+
+          <div class="form-group">
+            <%= form.label :category_id, "Category", class: "form-label" %>
+            <%= form.select :category_id, options_from_collection_for_select(@categories, :id, :name, @product.category_id),
+                           { prompt: "Select a category..." }, { class: "form-select", required: true } %>
+          </div>
+
+          <div class="form-group">
+            <%= form.label :supplier_id, "Supplier", class: "form-label" %>
+            <%= form.select :supplier_id, options_from_collection_for_select(@suppliers, :id, :name, @product.supplier_id),
+                           { prompt: "Select a supplier..." }, { class: "form-select" } %>
+          </div>
+        </div>
+
+        <div>
+          <h4 style="margin-bottom: 1rem;">Pricing & Inventory</h4>
+
+          <div class="form-group">
+            <%= form.label :unit_cost, "Unit Cost ($)", class: "form-label" %>
+            <%= form.number_field :unit_cost, step: 0.01, min: 0, class: "form-input" %>
+          </div>
+
+          <div class="form-group">
+            <%= form.label :selling_price, "Selling Price ($)", class: "form-label" %>
+            <%= form.number_field :selling_price, step: 0.01, min: 0, class: "form-input" %>
+          </div>
+
+          <div class="form-group">
+            <%= form.label :reorder_point, "Reorder Point", class: "form-label" %>
+            <%= form.number_field :reorder_point, min: 1, class: "form-input", required: true %>
+          </div>
+
+          <div class="form-group">
+            <%= form.label :lead_time_days, "Lead Time (Days)", class: "form-label" %>
+            <%= form.number_field :lead_time_days, min: 1, class: "form-input", required: true %>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+        <%= form.submit "Create Product", class: "btn btn-primary" %>
+        <%= link_to "Cancel", products_path, class: "btn btn-secondary" %>
+      </div>
+    <% end %>
+  </div>
+</div>

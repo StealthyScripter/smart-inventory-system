@@ -5,20 +5,25 @@ Rails.application.routes.draw do
   # Can be used by load balancers and uptime monitors to verify that the app is live.
   get "up" => "rails/health#show", as: :rails_health_check
 
-  resources :suppliers, only: [ :index, :show ]
+  resources :products
+  resources :suppliers
+  resources :locations
+  resources :purchase_orders
 
-  resources :locations, only: [ :index, :show ]
 
-  resources :products, only: [ :index, :show ]
+  # Sales transactions - using custom routes for better UX
+  get "sales", to: "sales#index"
+  post "sales", to: "sales#create"
+  get "sales/new", to: "sales#new", as: :new_sale
+  get "sales/:id", to: "sales#show", as: :sale
+  delete "sales/:id", to: "sales#destroy"
 
+  # Dashboard and other pages
   get "dashboard", to: "dashboard#index"
   root "dashboard#index"
 
   get "inventory", to: "inventory#index"
-
-  resources :purchase_orders, only: [ :index, :show ]
-
-  get "sales", to: "sales#index"
+  post "inventory/adjust", to: "inventory#adjust_stock"
 
   get "forecasting", to: "forecasting#index"
 

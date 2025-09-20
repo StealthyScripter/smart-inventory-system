@@ -1,3 +1,4 @@
+<!-- app/views/products/index.html.erb -->
 <% content_for :page_title, "Products" %>
 
 <div class="table-container">
@@ -11,7 +12,7 @@
           <option value="<%= category.id %>"><%= category.name %></option>
         <% end %>
       </select>
-      <%= link_to "Add Product", "#", class: "btn btn-primary" %>
+      <%= link_to "Add Product", new_product_path, class: "btn btn-primary" %>
     </div>
   </div>
   <table>
@@ -40,7 +41,16 @@
           </td>
           <td><%= product.reorder_point %></td>
           <td>
-            <%= link_to "Edit", "#", class: "btn btn-secondary", style: "padding: 0.25rem 0.5rem; font-size: 0.875rem;" %>
+            <%= link_to "Edit", edit_product_path(product),
+                        class: "btn btn-secondary",
+                        style: "padding: 0.25rem 0.5rem; font-size: 0.875rem;" %>
+          </td>
+        </tr>
+      <% end %>
+      <% if @products.empty? %>
+        <tr>
+          <td colspan="8" style="text-align: center; color: #718096; font-style: italic;">
+            No products found. <%= link_to "Add your first product", new_product_path %>.
           </td>
         </tr>
       <% end %>

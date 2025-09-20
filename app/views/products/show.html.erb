@@ -3,7 +3,10 @@
 <div class="table-container">
   <div class="table-header">
     <h3 class="table-title">Product Details</h3>
-    <%= link_to "Back to Products", products_path, class: "btn btn-secondary" %>
+    <div style="display: flex; gap: 1rem;">
+      <%= link_to "Edit Product", edit_product_path(@product), class: "btn btn-primary" %>
+      <%= link_to "Back to Products", products_path, class: "btn btn-secondary" %>
+    </div>
   </div>
   <div style="padding: 1.5rem;">
     <div class="grid-2">
@@ -12,17 +15,78 @@
         <p><strong>SKU:</strong> <%= @product.sku %></p>
         <p><strong>Name:</strong> <%= @product.name %></p>
         <p><strong>Category:</strong> <%= @product.category.name %></p>
-        <p><strong>Supplier:</strong> <%= @product.supplier&.name || "None" %></p>
+        <p><strong>Supplier:</strong>
+          <% if @product.supplier %>
+            <%= link_to @product.supplier.name, supplier_path(@product.supplier) %>
+          <% else %>
+            None assigned
+          <% end %>
+        </p>
         <p><strong>Description:</strong> <%= @product.description || "No description" %></p>
       </div>
       <div>
         <h4>Pricing & Stock</h4>
         <p><strong>Unit Cost:</strong> $<%= @product.unit_cost %></p>
         <p><strong>Selling Price:</strong> $<%= @product.selling_price %></p>
-        <p><strong>Total Stock:</strong> <%= @product.total_stock %></p>
+        <p><strong>Total Stock:</strong>
+          <span class="<%= @product.total_stock < @product.reorder_point ? 'stock-low' : 'stock-ok' %>">
+            <%= @product.total_stock %>
+          </span>
+        </p>
         <p><strong>Reorder Point:</strong> <%= @product.reorder_point %></p>
         <p><strong>Lead Time:</strong> <%= @product.lead_time_days %> days</p>
+
+        <% if @product.total_stock < @product.reorder_point %>
+          <div class="alert alert-warning" style="margin-top: 1rem;">
+            <strong>⚠️ Low Stock Alert:</strong> This product is below the reorder point!
+          </div>
+        <% end %>
       </div>
+    </div>
+
+    <!-- Stock Levels by Location -->
+    <div style="margin-top: 2rem;">
+      <h4>Stock by Location</h4>
+      <table style="margin-top: 1rem;">
+        <thead>
+          <tr>
+            <th>Location</th>
+            <th>Current Stock</th>
+            <th>Reserved</th>
+            <th>Available</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @product.stock_levels.includes(:location).each do |stock_level| %>
+            <tr>
+              <td><%= stock_level.location.name %></td>
+              <td><%= stock_level.current_quantity %></td>
+              <td><%= stock_level.reserved_quantity %></td>
+              <td><%= stock_level.available_quantity %></td>
+              <td>
+                <% if stock_level.current_quantity <= 0 %>
+                  <span class="badge badge-danger">Out of Stock</span>
+                <% elsif stock_level.current_quantity < @product.reorder_point %>
+                  <span class="badge badge-warning">Low</span>
+                <% else %>
+                  <span class="badge badge-success">Good</span>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Action Buttons -->
+    <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+      <%= link_to "Edit Product", edit_product_path(@product), class: "btn btn-primary" %>
+      <%= link_to "Create Purchase Order", new_purchase_order_path(product_id: @product.id), class: "btn btn-success" %>
+      <%= link_to "Quick Sale", new_sale_path(product_id: @product.id), class: "btn btn-warning" %>
+      <%= link_to "Delete Product", product_path(@product), method: :delete,
+                  confirm: "Are you sure? This will also delete all stock levels and cannot be undone.",
+                  class: "btn btn-danger" %>
     </div>
   </div>
 </div>

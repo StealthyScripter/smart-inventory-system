@@ -8,7 +8,7 @@ class StockMovement < ApplicationRecord
   validates :movement_type, :quantity, :movement_date, presence: true
   validates :quantity, numericality: { greater_than: 0 }
 
-  enum movement_type: {
+  enum :movement_type, {
     sale: "sale",
     purchase: "purchase",
     transfer: "transfer",

@@ -5,31 +5,61 @@
   <div class="table-container">
     <div class="table-header">
       <h3 class="table-title">Quick Sale</h3>
+      <%= link_to "New Sale", new_sale_path, class: "btn btn-secondary" %>
     </div>
     <div style="padding: 1.5rem;">
-      <%= form_with url: "#", local: true do |form| %>
+      <%= form_with model: @sale, url: sales_path, local: true do |form| %>
+        <% if @sale.errors.any? %>
+          <div class="alert alert-danger" style="margin-bottom: 1rem;">
+            <strong><%= pluralize(@sale.errors.count, "error") %> prohibited this sale:</strong>
+            <ul style="margin-top: 0.5rem; margin-bottom: 0;">
+              <% @sale.errors.full_messages.each do |message| %>
+                <li><%= message %></li>
+              <% end %>
+            </ul>
+          </div>
+        <% end %>
+
         <div class="form-group">
           <label class="form-label">Product</label>
-          <%= form.select :product_id, options_from_collection_for_select(@products, :id, :name, nil),
-                          { prompt: "Select product..." }, { class: "form-select" } %>
+          <%= form.select :product_id,
+                          options_from_collection_for_select(@products, :id, :name, @sale.product_id),
+                          { prompt: "Select product..." },
+                          { class: "form-select", required: true } %>
         </div>
+
         <div class="form-group">
           <label class="form-label">Location</label>
-          <%= form.select :location_id, options_from_collection_for_select(@locations, :id, :name),
-                          {}, { class: "form-select" } %>
+          <%= form.select :location_id,
+                          options_from_collection_for_select(@locations, :id, :name, @sale.location_id),
+                          { prompt: "Select location..." },
+                          { class: "form-select", required: true } %>
         </div>
+
         <div class="form-group">
           <label class="form-label">Customer Name</label>
-          <%= form.text_field :customer_name, placeholder: "Enter customer name", class: "form-input" %>
+          <%= form.text_field :customer_name, placeholder: "Enter customer name",
+                              class: "form-input", value: @sale.customer_name %>
         </div>
+
         <div class="form-group">
           <label class="form-label">Quantity</label>
-          <%= form.number_field :quantity, value: 1, min: 1, class: "form-input" %>
+          <%= form.number_field :quantity, value: @sale.quantity || 1, min: 1,
+                               class: "form-input", required: true %>
         </div>
+
         <div class="form-group">
-          <label class="form-label">Unit Price</label>
-          <%= form.number_field :unit_price, placeholder: "0.00", step: 0.01, class: "form-input" %>
+          <label class="form-label">Unit Price ($)</label>
+          <%= form.number_field :unit_price, placeholder: "0.00", step: 0.01, min: 0,
+                               class: "form-input", value: @sale.unit_price %>
         </div>
+
+        <div class="form-group">
+          <label class="form-label">Total Amount ($)</label>
+          <%= form.number_field :total_amount, placeholder: "0.00", step: 0.01, min: 0,
+                               class: "form-input", value: @sale.total_amount %>
+        </div>
+
         <%= form.submit "Process Sale", class: "btn btn-primary", style: "width: 100%;" %>
       <% end %>
     </div>
@@ -39,14 +69,19 @@
   <div class="table-container">
     <div class="table-header">
       <h3 class="table-title">Today's Sales</h3>
+      <span class="badge badge-info">
+        <%= @recent_transactions.sum(:total_amount) %> total sales
+      </span>
     </div>
     <table>
       <thead>
         <tr>
           <th>Time</th>
           <th>Product</th>
+          <th>Customer</th>
           <th>Qty</th>
           <th>Amount</th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -54,11 +89,48 @@
           <tr>
             <td><%= transaction.transaction_date.strftime("%H:%M") %></td>
             <td><%= transaction.product.name %></td>
+            <td><%= transaction.customer_name || "Walk-in" %></td>
             <td><%= transaction.quantity %></td>
             <td>$<%= transaction.total_amount %></td>
+            <td>
+              <%= link_to "View", sale_path(transaction), class: "btn btn-secondary",
+                          style: "padding: 0.25rem 0.5rem; font-size: 0.75rem;" %>
+              <%= link_to "Cancel", sale_path(transaction), method: :delete,
+                          confirm: "Are you sure? This will restore the inventory.",
+                          class: "btn btn-danger",
+                          style: "padding: 0.25rem 0.5rem; font-size: 0.75rem;" %>
+            </td>
+          </tr>
+        <% end %>
+        <% if @recent_transactions.empty? %>
+          <tr>
+            <td colspan="6" style="text-align: center; color: #718096; font-style: italic;">
+              No sales today
+            </td>
           </tr>
         <% end %>
       </tbody>
     </table>
   </div>
 </div>
+
+<script>
+  // Auto-calculate total amount when quantity or unit price changes
+  document.addEventListener('DOMContentLoaded', function() {
+    const quantityField = document.querySelector('#sales_transaction_quantity');
+    const unitPriceField = document.querySelector('#sales_transaction_unit_price');
+    const totalAmountField = document.querySelector('#sales_transaction_total_amount');
+
+    function calculateTotal() {
+      const quantity = parseFloat(quantityField.value) || 0;
+      const unitPrice = parseFloat(unitPriceField.value) || 0;
+      const total = quantity * unitPrice;
+      totalAmountField.value = total.toFixed(2);
+    }
+
+    if (quantityField && unitPriceField && totalAmountField) {
+      quantityField.addEventListener('input', calculateTotal);
+      unitPriceField.addEventListener('input', calculateTotal);
+    }
+  });
+</script>

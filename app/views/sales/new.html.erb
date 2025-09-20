@@ -1,0 +1,163 @@
+<% content_for :page_title, "New Sale" %>
+
+<div class="table-container">
+  <div class="table-header">
+    <h3 class="table-title">Process New Sale</h3>
+    <%= link_to "Back to Sales", sales_path, class: "btn btn-secondary" %>
+  </div>
+
+  <div style="padding: 2rem;">
+    <%= form_with model: @sale, url: sales_path, local: true do |form| %>
+      <% if @sale.errors.any? %>
+        <div class="alert alert-danger">
+          <strong><%= pluralize(@sale.errors.count, "error") %> prohibited this sale from being processed:</strong>
+          <ul style="margin-top: 0.5rem;">
+            <% @sale.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div class="grid-2" style="gap: 2rem;">
+        <div>
+          <h4 style="margin-bottom: 1rem;">Sale Details</h4>
+
+          <div class="form-group">
+            <%= form.label :product_id, "Product", class: "form-label" %>
+            <%= form.select :product_id,
+                            options_from_collection_for_select(@products, :id, :name, @sale.product_id),
+                            { prompt: "Select product..." },
+                            { class: "form-select", required: true } %>
+          </div>
+
+          <div class="form-group">
+            <%= form.label :location_id, "Location", class: "form-label" %>
+            <%= form.select :location_id,
+                            options_from_collection_for_select(@locations, :id, :name, @sale.location_id),
+                            { prompt: "Select location..." },
+                            { class: "form-select", required: true } %>
+          </div>
+
+          <div class="form-group">
+            <%= form.label :user_id, "Sales Representative", class: "form-label" %>
+            <%= form.select :user_id,
+                            options_from_collection_for_select(@users, :id, :full_name, @sale.user_id),
+                            { prompt: "Select sales rep..." },
+                            { class: "form-select" } %>
+          </div>
+
+          <div class="form-group">
+            <%= form.label :customer_name, "Customer Name", class: "form-label" %>
+            <%= form.text_field :customer_name, placeholder: "Enter customer name (optional)",
+                                class: "form-input" %>
+          </div>
+        </div>
+
+        <div>
+          <h4 style="margin-bottom: 1rem;">Pricing & Quantity</h4>
+
+          <div class="form-group">
+            <%= form.label :quantity, class: "form-label" %>
+            <%= form.number_field :quantity, value: @sale.quantity || 1, min: 1,
+                                 class: "form-input", required: true %>
+          </div>
+
+          <div class="form-group">
+            <%= form.label :unit_price, "Unit Price ($)", class: "form-label" %>
+            <%= form.number_field :unit_price, placeholder: "0.00", step: 0.01, min: 0,
+                                 class: "form-input", required: true %>
+          </div>
+
+          <div class="form-group">
+            <%= form.label :total_amount, "Total Amount ($)", class: "form-label" %>
+            <%= form.number_field :total_amount, placeholder: "0.00", step: 0.01, min: 0,
+                                 class: "form-input", readonly: true,
+                                 style: "background-color: #f7fafc;" %>
+            <small style="color: #718096; font-size: 0.875rem;">
+              This will be calculated automatically based on quantity × unit price
+            </small>
+          </div>
+
+          <!-- Stock Information Display -->
+          <div id="stock-info" style="margin-top: 1rem; padding: 1rem; background: #f7fafc; border-radius: 0.375rem; display: none;">
+            <h5 style="margin-bottom: 0.5rem;">Stock Information</h5>
+            <p id="stock-details" style="color: #4a5568; font-size: 0.875rem;">
+              Select a product and location to view stock levels
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+        <%= form.submit "Process Sale", class: "btn btn-primary" %>
+        <%= link_to "Cancel", sales_path, class: "btn btn-secondary" %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const quantityField = document.querySelector('#sales_transaction_quantity');
+    const unitPriceField = document.querySelector('#sales_transaction_unit_price');
+    const totalAmountField = document.querySelector('#sales_transaction_total_amount');
+    const productSelect = document.querySelector('#sales_transaction_product_id');
+    const locationSelect = document.querySelector('#sales_transaction_location_id');
+    const stockInfo = document.querySelector('#stock-info');
+    const stockDetails = document.querySelector('#stock-details');
+
+    // Auto-calculate total amount
+    function calculateTotal() {
+      const quantity = parseFloat(quantityField.value) || 0;
+      const unitPrice = parseFloat(unitPriceField.value) || 0;
+      const total = quantity * unitPrice;
+      totalAmountField.value = total.toFixed(2);
+    }
+
+    // Update stock information (simplified version)
+    function updateStockInfo() {
+      const productId = productSelect.value;
+      const locationId = locationSelect.value;
+
+      if (productId && locationId) {
+        stockInfo.style.display = 'block';
+        stockDetails.innerHTML = 'Loading stock information...';
+
+        // placeholder message
+        setTimeout(() => {
+          stockDetails.innerHTML = 'Stock information would be displayed here. In a real implementation, this would show available quantity via AJAX.';
+        }, 500);
+      } else {
+        stockInfo.style.display = 'none';
+      }
+    }
+
+    // Populate unit price from product data (simplified)
+    function populateUnitPrice() {
+      const productId = productSelect.value;
+      if (productId) {
+        // In a real implementation, you would fetch the product's selling price via AJAX
+        // For now, just clear the field to let user enter manually
+        // unitPriceField.value = '';
+      }
+    }
+
+    // Event listeners
+    if (quantityField && unitPriceField && totalAmountField) {
+      quantityField.addEventListener('input', calculateTotal);
+      unitPriceField.addEventListener('input', calculateTotal);
+    }
+
+    if (productSelect) {
+      productSelect.addEventListener('change', function() {
+        populateUnitPrice();
+        updateStockInfo();
+      });
+    }
+
+    if (locationSelect) {
+      locationSelect.addEventListener('change', updateStockInfo);
+    }
+  });
+</script>
