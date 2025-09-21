@@ -2,8 +2,8 @@
 require 'rails_helper'
 
 RSpec.describe "Products CRUD", type: :request do
-  let(:category) { Category.create!(name: "Electronics") }
-  let(:supplier) { Supplier.create!(name: "Apple Inc.", default_lead_time_days: 7) }
+  let!(:category) { Category.create!(name: "Electronics") }  # Changed from let to let!
+  let!(:supplier) { Supplier.create!(name: "Apple Inc.", default_lead_time_days: 7) }  # Changed from let to let!
   let(:location) { Location.create!(name: "Main Store") }
 
   let(:valid_attributes) {

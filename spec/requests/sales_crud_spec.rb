@@ -118,9 +118,18 @@ RSpec.describe "Sales CRUD", type: :request do
         expect(stock_level.current_quantity).to eq(original_quantity)
       end
 
-      it "renders the index template with errors" do
+      it "renders the new template with errors when coming from new form" do
         post sales_path, params: { sales_transaction: insufficient_stock_attributes }
         expect(response).to have_http_status(:unprocessable_content)
+        expect(response.body).to include('Process New Sale')
+        expect(response.body).to include('exceeds available stock')
+      end
+
+      it "renders the index template with errors when coming from quick sale form" do
+        post sales_path, params: { sales_transaction: insufficient_stock_attributes },
+             headers: { 'HTTP_REFERER' => sales_url }
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(response.body).to include('Sales &amp; Transactions')
         expect(response.body).to include('exceeds available stock')
       end
     end
@@ -132,8 +141,15 @@ RSpec.describe "Sales CRUD", type: :request do
         }.not_to change(SalesTransaction, :count)
       end
 
-      it "renders the index template with errors" do
+      it "renders the new template with errors when coming from new form" do
         post sales_path, params: { sales_transaction: invalid_attributes }
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(response.body).to include('Process New Sale')
+      end
+
+      it "renders the index template with errors when coming from quick sale form" do
+        post sales_path, params: { sales_transaction: invalid_attributes },
+             headers: { 'HTTP_REFERER' => sales_url }
         expect(response).to have_http_status(:unprocessable_content)
         expect(response.body).to include('Sales &amp; Transactions')
       end

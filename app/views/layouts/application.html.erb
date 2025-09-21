@@ -373,6 +373,31 @@
             color: #742a2a;
         }
 
+        /* Flash Messages */
+        .flash-success {
+            background: #f0fff4;
+            border: 1px solid #9ae6b4;
+            color: #22543d;
+        }
+
+        .flash-error {
+            background: #fff5f5;
+            border: 1px solid #feb2b2;
+            color: #742a2a;
+        }
+
+        .flash-notice {
+            background: #ebf8ff;
+            border: 1px solid #90cdf4;
+            color: #2a4365;
+        }
+
+        .flash-alert {
+            background: #fffbeb;
+            border: 1px solid #f6e05e;
+            color: #744210;
+        }
+
         /* Grid layouts */
         .grid-2 {
             display: grid;
@@ -512,6 +537,26 @@
         </header>
 
         <div class="content-area">
+          <!-- Flash Messages -->
+          <% if notice %>
+            <div class="alert flash-notice">
+              <%= notice %>
+            </div>
+          <% end %>
+
+          <% if alert %>
+            <div class="alert flash-alert">
+              <%= alert %>
+            </div>
+          <% end %>
+
+          <% flash.each do |type, message| %>
+            <% next if ['notice', 'alert'].include?(type.to_s) %>
+            <div class="alert flash-<%= type %>">
+              <%= message %>
+            </div>
+          <% end %>
+
           <%= yield %>
         </div>
       </main>
