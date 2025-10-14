@@ -52,6 +52,14 @@ class SalesController < ApplicationController
     redirect_to sales_path, notice: "Sale was successfully cancelled and inventory restored."
   end
 
+  def product_details
+    @product = Product.find(params[:product_id])
+    render json: {
+      selling_price: @product.selling_price,
+      unit_cost: @product.unit_cost
+    }
+  end
+
   private
 
   def set_sale
@@ -104,6 +112,6 @@ class SalesController < ApplicationController
 
   def sale_params
     params.require(:sales_transaction).permit(:product_id, :location_id, :user_id,
-                                             :customer_name, :quantity, :unit_price, :total_amount)
+      :customer_name, :quantity, :unit_price, :total_amount)
   end
 end

@@ -133,13 +133,22 @@
       }
     }
 
-    // Populate unit price from product data (simplified)
+    // Populate unit price from product data
     function populateUnitPrice() {
       const productId = productSelect.value;
       if (productId) {
-        // In a real implementation, you would fetch the product's selling price via AJAX
-        // For now, just clear the field to let user enter manually
-        // unitPriceField.value = '';
+        fetch(`/sales/product_details/${productId}`)
+        .then(response => response.json())
+        .then(data => {
+          unitPriceField.value = data.selling_price;
+          calculateTotal(); // Recalculate total after setting price
+        })
+        .catch(error => {
+          console.error('Error fetching product details:', error);
+        });
+      } else {
+        unitPriceField.value = '';
+        calculateTotal();
       }
     }
 

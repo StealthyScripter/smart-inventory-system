@@ -17,6 +17,7 @@ Rails.application.routes.draw do
   get "sales/new", to: "sales#new", as: :new_sale
   get "sales/:id", to: "sales#show", as: :sale
   delete "sales/:id", to: "sales#destroy"
+  get "sales/product_details/:product_id", to: "sales#product_details", as: :product_details
 
   # Dashboard and other pages
   get "dashboard", to: "dashboard#index"
