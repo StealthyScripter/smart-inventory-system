@@ -1,4 +1,5 @@
 class User < ApplicationRecord
+  has_secure_password
   belongs_to :location, optional: true
   has_many :sales_transactions, dependent: :destroy
   has_many :purchase_orders, dependent: :destroy

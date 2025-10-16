@@ -37,23 +37,29 @@ microsoft = Supplier.find_or_create_by!(name: "Microsoft Corp.") do |supplier|
   supplier.default_lead_time_days = 5
 end
 
-# Create Users
+# Create Users with passwords
 john = User.find_or_create_by!(email: "john.doe@inventory.com") do |user|
   user.first_name = "John"
   user.last_name = "Doe"
   user.role = "manager"
+  user.password = "password123"
+  user.password_confirmation = "password123"
 end
 
 jane = User.find_or_create_by!(email: "jane.smith@inventory.com") do |user|
   user.first_name = "Jane"
   user.last_name = "Smith"
   user.role = "staff"
+  user.password = "password123"
+  user.password_confirmation = "password123"
 end
 
 bob = User.find_or_create_by!(email: "bob.johnson@inventory.com") do |user|
   user.first_name = "Bob"
   user.last_name = "Johnson"
   user.role = "manager"
+  user.password = "password123"
+  user.password_confirmation = "password123"
 end
 
 # Create Locations
@@ -217,3 +223,8 @@ puts "Stock Levels: #{StockLevel.count}"
 puts "Purchase Orders: #{PurchaseOrder.count}"
 puts "Sales Transactions: #{SalesTransaction.count}"
 puts "Demand Forecasts: #{DemandForecast.count}"
+puts ""
+puts "Login credentials:"
+puts "Email: john.doe@inventory.com | Password: password123"
+puts "Email: jane.smith@inventory.com | Password: password123"
+puts "Email: bob.johnson@inventory.com | Password: password123"

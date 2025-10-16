@@ -25,7 +25,9 @@ RSpec.describe Product, type: :model do
           first_name: 'Customer',
           last_name: 'One',
           email: 'customerone@example.com',
-          role: 'staff'
+          role: 'staff',
+          password: 'password123',
+          password_confirmation: 'password123'
         )
       }
       let(:purchasing_user_1) {
@@ -33,7 +35,9 @@ RSpec.describe Product, type: :model do
           first_name: 'Customer',
           last_name: 'Two',
           email: 'customertwo@example.com',
-          role: 'staff'
+          role: 'staff',
+          password: 'password123',
+          password_confirmation: 'password123'
         )
       }
 

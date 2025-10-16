@@ -1,8 +1,9 @@
 require 'rails_helper'
 
 RSpec.describe "Purchase Orders", type: :request do
+  let(:authenticated_user) { create_authenticated_user }
   let(:supplier) { Supplier.create!(name: "Apple Inc.", default_lead_time_days: 7) }
-  let(:user) { User.create!(first_name: "John", last_name: "Doe", email: "john@example.com", role: "manager") }
+  let(:user) { User.create!(first_name: "John", last_name: "Doe", email: "john@example.com", role: "manager", password: "password123", password_confirmation: "password123") }
   let!(:purchase_order) {
     PurchaseOrder.create!(
       supplier: supplier,
@@ -12,6 +13,10 @@ RSpec.describe "Purchase Orders", type: :request do
       status: "pending"
     )
   }
+
+  before do
+    login_as(authenticated_user)
+  end
 
   describe "GET /purchase_orders" do
     it "returns http success" do
