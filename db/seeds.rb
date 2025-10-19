@@ -151,8 +151,8 @@ ipad_air.update!(
 # ========================
 # Create Stock Levels
 # ========================
-[iphone15, macbook, airpods, ipad_air].each do |product|
-  [main_warehouse, store_downtown, store_mall].each do |location|
+[ iphone15, macbook, airpods, ipad_air ].each do |product|
+  [ main_warehouse, store_downtown, store_mall ].each do |location|
     stock = StockLevel.find_or_initialize_by(product: product, location: location)
     case location
     when main_warehouse
