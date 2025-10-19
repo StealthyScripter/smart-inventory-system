@@ -529,10 +529,16 @@
             <header class="header">
                 <h1 class="header-title"><%= yield(:page_title) || "Dashboard" %></h1>
                 <div class="user-info">
-                <span>Welcome, <%= current_user.full_name %></span>
-                <span class="badge badge-info"><%= current_user.role.titleize %></span>
-                <%= link_to "Logout", logout_path, method: :delete, class: "btn btn-secondary" %>
-                </div>
+                    <% if logged_in? %>
+                        <span>Welcome, <%= current_user.full_name %></span>
+                        <span class="badge badge-info"><%= current_user.role.titleize %></span>
+                        <%= link_to "Logout", logout_path, method: :delete, class: "btn btn-secondary",
+                                    style: "padding: 0.5rem 1rem; margin-left: 1rem;" %>
+                    <% else %>
+                        <%= link_to "Login", login_path, class: "btn btn-primary" %>
+                        <%= link_to "Sign Up", signup_path, class: "btn btn-secondary" %>
+                    <% end %>
+                    </div>
             </header>
 
             <div class="content-area">

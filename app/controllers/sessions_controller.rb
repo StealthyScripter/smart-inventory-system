@@ -1,20 +1,13 @@
 class SessionsController < ApplicationController
-  skip_before_action :require_authentication, only: [ :new, :create ]
+  skip_before_action :require_login, only: [:new, :create]
 
   def new
   end
 
   def create
-    puts "=== DEBUG PARAMS ==="
-    puts params.inspect
-    puts "====================="
-
     user = User.find_by(email: params[:email])
-    puts "=== FOUND USER ==="
-    puts user.inspect
-    puts "=================="
 
-    if user&.authenticate(params[:password])
+    if user && user.authenticate(params[:password])
       session[:user_id] = user.id
       redirect_to root_path, notice: "Logged in successfully!"
     else
