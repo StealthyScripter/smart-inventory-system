@@ -3,9 +3,9 @@ class SalesController < ApplicationController
 
   def index
     @recent_transactions = SalesTransaction.includes(:product, :location, :user)
-    .where("transaction_date >= ?", Date.current)
-    .order(transaction_date: :desc)
-    @sale = SalesTransaction.new # For the quick sale form
+      .where("transaction_date >= ?", Date.current)
+      .order(transaction_date: :desc)
+    @sale = SalesTransaction.new
     load_form_data
   end
 
@@ -17,11 +17,8 @@ class SalesController < ApplicationController
   def create
     @sale = SalesTransaction.new(sale_params)
     @sale.transaction_date = Time.current
+    @sale.user ||= current_user # safer default
 
-    # Find the current user
-    @sale.user = User.first if @sale.user.blank?
-
-    # Check stock availability before saving
     if valid_stock_for_sale?
       if @sale.save
         process_successful_sale
@@ -35,40 +32,31 @@ class SalesController < ApplicationController
     end
   end
 
-  def show
-  end
+  def show; end
 
   def destroy
     # Reverse the stock movement
     stock_level = StockLevel.find_by(product: @sale.product, location: @sale.location)
-    if stock_level
-      stock_level.update!(current_quantity: stock_level.current_quantity + @sale.quantity)
-    end
+    stock_level&.update!(current_quantity: stock_level.current_quantity + @sale.quantity)
 
-    # Remove related stock movements
     StockMovement.where(reference: @sale).destroy_all
-
     @sale.destroy
     redirect_to sales_path, notice: "Sale was successfully cancelled and inventory restored."
   end
 
   def product_details
     @product = Product.find(params[:product_id])
-    render json: {
-      selling_price: @product.selling_price,
-      unit_cost: @product.unit_cost
-    }
+    render json: { selling_price: @product.selling_price, unit_cost: @product.unit_cost }
   end
 
   private
 
   def set_sale
-    @sale = SalesTransaction.find(params[:id])
+    @sale = current_user.sales_transactions.find(params[:id])
   end
 
   def valid_stock_for_sale?
     return false unless @sale.product && @sale.location && @sale.quantity
-
     stock_level = StockLevel.find_by(product: @sale.product, location: @sale.location)
     stock_level && stock_level.current_quantity >= @sale.quantity
   end
@@ -77,7 +65,6 @@ class SalesController < ApplicationController
     stock_level = StockLevel.find_by(product: @sale.product, location: @sale.location)
     stock_level.update!(current_quantity: stock_level.current_quantity - @sale.quantity)
 
-    # Create stock movement record
     StockMovement.create!(
       product: @sale.product,
       destination_location: @sale.location,
@@ -94,7 +81,6 @@ class SalesController < ApplicationController
     load_form_data
 
     if request.referer&.include?("sales") && !request.referer&.include?("new")
-      # Came from quick sale form on index page
       @recent_transactions = SalesTransaction.includes(:product, :location, :user)
         .where("transaction_date >= ?", Date.current)
         .order(transaction_date: :desc)
@@ -106,12 +92,13 @@ class SalesController < ApplicationController
 
   def load_form_data
     @products = Product.includes(:stock_levels).order(:name)
-    @locations = Location.all.order(:name)
-    @users = User.all.order(:first_name, :last_name)
+    @locations = Location.order(:name)
+    @users = User.order(:first_name, :last_name)
   end
 
   def sale_params
-    params.require(:sales_transaction).permit(:product_id, :location_id, :user_id,
-      :customer_name, :quantity, :unit_price, :total_amount)
+    params.require(:sales_transaction).permit(
+      :product_id, :location_id, :user_id, :customer_name, :quantity, :unit_price, :total_amount
+    )
   end
 end

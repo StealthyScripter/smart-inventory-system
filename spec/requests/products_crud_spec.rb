@@ -1,10 +1,14 @@
-# spec/requests/products_crud_spec.rb
 require 'rails_helper'
 
 RSpec.describe "Products CRUD", type: :request do
+  let(:user) { create_authenticated_user }
   let!(:category) { Category.create!(name: "Electronics") }  # Changed from let to let!
   let!(:supplier) { Supplier.create!(name: "Apple Inc.", default_lead_time_days: 7) }  # Changed from let to let!
   let(:location) { Location.create!(name: "Main Store") }
+
+  before do
+    login_as(user)
+  end
 
   let(:valid_attributes) {
     {

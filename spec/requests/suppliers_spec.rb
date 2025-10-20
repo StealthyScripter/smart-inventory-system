@@ -1,7 +1,12 @@
 require 'rails_helper'
 
 RSpec.describe "Suppliers", type: :request do
+  let(:user) { create_authenticated_user }
   let!(:supplier) { Supplier.create!(name: "Apple Inc.", contact_email: "orders@apple.com", default_lead_time_days: 7) }
+
+  before do
+    login_as(user)
+  end
 
   describe "GET /suppliers" do
     it "returns http success" do

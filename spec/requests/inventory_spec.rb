@@ -1,10 +1,15 @@
 require 'rails_helper'
 
 RSpec.describe "Inventory", type: :request do
+  let(:user) { create_authenticated_user }
   let(:category) { Category.create!(name: "Electronics") }
   let(:location) { Location.create!(name: "Main Store") }
   let(:product) { Product.create!(name: "iPhone", sku: "IP001", category: category, reorder_point: 10, lead_time_days: 7) }
   let!(:stock_level) { StockLevel.create!(product: product, location: location, current_quantity: 50) }
+
+  before do
+    login_as(user)
+  end
 
   describe "GET /inventory" do
     it "returns http success" do

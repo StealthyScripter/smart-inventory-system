@@ -1,11 +1,16 @@
 require 'rails_helper'
 
 RSpec.describe "Sales CRUD", type: :request do
+  let(:authenticated_user) { create_authenticated_user }
   let(:category) { Category.create!(name: "Electronics") }
   let(:location) { Location.create!(name: "Main Store") }
-  let(:user) { User.create!(first_name: "Jane", last_name: "Doe", email: "jane@example.com", role: "staff") }
+  let(:user) { User.create!(first_name: "Jane", last_name: "Doe", email: "jane@example.com", role: "staff", password: "password123", password_confirmation: "password123") }
   let(:product) { Product.create!(name: "iPhone", sku: "IP001", category: category, reorder_point: 10, lead_time_days: 7) }
   let!(:stock_level) { StockLevel.create!(product: product, location: location, current_quantity: 50) }
+
+  before do
+    login_as(authenticated_user)
+  end
 
   let(:valid_attributes) {
     {

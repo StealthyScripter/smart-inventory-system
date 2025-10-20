@@ -1,8 +1,13 @@
 require 'rails_helper'
 
 RSpec.describe "Products", type: :request do
+  let(:user) { create_authenticated_user }
   let(:category) { Category.create!(name: "Electronics") }
   let!(:product) { Product.create!(name: "iPhone", sku: "IP001", category: category, reorder_point: 10, lead_time_days: 7) }
+
+  before do
+    login_as(user)
+  end
 
   describe "GET /products" do
     it "returns http success" do
@@ -32,6 +37,22 @@ RSpec.describe "Products", type: :request do
     it "displays the specific product" do
       get product_path(product)
       expect(assigns(:product)).to eq(product)
+    end
+  end
+
+  describe "without authentication" do
+    before do
+      delete logout_path
+    end
+
+    it "redirects products index to login" do
+      get products_path
+      expect(response).to redirect_to(login_path)
+    end
+
+    it "redirects product show to login" do
+      get product_path(product)
+      expect(response).to redirect_to(login_path)
     end
   end
 end

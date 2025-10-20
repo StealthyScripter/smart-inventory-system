@@ -1,7 +1,12 @@
 require 'rails_helper'
 
 RSpec.describe "Locations", type: :request do
+  let(:user) { create_authenticated_user }
   let!(:location) { Location.create!(name: "Main Warehouse", address: "123 Main St") }
+
+  before do
+    login_as(user)
+  end
 
   describe "GET /locations" do
     it "returns http success" do
