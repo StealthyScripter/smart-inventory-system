@@ -3,7 +3,7 @@
 <div class="table-container">
   <div class="table-header">
     <h3 class="table-title">Suppliers</h3>
-    <%= link_to "Add Supplier", "#", class: "btn btn-primary" %>
+    <%= link_to "Add Supplier", new_supplier_path, class: "btn btn-primary" %>
   </div>
   <table>
     <thead>
@@ -25,7 +25,8 @@
           <td><%= supplier.default_lead_time_days %> days</td>
           <td><%= supplier.purchase_orders.pending.count %></td>
           <td>
-            <%= link_to "Edit", "#", class: "btn btn-secondary", style: "padding: 0.25rem 0.5rem; font-size: 0.875rem;" %>
+            <%= link_to "Edit", edit_supplier_path(supplier), class: "btn btn-secondary",
+                        style: "padding: 0.25rem 0.5rem; font-size: 0.875rem;" %>
           </td>
         </tr>
       <% end %>

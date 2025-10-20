@@ -12,13 +12,13 @@ class User < ApplicationRecord
   validates :first_name, :last_name, :role, presence: true
   validates :password, length: { minimum: 6 }, if: -> { password.present? }
 
+  def full_name
+    "#{first_name} #{last_name}"
+  end
+
   private
 
   def set_default_role
     self.role ||= "employee"
-  end
-
-  def full_name
-    "#{first_name} #{last_name}"
   end
 end
