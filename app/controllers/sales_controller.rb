@@ -1,5 +1,5 @@
 class SalesController < ApplicationController
-  before_action :set_sale, only: [:show, :destroy]
+  before_action :set_sale, only: [ :show, :destroy ]
 
   def index
     @recent_transactions = SalesTransaction.includes(:product, :location, :user)
