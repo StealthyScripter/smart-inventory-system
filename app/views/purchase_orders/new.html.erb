@@ -1,0 +1,150 @@
+<% content_for :page_title, "Create Purchase Order" %>
+
+<div class="table-container">
+  <div class="table-header">
+    <h3 class="table-title">Create New Purchase Order</h3>
+    <%= link_to "Back to Purchase Orders", purchase_orders_path, class: "btn btn-secondary" %>
+  </div>
+
+  <div style="padding: 2rem;">
+    <%= form_with model: @purchase_order, local: true, id: "purchase-order-form" do |form| %>
+      <% if @purchase_order.errors.any? %>
+        <div class="alert alert-danger">
+          <strong><%= pluralize(@purchase_order.errors.count, "error") %> prohibited this purchase order from being saved:</strong>
+          <ul style="margin-top: 0.5rem;">
+            <% @purchase_order.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <!-- Order Details -->
+      <div class="grid-2" style="gap: 2rem; margin-bottom: 2rem;">
+        <div>
+          <h4 style="margin-bottom: 1rem;">Order Information</h4>
+
+          <div class="form-group">
+            <%= form.label :supplier_id, "Supplier", class: "form-label" %>
+            <%= form.select :supplier_id,
+                           options_from_collection_for_select(@suppliers, :id, :name),
+                           { prompt: "Select supplier..." },
+                           { class: "form-select", required: true, id: "supplier-select" } %>
+          </div>
+
+          <div class="form-group">
+            <%= form.label :expected_delivery_date, "Expected Delivery Date", class: "form-label" %>
+            <%= form.date_field :expected_delivery_date,
+                               class: "form-input",
+                               min: Date.current,
+                               value: Date.current + 7.days %>
+          </div>
+        </div>
+
+        <div>
+          <h4 style="margin-bottom: 1rem;">Additional Information</h4>
+
+          <div class="form-group">
+            <%= form.label :notes, "Notes (Optional)", class: "form-label" %>
+            <%= form.text_area :notes, rows: 5, class: "form-input",
+                              placeholder: "Add any special instructions or notes..." %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Order Items -->
+      <div style="margin-bottom: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <h4>Order Items</h4>
+          <button type="button" id="add-item" class="btn btn-secondary">
+            + Add Product
+          </button>
+        </div>
+
+        <div id="order-items">
+          <%= form.fields_for :purchase_order_items do |item_form| %>
+            <%= render 'purchase_order_item_fields', f: item_form, products: @products %>
+          <% end %>
+        </div>
+
+        <!-- Template for new items (moved inside form) -->
+        <div id="item-template" style="display: none;">
+          <%= form.fields_for :purchase_order_items, PurchaseOrderItem.new, child_index: 'NEW_RECORD' do |item_form| %>
+            <%= render 'purchase_order_item_fields', f: item_form, products: @products %>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Order Summary -->
+      <div style="background: #f7fafc; padding: 1.5rem; border-radius: 0.5rem; margin-bottom: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h4>Order Total:</h4>
+          <h2 id="order-total" style="color: #2d3748; margin: 0;">$0.00</h2>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div style="display: flex; gap: 1rem;">
+        <%= form.submit "Create Purchase Order", class: "btn btn-primary" %>
+        <%= link_to "Cancel", purchase_orders_path, class: "btn btn-secondary" %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Add new item
+  document.getElementById('add-item').addEventListener('click', function() {
+    const template = document.getElementById('item-template');
+    const content = template.innerHTML.replace(/NEW_RECORD/g, new Date().getTime());
+    document.getElementById('order-items').insertAdjacentHTML('beforeend', content);
+    updateTotal();
+  });
+
+  // Remove item
+  document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('remove-item')) {
+      e.preventDefault();
+      const item = e.target.closest('.order-item');
+      const destroyField = item.querySelector('input[name*="_destroy"]');
+      if (destroyField) {
+        destroyField.value = '1';
+        item.style.display = 'none';
+      } else {
+        item.remove();
+      }
+      updateTotal();
+    }
+  });
+
+  // Update totals when quantity or price changes
+  document.addEventListener('input', function(e) {
+    if (e.target.classList.contains('quantity-input') || e.target.classList.contains('unit-cost')) {
+      const item = e.target.closest('.order-item');
+      updateItemTotal(item);
+    }
+  });
+
+  function updateItemTotal(item) {
+    const quantity = parseFloat(item.querySelector('.quantity-input').value) || 0;
+    const unitCost = parseFloat(item.querySelector('.unit-cost').value) || 0;
+    const total = quantity * unitCost;
+    item.querySelector('.item-total').textContent = '$' + total.toFixed(2);
+    updateTotal();
+  }
+
+  function updateTotal() {
+    let total = 0;
+    document.querySelectorAll('.order-item:not([style*="display: none"])').forEach(item => {
+      const quantity = parseFloat(item.querySelector('.quantity-input').value) || 0;
+      const unitCost = parseFloat(item.querySelector('.unit-cost').value) || 0;
+      total += quantity * unitCost;
+    });
+    document.getElementById('order-total').textContent = '$' + total.toFixed(2);
+  }
+
+  // Initial calculation
+  updateTotal();
+});
+</script>

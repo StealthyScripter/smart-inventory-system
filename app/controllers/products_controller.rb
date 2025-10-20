@@ -7,6 +7,10 @@ class ProductsController < ApplicationController
   end
 
   def show
+    respond_to do |format|
+      format.html
+      format.json { render json: @product.as_json(only: [:id, :name, :sku, :unit_cost, :selling_price]) }
+    end
   end
 
   def new

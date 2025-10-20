@@ -12,10 +12,19 @@ Rails.application.routes.draw do
   post "login", to: "sessions#create"
   delete "logout", to: "sessions#destroy"
 
-  resources :products
+  resources :products do
+    member do
+      get :json, to: "products#show", defaults: { format: :json }
+    end
+  end
   resources :suppliers
   resources :locations
-  resources :purchase_orders
+  resources :purchase_orders do
+    member do
+      patch :mark_as_sent
+      patch :mark_as_received
+    end
+  end
 
 
   # Sales transactions - using custom routes for better UX

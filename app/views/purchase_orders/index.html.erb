@@ -11,8 +11,7 @@
         <option value="received">Received</option>
         <option value="cancelled">Cancelled</option>
       </select>
-      <%= link_to "Create Order", "#", class: "btn btn-primary",
-                  onclick: "alert('Create Purchase Order feature coming soon!'); return false;" %>
+      <%= link_to "Create Order", new_purchase_order_path, class: "btn btn-primary" %>
     </div>
   </div>
   <table>
@@ -41,18 +40,15 @@
             </span>
           </td>
           <td>
-            <% if order.pending? %>
-              <%= link_to "Send", "#", class: "btn btn-primary",
-                          style: "padding: 0.25rem 0.5rem; font-size: 0.875rem;",
-                          onclick: "alert('Send order feature coming soon!'); return false;" %>
-            <% elsif order.ordered? %>
-              <%= link_to "Receive", "#", class: "btn btn-success",
-                          style: "padding: 0.25rem 0.5rem; font-size: 0.875rem;",
-                          onclick: "alert('Receive order feature coming soon!'); return false;" %>
-            <% else %>
-              <%= link_to "View", purchase_order_path(order), class: "btn btn-secondary",
-                          style: "padding: 0.25rem 0.5rem; font-size: 0.875rem;" %>
-            <% end %>
+            <%= link_to "View", purchase_order_path(order), class: "btn btn-secondary",
+                        style: "padding: 0.25rem 0.5rem; font-size: 0.875rem;" %>
+          </td>
+        </tr>
+      <% end %>
+      <% if @purchase_orders.empty? %>
+        <tr>
+          <td colspan="7" style="text-align: center; color: #718096; font-style: italic;">
+            No purchase orders yet. <%= link_to "Create your first order", new_purchase_order_path %>.
           </td>
         </tr>
       <% end %>
