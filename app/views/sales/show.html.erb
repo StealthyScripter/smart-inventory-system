@@ -5,9 +5,10 @@
     <h3 class="table-title">Sale Details - #<%= @sale.id %></h3>
     <div style="display: flex; gap: 1rem;">
       <%= link_to "Back to Sales", sales_path, class: "btn btn-secondary" %>
-      <%= link_to "Cancel Sale", sale_path(@sale), method: :delete,
-                  confirm: "Are you sure? This will restore the inventory and cannot be undone.",
-                  class: "btn btn-danger" %>
+      <%= button_to "Cancel Sale", sale_path(@sale),
+                    method: :delete,
+                    form: { data: { turbo_confirm: "Are you sure? This will restore the inventory and cannot be undone." } },
+                    class: "btn btn-danger" %>
     </div>
   </div>
 
@@ -131,9 +132,10 @@
       <%= link_to "Print Receipt", "#", class: "btn btn-secondary",
                   onclick: "window.print(); return false;" %>
       <%= link_to "New Sale", new_sale_path, class: "btn btn-primary" %>
-      <%= link_to "Cancel This Sale", sale_path(@sale), method: :delete,
-                  confirm: "Are you sure? This will restore #{@sale.quantity} units to inventory and cannot be undone.",
-                  class: "btn btn-danger" %>
+      <%= button_to "Cancel This Sale", sale_path(@sale),
+                    method: :delete,
+                    form: { data: { turbo_confirm: "Are you sure? This will restore #{@sale.quantity} units to inventory and cannot be undone." } },
+                    class: "btn btn-danger" %>
     </div>
   </div>
 </div>
