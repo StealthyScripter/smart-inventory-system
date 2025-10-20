@@ -82,9 +82,10 @@
       <div style="margin-top: 2rem; display: flex; gap: 1rem;">
         <%= form.submit "Update Product", class: "btn btn-primary" %>
         <%= link_to "Cancel", @product, class: "btn btn-secondary" %>
-        <%= link_to "Delete Product", @product, method: :delete,
-                    confirm: "Are you sure? This will also delete all stock levels for this product.",
-                    class: "btn btn-danger" %>
+        <%= button_to "Delete Product", @product,
+                      method: :delete,
+                      form: { data: { turbo_confirm: "Are you sure? This will delete all stock levels and cannot be undone." } },
+                      class: "btn btn-danger" %>
       </div>
     <% end %>
   </div>

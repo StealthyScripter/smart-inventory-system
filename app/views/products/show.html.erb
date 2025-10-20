@@ -82,11 +82,11 @@
     <!-- Action Buttons -->
     <div style="margin-top: 2rem; display: flex; gap: 1rem;">
       <%= link_to "Edit Product", edit_product_path(@product), class: "btn btn-primary" %>
-      <%= link_to "Create Purchase Order", new_purchase_order_path(product_id: @product.id), class: "btn btn-success" %>
       <%= link_to "Quick Sale", new_sale_path(product_id: @product.id), class: "btn btn-warning" %>
-      <%= link_to "Delete Product", product_path(@product), method: :delete,
-                  confirm: "Are you sure? This will also delete all stock levels and cannot be undone.",
-                  class: "btn btn-danger" %>
+      <%= button_to "Delete Product", product_path(@product),
+                    method: :delete,
+                    form: { data: { turbo_confirm: "Are you sure? This will delete all stock levels and cannot be undone." } },
+                    class: "btn btn-danger" %>
     </div>
   </div>
 </div>

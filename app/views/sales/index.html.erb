@@ -95,10 +95,14 @@
             <td>
               <%= link_to "View", sale_path(transaction), class: "btn btn-secondary",
                           style: "padding: 0.25rem 0.5rem; font-size: 0.75rem;" %>
-              <%= link_to "Cancel", sale_path(transaction), method: :delete,
-                          confirm: "Are you sure? This will restore the inventory.",
-                          class: "btn btn-danger",
-                          style: "padding: 0.25rem 0.5rem; font-size: 0.75rem;" %>
+              <%= button_to "Cancel", sale_path(transaction),
+                            method: :delete,
+                            form: {
+                              data: { turbo_confirm: "Are you sure? This will restore the inventory." },
+                              style: "display: inline;"
+                            },
+                            class: "btn btn-danger",
+                            style: "padding: 0.25rem 0.5rem; font-size: 0.75rem;" %>
             </td>
           </tr>
         <% end %>
