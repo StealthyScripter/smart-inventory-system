@@ -1,9 +1,9 @@
 <% content_for :page_title, "Dashboard" %>
 
 <!-- Alerts -->
-<% if @low_stock_items.any? %>
+<% if @low_stock_products.any? %>
   <div class="alert alert-warning">
-    <strong>⚠️ Low Stock Alert:</strong> <%= @low_stock_items.count %> products are below reorder point
+    <strong>⚠️ Low Stock Alert:</strong> <%= @low_stock_products.length %> products are below reorder point
   </div>
 <% end %>
 
@@ -18,31 +18,27 @@
   <div class="stat-card">
     <div class="stat-header">
       <span class="stat-title">Total Products</span>
-      <span class="stat-change positive">+12%</span>
     </div>
-    <div class="stat-value"><%= @total_products %></div>
+    <div class="stat-value"><%= number_with_delimiter(@total_products) %></div>
   </div>
 
   <div class="stat-card">
     <div class="stat-header">
       <span class="stat-title">Total Value</span>
-      <span class="stat-change positive">+8.5%</span>
     </div>
-    <div class="stat-value">$<%= number_with_delimiter(@total_value.round(2)) %></div>
+    <div class="stat-value">$<%= number_with_delimiter(@total_value.round(2), delimiter: ',') %></div>
   </div>
 
   <div class="stat-card">
     <div class="stat-header">
       <span class="stat-title">Low Stock Items</span>
-      <span class="stat-change negative">+3</span>
     </div>
-    <div class="stat-value"><%= @low_stock_items.count %></div>
+    <div class="stat-value"><%= @low_stock_products.length %></div>
   </div>
 
   <div class="stat-card">
     <div class="stat-header">
       <span class="stat-title">Pending Orders</span>
-      <span class="stat-change positive">-2</span>
     </div>
     <div class="stat-value"><%= @pending_orders %></div>
   </div>
@@ -65,12 +61,20 @@
         </tr>
       </thead>
       <tbody>
-        <% @recent_sales.limit(5).each do |sale| %>
+        <% if @recent_sales.any? %>
+          <% @recent_sales.limit(5).each do |sale| %>
+            <tr>
+              <td><%= sale.product.name %></td>
+              <td><%= sale.quantity %></td>
+              <td>$<%= number_with_delimiter(sale.total_amount.round(2)) %></td>
+              <td><%= time_ago_in_words(sale.transaction_date) %> ago</td>
+            </tr>
+          <% end %>
+        <% else %>
           <tr>
-            <td><%= sale.product.name %></td>
-            <td><%= sale.quantity %></td>
-            <td>$<%= sale.total_amount %></td>
-            <td><%= time_ago_in_words(sale.transaction_date) %> ago</td>
+            <td colspan="4" style="text-align: center; color: #718096; font-style: italic;">
+              No recent sales
+            </td>
           </tr>
         <% end %>
       </tbody>
@@ -81,7 +85,7 @@
   <div class="table-container">
     <div class="table-header">
       <h3 class="table-title">Low Stock Alerts</h3>
-      <%= link_to "Reorder", purchase_orders_path, class: "btn btn-primary" %>
+      <%= link_to "View All", products_path, class: "btn btn-primary" %>
     </div>
     <table>
       <thead>
@@ -93,15 +97,23 @@
         </tr>
       </thead>
       <tbody>
-        <% @low_stock_items.each do |product| %>
+        <% if @low_stock_products.any? %>
+          <% @low_stock_products.each do |product| %>
+            <tr>
+              <td><%= link_to product.name, product_path(product) %></td>
+              <td class="stock-low"><%= product.total_stock %></td>
+              <td><%= product.reorder_point %></td>
+              <td>
+                <span class="badge <%= product.total_stock == 0 ? 'badge-danger' : 'badge-warning' %>">
+                  <%= product.total_stock == 0 ? 'Critical' : 'Low' %>
+                </span>
+              </td>
+            </tr>
+          <% end %>
+        <% else %>
           <tr>
-            <td><%= product.name %></td>
-            <td class="stock-low"><%= product.total_stock %></td>
-            <td><%= product.reorder_point %></td>
-            <td>
-              <span class="badge <%= product.total_stock == 0 ? 'badge-danger' : 'badge-warning' %>">
-                <%= product.total_stock == 0 ? 'Critical' : 'Low' %>
-              </span>
+            <td colspan="4" style="text-align: center; color: #718096; font-style: italic;">
+              All products are adequately stocked
             </td>
           </tr>
         <% end %>

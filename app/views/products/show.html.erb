@@ -26,15 +26,18 @@
       </div>
       <div>
         <h4>Pricing & Stock</h4>
-        <p><strong>Unit Cost:</strong> $<%= @product.unit_cost %></p>
-        <p><strong>Selling Price:</strong> $<%= @product.selling_price %></p>
+        <p><strong>Unit Cost:</strong> $<%= number_with_delimiter(@product.unit_cost.to_f.round(2)) %></p>
+        <p><strong>Selling Price:</strong> $<%= number_with_delimiter(@product.selling_price.to_f.round(2)) %></p>
         <p><strong>Total Stock:</strong>
           <span class="<%= @product.total_stock < @product.reorder_point ? 'stock-low' : 'stock-ok' %>">
-            <%= @product.total_stock %>
+            <%= number_with_delimiter(@product.total_stock) %> units
           </span>
         </p>
-        <p><strong>Reorder Point:</strong> <%= @product.reorder_point %></p>
+        <p><strong>Reorder Point:</strong> <%= @product.reorder_point %> units</p>
         <p><strong>Lead Time:</strong> <%= @product.lead_time_days %> days</p>
+        <p><strong>Total Inventory Value:</strong>
+          $<%= number_with_delimiter((@product.total_stock * @product.unit_cost.to_f).round(2)) %>
+        </p>
 
         <% if @product.total_stock < @product.reorder_point %>
           <div class="alert alert-warning" style="margin-top: 1rem;">
@@ -54,6 +57,7 @@
             <th>Current Stock</th>
             <th>Reserved</th>
             <th>Available</th>
+            <th>Value</th>
             <th>Status</th>
           </tr>
         </thead>
@@ -64,6 +68,7 @@
               <td><%= stock_level.current_quantity %></td>
               <td><%= stock_level.reserved_quantity %></td>
               <td><%= stock_level.available_quantity %></td>
+              <td>$<%= number_with_delimiter((stock_level.current_quantity * @product.unit_cost.to_f).round(2)) %></td>
               <td>
                 <% if stock_level.current_quantity <= 0 %>
                   <span class="badge badge-danger">Out of Stock</span>
@@ -76,6 +81,16 @@
             </tr>
           <% end %>
         </tbody>
+        <tfoot>
+          <tr style="font-weight: 700; background: #f7fafc;">
+            <td>Total</td>
+            <td><%= @product.total_stock %></td>
+            <td><%= @product.stock_levels.sum(:reserved_quantity) %></td>
+            <td><%= @product.available_stock %></td>
+            <td>$<%= number_with_delimiter((@product.total_stock * @product.unit_cost.to_f).round(2)) %></td>
+            <td></td>
+          </tr>
+        </tfoot>
       </table>
     </div>
 

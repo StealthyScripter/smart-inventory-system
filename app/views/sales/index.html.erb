@@ -70,7 +70,7 @@
     <div class="table-header">
       <h3 class="table-title">Today's Sales</h3>
       <span class="badge badge-info">
-        <%= @recent_transactions.sum(:total_amount) %> total sales
+        $<%= number_with_delimiter(@recent_transactions.sum(:total_amount).round(2)) %> total
       </span>
     </div>
     <table>
@@ -91,7 +91,7 @@
             <td><%= transaction.product.name %></td>
             <td><%= transaction.customer_name || "Walk-in" %></td>
             <td><%= transaction.quantity %></td>
-            <td>$<%= transaction.total_amount %></td>
+            <td>$<%= number_with_delimiter(transaction.total_amount.round(2)) %></td>
             <td>
               <%= link_to "View", sale_path(transaction), class: "btn btn-secondary",
                           style: "padding: 0.25rem 0.5rem; font-size: 0.75rem;" %>

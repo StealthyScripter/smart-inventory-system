@@ -2,10 +2,10 @@ class DashboardController < ApplicationController
   def index
     @total_products = Product.count
     @total_value = calculate_total_inventory_value
-    @low_stock_items = find_low_stock_products.limit(5)
+    @low_stock_products = find_low_stock_products
     @recent_sales = SalesTransaction.recent.includes(:product, :location).limit(10)
     @pending_orders = PurchaseOrder.pending.count
-    @out_of_stock_count = Product.joins(:stock_levels).where(stock_levels: { current_quantity: 0 }).distinct.count
+    @out_of_stock_count = count_out_of_stock_products
   end
 
   private
@@ -17,8 +17,15 @@ class DashboardController < ApplicationController
   end
 
   def find_low_stock_products
-    Product.joins(:stock_levels)
-           .where("stock_levels.current_quantity < products.reorder_point")
-           .includes(:stock_levels)
+    # Get all products and filter in Ruby
+    Product.includes(:stock_levels).all.select do |product|
+      product.total_stock < product.reorder_point
+    end.sort_by(&:total_stock).take(5)
+  end
+
+  def count_out_of_stock_products
+    Product.includes(:stock_levels).all.count do |product|
+      product.total_stock == 0
+    end
   end
 end
