@@ -1,4 +1,3 @@
-# db/seeds.rb
 # This file ensures the existence of records required to run the application
 # in every environment (production, development, test).
 # The code here is idempotent and can be executed at any point.
