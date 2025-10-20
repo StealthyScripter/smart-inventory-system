@@ -79,6 +79,45 @@
         </div>
       </div>
 
+      <!-- Stock Levels Section -->
+      <div style="margin-top: 2rem;">
+        <h4 style="margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+          📦 Stock Levels by Location
+          <span style="font-size: 0.875rem; font-weight: normal; color: #718096;">
+            (Adjust quantities as needed)
+          </span>
+        </h4>
+
+        <div style="background: #f7fafc; padding: 1.5rem; border-radius: 0.5rem; border: 1px solid #e2e8f0;">
+          <div class="grid-2" style="gap: 1.5rem;">
+            <% @locations.each do |location| %>
+              <% stock_level = @stock_levels[location.id] %>
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label" style="display: flex; justify-content: space-between; align-items: center;">
+                  <span>
+                    <strong><%= location.name %></strong>
+                    <% if stock_level %>
+                      <span style="font-size: 0.875rem; color: #718096; font-weight: normal;">
+                        (Current: <%= stock_level.current_quantity %>)
+                      </span>
+                    <% end %>
+                  </span>
+                </label>
+                <%= number_field_tag "stock_levels[#{location.id}]",
+                                     stock_level&.current_quantity || 0,
+                                     min: 0,
+                                     class: "form-input",
+                                     style: "font-weight: 600;" %>
+              </div>
+            <% end %>
+          </div>
+
+          <div class="alert alert-warning" style="margin-top: 1rem; margin-bottom: 0;">
+            <strong>⚠️ Note:</strong> Changing stock quantities will create stock movement records for audit purposes.
+          </div>
+        </div>
+      </div>
+
       <div style="margin-top: 2rem; display: flex; gap: 1rem;">
         <%= form.submit "Update Product", class: "btn btn-primary" %>
         <%= link_to "Cancel", @product, class: "btn btn-secondary" %>
@@ -90,3 +129,9 @@
     <% end %>
   </div>
 </div>
+
+<style>
+  .form-input[type="number"] {
+    text-align: right;
+  }
+</style>

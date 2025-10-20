@@ -1,5 +1,5 @@
 class ProductsController < ApplicationController
-  before_action :set_product, only: [ :show, :edit, :update, :destroy ]
+  before_action :set_product, only: [:show, :edit, :update, :destroy]
 
   def index
     @products = Product.includes(:category, :supplier, :stock_levels)
@@ -33,13 +33,18 @@ class ProductsController < ApplicationController
 
   def edit
     load_form_data
+    load_stock_levels
   end
 
   def update
     if @product.update(product_params)
+      # Update stock levels if provided
+      update_stock_levels if params[:stock_levels].present?
+
       redirect_to @product, notice: "Product was successfully updated."
     else
       load_form_data
+      load_stock_levels
       render :edit, status: :unprocessable_content
     end
   end
@@ -58,6 +63,34 @@ class ProductsController < ApplicationController
   def load_form_data
     @categories = Category.all.order(:name)
     @suppliers = Supplier.all.order(:name)
+  end
+
+  def load_stock_levels
+    @locations = Location.all.order(:name)
+    @stock_levels = @product.stock_levels.includes(:location).index_by(&:location_id)
+  end
+
+  def update_stock_levels
+    params[:stock_levels].each do |location_id, quantity|
+      stock_level = @product.stock_levels.find_or_initialize_by(location_id: location_id)
+      old_quantity = stock_level.current_quantity
+      new_quantity = quantity.to_i
+
+      if stock_level.update(current_quantity: new_quantity)
+        # Create stock movement record for the adjustment
+        if old_quantity != new_quantity
+          StockMovement.create!(
+            product: @product,
+            destination_location_id: location_id,
+            movement_type: "adjustment",
+            quantity: (new_quantity - old_quantity).abs,
+            user: current_user,
+            movement_date: Time.current,
+            notes: "Stock adjusted from #{old_quantity} to #{new_quantity} via product edit"
+          )
+        end
+      end
+    end
   end
 
   def product_params
