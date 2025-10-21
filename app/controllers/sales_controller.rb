@@ -5,7 +5,7 @@ class SalesController < ApplicationController
 
   def index
     @recent_transactions = scoped_sales_transactions
-      .where("transaction_date >= ?", Date.current)
+      .where("transaction_date >= ?", Date.current.beginning_of_day)
       .order(transaction_date: :desc)
     @sale = SalesTransaction.new
     load_form_data
@@ -44,12 +44,17 @@ class SalesController < ApplicationController
   def show; end
 
   def destroy
-    # Reverse the stock movement
     stock_level = StockLevel.find_by(product: @sale.product, location: @sale.location)
-    stock_level&.update!(current_quantity: stock_level.current_quantity + @sale.quantity)
+
+    if stock_level
+      stock_level.update!(current_quantity: stock_level.current_quantity + @sale.quantity)
+    else
+      Rails.logger.warn "No stock level found for product #{@sale.product_id} at location #{@sale.location_id}"
+    end
 
     StockMovement.where(reference: @sale).destroy_all
     @sale.destroy
+
     redirect_to sales_path, notice: "Sale was successfully cancelled and inventory restored."
   end
 

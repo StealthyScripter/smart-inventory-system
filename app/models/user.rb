@@ -11,7 +11,8 @@ class User < ApplicationRecord
   validates :email, presence: true, uniqueness: true
   validates :first_name, :last_name, :role, presence: true
   validates :password, length: { minimum: 6 }, if: -> { password.present? }
-  validates :role, inclusion: { in: %w[admin manager supervisor employee guest] }
+  validates :role, inclusion: { in: %w[admin manager supervisor employee guest staff] }
+  after_update :log_role_change, if: :saved_change_to_role
 
   # Validate that supervisor and employee must have a location
   validate :location_required_for_scoped_roles
@@ -51,5 +52,15 @@ class User < ApplicationRecord
     if (supervisor? || employee?) && location_id.blank?
       errors.add(:location, "must be assigned for #{role} role")
     end
+  end
+
+  def log_role_change
+    Rails.logger.warn(
+      "SECURITY: User role changed - " \
+      "User ID: #{id}, " \
+      "From: #{role_before_last_save}, " \
+      "To: #{role}, " \
+      "Changed at: #{updated_at}"
+    )
   end
 end

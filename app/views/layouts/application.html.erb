@@ -15,446 +15,133 @@
     <%= javascript_importmap_tags %>
     <style>
       * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background: #f8fafc;
-            color: #1a202c;
-        }
-
-        .app-container {
-            display: flex;
-            min-height: 100vh;
-        }
-
-        /* Sidebar */
-        .sidebar {
-            width: 280px;
-            background: #2d3748;
-            color: white;
-            padding: 1rem 0;
-            overflow-y: auto;
-        }
-
-        .logo {
-            padding: 0 1.5rem 2rem;
-            border-bottom: 1px solid #4a5568;
-            margin-bottom: 1rem;
-        }
-
-        .logo h1 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #63b3ed;
-        }
-
-        .nav-menu {
-            list-style: none;
-        }
-
-        .nav-item {
-            margin: 0.25rem 0;
-        }
-
-        .nav-link {
-            display: flex;
-            align-items: center;
-            padding: 0.75rem 1.5rem;
-            color: #e2e8f0;
-            text-decoration: none;
-            transition: all 0.2s;
-            cursor: pointer;
-        }
-
-        .nav-link:hover,
-        .nav-link.active {
-            background: #4a5568;
-            color: #63b3ed;
-        }
-
-        .nav-icon {
-            width: 20px;
-            height: 20px;
-            margin-right: 0.75rem;
-            fill: currentColor;
-        }
-
-        /* Main Content */
-        .main-content {
-            flex: 1;
-            overflow-y: auto;
-        }
-
-        .header {
-            background: white;
-            padding: 1rem 2rem;
-            border-bottom: 1px solid #e2e8f0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .header-title {
-            font-size: 1.875rem;
-            font-weight: 700;
-            color: #2d3748;
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .content-area {
-            padding: 2rem;
-        }
-
-        .page {
-            display: none;
-        }
-
-        .page.active {
-            display: block;
-        }
-
-        /* Dashboard Cards */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .stat-card {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 0.5rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            border-left: 4px solid #63b3ed;
-        }
-
-        .stat-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.5rem;
-        }
-
-        .stat-title {
-            color: #718096;
-            font-size: 0.875rem;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .stat-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #2d3748;
-        }
-
-        .stat-change {
-            font-size: 0.875rem;
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.25rem;
-        }
-
-        .stat-change.positive {
-            background: #f0fff4;
-            color: #38a169;
-        }
-
-        .stat-change.negative {
-            background: #fff5f5;
-            color: #e53e3e;
-        }
-
-        /* Tables */
-        .table-container {
-            background: white;
-            border-radius: 0.5rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            overflow: hidden;
-            margin-bottom: 2rem;
-        }
-
-        .table-header {
-            padding: 1.5rem;
-            border-bottom: 1px solid #e2e8f0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .table-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: #2d3748;
-        }
-
-        .btn {
-            padding: 0.5rem 1rem;
-            border: none;
-            border-radius: 0.375rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .btn-primary {
-            background: #3182ce;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #2c5282;
-        }
-
-        .btn-secondary {
-            background: #e2e8f0;
-            color: #4a5568;
-        }
-
-        .btn-secondary:hover {
-            background: #cbd5e0;
-        }
-
-        .btn-success {
-            background: #38a169;
-            color: white;
-        }
-
-        .btn-warning {
-            background: #d69e2e;
-            color: white;
-        }
-
-        .btn-danger {
-            background: #e53e3e;
-            color: white;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th, td {
-            padding: 0.75rem 1.5rem;
-            text-align: left;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        th {
-            background: #f7fafc;
-            font-weight: 600;
-            color: #4a5568;
-            font-size: 0.875rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        tbody tr:hover {
-            background: #f7fafc;
-        }
-
-        /* Status badges */
-        .badge {
-            padding: 0.25rem 0.75rem;
-            font-size: 0.75rem;
-            font-weight: 500;
-            border-radius: 9999px;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .badge-success {
-            background: #c6f6d5;
-            color: #22543d;
-        }
-
-        .badge-warning {
-            background: #faf089;
-            color: #744210;
-        }
-
-        .badge-danger {
-            background: #fed7d7;
-            color: #742a2a;
-        }
-
-        .badge-info {
-            background: #bee3f8;
-            color: #2a4365;
-        }
-
-        /* Forms */
-        .form-group {
-            margin-bottom: 1rem;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            color: #4a5568;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 0.5rem 0.75rem;
-            border: 1px solid #cbd5e0;
-            border-radius: 0.375rem;
-            font-size: 1rem;
-        }
-
-        .form-input:focus {
-            outline: none;
-            border-color: #3182ce;
-            box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
-        }
-
-        .form-select {
-            width: 100%;
-            padding: 0.5rem 0.75rem;
-            border: 1px solid #cbd5e0;
-            border-radius: 0.375rem;
-            background: white;
-            font-size: 1rem;
-        }
-
-        /* Charts placeholder */
-        .chart-container {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 0.5rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            height: 300px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #718096;
-            margin-bottom: 2rem;
-        }
-
-        /* Alerts */
-        .alert {
-            padding: 1rem 1.5rem;
-            border-radius: 0.5rem;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .alert-warning {
-            background: #fffbeb;
-            border: 1px solid #f6e05e;
-            color: #744210;
-        }
-
-        .alert-danger {
-            background: #fff5f5;
-            border: 1px solid #feb2b2;
-            color: #742a2a;
-        }
-
-        /* Flash Messages */
-        .flash-success {
-            background: #f0fff4;
-            border: 1px solid #9ae6b4;
-            color: #22543d;
-        }
-
-        .flash-error {
-            background: #fff5f5;
-            border: 1px solid #feb2b2;
-            color: #742a2a;
-        }
-
-        .flash-notice {
-            background: #ebf8ff;
-            border: 1px solid #90cdf4;
-            color: #2a4365;
-        }
-
-        .flash-alert {
-            background: #fffbeb;
-            border: 1px solid #f6e05e;
-            color: #744210;
-        }
-
-        /* Grid layouts */
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-        }
-
-        .grid-3 {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 2rem;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 100%;
-                position: fixed;
-                top: 0;
-                left: -100%;
-                z-index: 1000;
-                transition: left 0.3s;
-            }
-
-            .sidebar.open {
-                left: 0;
-            }
-
-            .main-content {
-                margin-left: 0;
-            }
-
-            .grid-2, .grid-3 {
-                grid-template-columns: 1fr;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* Low stock indicator */
-        .stock-low {
-            color: #e53e3e;
-            font-weight: 600;
-        }
-
-        .stock-ok {
-            color: #38a169;
-        }
-
-        .forecast-chart {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            text-align: center;
-        }
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background: #f8fafc;
+        color: #1a202c;
+      }
+      .app-container {
+        display: flex;
+        min-height: 100vh;
+      }
+      .sidebar {
+        width: 280px;
+        background: #2d3748;
+        color: white;
+        padding: 1rem 0;
+        overflow-y: auto;
+      }
+      .logo {
+        padding: 0 1.5rem 2rem;
+        border-bottom: 1px solid #4a5568;
+        margin-bottom: 1rem;
+      }
+      .logo h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #63b3ed;
+      }
+      .nav-menu {
+        list-style: none;
+      }
+      .nav-item {
+        margin: 0.25rem 0;
+      }
+      .nav-link {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 1.5rem;
+        color: #e2e8f0;
+        text-decoration: none;
+        transition: all 0.2s;
+        cursor: pointer;
+      }
+      .nav-link:hover,
+      .nav-link.active {
+        background: #4a5568;
+        color: #63b3ed;
+      }
+      .nav-icon {
+        width: 20px;
+        height: 20px;
+        margin-right: 0.75rem;
+        fill: currentColor;
+      }
+      .main-content {
+        flex: 1;
+        overflow-y: auto;
+      }
+      .header {
+        background: white;
+        padding: 1rem 2rem;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .header-title {
+        font-size: 1.875rem;
+        font-weight: 700;
+        color: #2d3748;
+      }
+      .user-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+      .content-area {
+        padding: 2rem;
+      }
+      .alert {
+        padding: 1rem 1.5rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+      .flash-success {
+        background: #f0fff4;
+        border: 1px solid #9ae6b4;
+        color: #22543d;
+      }
+      .flash-error {
+        background: #fff5f5;
+        border: 1px solid #feb2b2;
+        color: #742a2a;
+      }
+      .flash-notice {
+        background: #ebf8ff;
+        border: 1px solid #90cdf4;
+        color: #2a4365;
+      }
+      .flash-alert {
+        background: #fffbeb;
+        border: 1px solid #f6e05e;
+        color: #744210;
+      }
     </style>
     <%= render partial: "layouts/styles" %>
   </head>
 
   <body>
+    <div class="content-area" style="max-width: 960px; margin: 2rem auto;">
+      <% if notice %>
+        <div class="alert flash-notice"><%= notice %></div>
+      <% end %>
+      <% if alert %>
+        <div class="alert flash-alert"><%= alert %></div>
+      <% end %>
+      <% flash.each do |type, message| %>
+        <% next if ['notice', 'alert'].include?(type.to_s) %>
+        <div class="alert flash-<%= type %>"><%= message %></div>
+      <% end %>
+    </div>
+
     <% if current_user %>
       <div class="app-container">
         <!-- Sidebar -->
@@ -463,7 +150,6 @@
             <h1>📦 Smart Inventory</h1>
           </div>
           <ul class="nav-menu">
-            <!-- Dashboard - Available to all logged-in users -->
             <li class="nav-item">
               <%= link_to root_path, class: "nav-link #{'active' if current_page?(root_path)}" do %>
                 <svg class="nav-icon" viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
@@ -471,7 +157,6 @@
               <% end %>
             </li>
 
-            <!-- Products - All users can view -->
             <li class="nav-item">
               <%= link_to products_path, class: "nav-link #{'active' if current_page?(products_path)}" do %>
                 <svg class="nav-icon" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
@@ -479,7 +164,6 @@
               <% end %>
             </li>
 
-            <!-- Inventory - All users can view -->
             <li class="nav-item">
               <%= link_to inventory_path, class: "nav-link #{'active' if current_page?(inventory_path)}" do %>
                 <svg class="nav-icon" viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z"/></svg>
@@ -487,7 +171,6 @@
               <% end %>
             </li>
 
-            <!-- Purchase Orders - Admin, Manager, Supervisor only -->
             <% if can_create_purchase_orders? %>
               <li class="nav-item">
                 <%= link_to purchase_orders_path, class: "nav-link #{'active' if current_page?(purchase_orders_path)}" do %>
@@ -497,7 +180,6 @@
               </li>
             <% end %>
 
-            <!-- Sales - All except guests -->
             <% if can_make_sales? %>
               <li class="nav-item">
                 <%= link_to sales_path, class: "nav-link #{'active' if current_page?(sales_path)}" do %>
@@ -507,7 +189,6 @@
               </li>
             <% end %>
 
-            <!-- Forecasting - Admin, Manager, Supervisor only -->
             <% if can_create? %>
               <li class="nav-item">
                 <%= link_to forecasting_path, class: "nav-link #{'active' if current_page?(forecasting_path)}" do %>
@@ -517,7 +198,6 @@
               </li>
             <% end %>
 
-            <!-- Locations - All users can view -->
             <li class="nav-item">
               <%= link_to locations_path, class: "nav-link #{'active' if current_page?(locations_path)}" do %>
                 <svg class="nav-icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
@@ -525,7 +205,6 @@
               <% end %>
             </li>
 
-            <!-- Suppliers - Admin, Manager, Supervisor only -->
             <% if can_create? %>
               <li class="nav-item">
                 <%= link_to suppliers_path, class: "nav-link #{'active' if current_page?(suppliers_path)}" do %>
@@ -535,7 +214,6 @@
               </li>
             <% end %>
 
-            <!-- User Management - Managers only -->
             <% if can_manage_users? %>
               <li class="nav-item">
                 <%= link_to admin_users_path, class: "nav-link #{'active' if current_page?(admin_users_path)}" do %>
@@ -558,10 +236,10 @@
                   <%= current_user.role.titleize %>
                 </span>
                 <%= button_to "Logout", logout_path,
-                            method: :delete,
-                            form: { data: { turbo_confirm: "Are you sure you want to logout?" } },
-                            class: "btn btn-secondary",
-                            style: "padding: 0.5rem 1rem; margin-left: 1rem;" %>
+                              method: :delete,
+                              form: { data: { turbo_confirm: "Are you sure you want to logout?" } },
+                              class: "btn btn-secondary",
+                              style: "padding: 0.5rem 1rem; margin-left: 1rem;" %>
               <% else %>
                 <%= link_to "Login", login_path, class: "btn btn-primary" %>
                 <%= link_to "Sign Up", signup_path, class: "btn btn-secondary" %>
@@ -570,17 +248,6 @@
           </header>
 
           <div class="content-area">
-            <% if notice %>
-              <div class="alert flash-notice"><%= notice %></div>
-            <% end %>
-            <% if alert %>
-              <div class="alert flash-alert"><%= alert %></div>
-            <% end %>
-            <% flash.each do |type, message| %>
-              <% next if ['notice', 'alert'].include?(type.to_s) %>
-              <div class="alert flash-<%= type %>"><%= message %></div>
-            <% end %>
-
             <%= yield %>
           </div>
         </main>
