@@ -1,5 +1,8 @@
 class PurchaseOrdersController < ApplicationController
   before_action :set_purchase_order, only: [:show, :edit, :update, :destroy, :mark_as_sent, :mark_as_received]
+  before_action :require_create_permission, only: [:new, :create]
+  before_action :require_edit_permission, only: [:edit, :update, :mark_as_sent, :mark_as_received]
+  before_action :require_admin_or_manager, only: [:destroy]
 
   def index
     @purchase_orders = current_user.purchase_orders.includes(:supplier, :user)
@@ -12,7 +15,7 @@ class PurchaseOrdersController < ApplicationController
 
   def new
     @purchase_order = PurchaseOrder.new
-    @purchase_order.purchase_order_items.build # Start with one line item
+    @purchase_order.purchase_order_items.build
     @suppliers = Supplier.all.order(:name)
     @products = Product.includes(:supplier).order(:name)
   end
@@ -23,8 +26,6 @@ class PurchaseOrdersController < ApplicationController
     @purchase_order.order_number = generate_order_number
     @purchase_order.order_date = Date.current
     @purchase_order.status = "pending"
-
-    # Calculate total amount
     @purchase_order.total_amount = calculate_total_amount
 
     if @purchase_order.save
@@ -42,7 +43,6 @@ class PurchaseOrdersController < ApplicationController
   end
 
   def update
-    # Recalculate total amount
     @purchase_order.total_amount = calculate_total_amount
 
     if @purchase_order.update(purchase_order_params)
@@ -69,14 +69,11 @@ class PurchaseOrdersController < ApplicationController
 
   def mark_as_received
     if @purchase_order.update(status: "received")
-      # Update stock levels for all items in the order
       @purchase_order.purchase_order_items.each do |item|
-        # Add stock to the main warehouse (or first location)
         location = Location.first
         stock_level = StockLevel.find_or_create_by(product: item.product, location: location)
         stock_level.increment!(:current_quantity, item.quantity)
 
-        # Create stock movement record
         StockMovement.create!(
           product: item.product,
           destination_location: location,
@@ -111,14 +108,13 @@ class PurchaseOrdersController < ApplicationController
   end
 
   def generate_order_number
-    # Generate order number like PO-2024-001
     last_order = PurchaseOrder.order(:created_at).last
     if last_order && last_order.order_number.match(/PO-(\d{4})-(\d+)/)
       year = $1
       number = $2.to_i
 
       if year == Date.current.year.to_s
-        "PO-#{year}-#{(number + 1).to_s.padded(3, '0')}"
+        "PO-#{year}-#{(number + 1).to_s.rjust(3, '0')}"
       else
         "PO-#{Date.current.year}-001"
       end

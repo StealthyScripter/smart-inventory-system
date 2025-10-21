@@ -7,16 +7,12 @@
     <meta name="mobile-web-app-capable" content="yes">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
-
     <%= yield :head %>
-
     <link rel="icon" href="/icon.png" type="image/png">
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/icon.png">
-
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
-
     <style>
       * {
             margin: 0;
@@ -455,6 +451,7 @@
             text-align: center;
         }
     </style>
+    <%= render partial: "layouts/styles" %>
   </head>
 
   <body>
@@ -466,6 +463,7 @@
             <h1>📦 Smart Inventory</h1>
           </div>
           <ul class="nav-menu">
+            <!-- Dashboard - Available to all logged-in users -->
             <li class="nav-item">
               <%= link_to root_path, class: "nav-link #{'active' if current_page?(root_path)}" do %>
                 <svg class="nav-icon" viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
@@ -473,6 +471,7 @@
               <% end %>
             </li>
 
+            <!-- Products - All users can view -->
             <li class="nav-item">
               <%= link_to products_path, class: "nav-link #{'active' if current_page?(products_path)}" do %>
                 <svg class="nav-icon" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
@@ -480,6 +479,7 @@
               <% end %>
             </li>
 
+            <!-- Inventory - All users can view -->
             <li class="nav-item">
               <%= link_to inventory_path, class: "nav-link #{'active' if current_page?(inventory_path)}" do %>
                 <svg class="nav-icon" viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z"/></svg>
@@ -487,27 +487,37 @@
               <% end %>
             </li>
 
-            <li class="nav-item">
-              <%= link_to purchase_orders_path, class: "nav-link #{'active' if current_page?(purchase_orders_path)}" do %>
-                <svg class="nav-icon" viewBox="0 0 24 24"><path d="M7 4V2C7 1.45 7.45 1 8 1H16C16.55 1 17 1.45 17 2V4H20C20.55 4 21 4.45 21 5S20.55 6 20 6H19V19C19 20.1 18.1 21 17 21H7C5.9 21 5 20.1 5 19V6H4C3.45 6 3 5.55 3 5S3.45 4 4 4H7ZM9 3V4H15V3H9ZM7 6V19H17V6H7Z"/></svg>
-                Purchase Orders
-              <% end %>
-            </li>
+            <!-- Purchase Orders - Admin, Manager, Supervisor only -->
+            <% if can_create_purchase_orders? %>
+              <li class="nav-item">
+                <%= link_to purchase_orders_path, class: "nav-link #{'active' if current_page?(purchase_orders_path)}" do %>
+                  <svg class="nav-icon" viewBox="0 0 24 24"><path d="M7 4V2C7 1.45 7.45 1 8 1H16C16.55 1 17 1.45 17 2V4H20C20.55 4 21 4.45 21 5S20.55 6 20 6H19V19C19 20.1 18.1 21 17 21H7C5.9 21 5 20.1 5 19V6H4C3.45 6 3 5.55 3 5S3.45 4 4 4H7ZM9 3V4H15V3H9ZM7 6V19H17V6H7Z"/></svg>
+                  Purchase Orders
+                <% end %>
+              </li>
+            <% end %>
 
-            <li class="nav-item">
-              <%= link_to sales_path, class: "nav-link #{'active' if current_page?(sales_path)}" do %>
-                <svg class="nav-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-                Sales
-              <% end %>
-            </li>
+            <!-- Sales - All except guests -->
+            <% if can_make_sales? %>
+              <li class="nav-item">
+                <%= link_to sales_path, class: "nav-link #{'active' if current_page?(sales_path)}" do %>
+                  <svg class="nav-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                  Sales
+                <% end %>
+              </li>
+            <% end %>
 
-            <li class="nav-item">
-              <%= link_to forecasting_path, class: "nav-link #{'active' if current_page?(forecasting_path)}" do %>
-                <svg class="nav-icon" viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
-                Forecasting
-              <% end %>
-            </li>
+            <!-- Forecasting - Admin, Manager, Supervisor only -->
+            <% if can_create? %>
+              <li class="nav-item">
+                <%= link_to forecasting_path, class: "nav-link #{'active' if current_page?(forecasting_path)}" do %>
+                  <svg class="nav-icon" viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
+                  Forecasting
+                <% end %>
+              </li>
+            <% end %>
 
+            <!-- Locations - All users can view -->
             <li class="nav-item">
               <%= link_to locations_path, class: "nav-link #{'active' if current_page?(locations_path)}" do %>
                 <svg class="nav-icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
@@ -515,52 +525,66 @@
               <% end %>
             </li>
 
-            <li class="nav-item">
-              <%= link_to suppliers_path, class: "nav-link #{'active' if current_page?(suppliers_path)}" do %>
-                <svg class="nav-icon" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-                Suppliers
-              <% end %>
-            </li>
+            <!-- Suppliers - Admin, Manager, Supervisor only -->
+            <% if can_create? %>
+              <li class="nav-item">
+                <%= link_to suppliers_path, class: "nav-link #{'active' if current_page?(suppliers_path)}" do %>
+                  <svg class="nav-icon" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                  Suppliers
+                <% end %>
+              </li>
+            <% end %>
+
+            <!-- User Management - Managers only -->
+            <% if can_manage_users? %>
+              <li class="nav-item">
+                <%= link_to admin_users_path, class: "nav-link #{'active' if current_page?(admin_users_path)}" do %>
+                  <svg class="nav-icon" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+                  Users
+                <% end %>
+              </li>
+            <% end %>
           </ul>
         </nav>
 
         <!-- Main Content -->
         <main class="main-content">
-            <header class="header">
-                <h1 class="header-title"><%= yield(:page_title) || "Dashboard" %></h1>
-                <div class="user-info">
-                    <% if logged_in? %>
-                        <span>Welcome, <%= current_user.full_name %></span>
-                        <span class="badge badge-info"><%= current_user.role.titleize %></span>
-                        <%= button_to "Logout", logout_path,
-                                    method: :delete,
-                                    form: { data: { turbo_confirm: "Are you sure you want to logout?" } },
-                                    class: "btn btn-secondary",
-                                    style: "padding: 0.5rem 1rem; margin-left: 1rem;" %>
-                    <% else %>
-                        <%= link_to "Login", login_path, class: "btn btn-primary" %>
-                        <%= link_to "Sign Up", signup_path, class: "btn btn-secondary" %>
-                    <% end %>
-                </div>
-            </header>
-
-            <div class="content-area">
-                <% if notice %>
-                <div class="alert flash-notice"><%= notice %></div>
-                <% end %>
-                <% if alert %>
-                <div class="alert flash-alert"><%= alert %></div>
-                <% end %>
-                <% flash.each do |type, message| %>
-                <% next if ['notice', 'alert'].include?(type.to_s) %>
-                <div class="alert flash-<%= type %>"><%= message %></div>
-                <% end %>
-
-                <%= yield %>
+          <header class="header">
+            <h1 class="header-title"><%= yield(:page_title) || "Dashboard" %></h1>
+            <div class="user-info">
+              <% if logged_in? %>
+                <span>Welcome, <%= current_user.full_name %></span>
+                <span class="badge badge-<%= current_user.admin? || current_user.manager? ? 'success' : current_user.supervisor? ? 'info' : 'warning' %>">
+                  <%= current_user.role.titleize %>
+                </span>
+                <%= button_to "Logout", logout_path,
+                            method: :delete,
+                            form: { data: { turbo_confirm: "Are you sure you want to logout?" } },
+                            class: "btn btn-secondary",
+                            style: "padding: 0.5rem 1rem; margin-left: 1rem;" %>
+              <% else %>
+                <%= link_to "Login", login_path, class: "btn btn-primary" %>
+                <%= link_to "Sign Up", signup_path, class: "btn btn-secondary" %>
+              <% end %>
             </div>
-            </main>
-      </div>
+          </header>
 
+          <div class="content-area">
+            <% if notice %>
+              <div class="alert flash-notice"><%= notice %></div>
+            <% end %>
+            <% if alert %>
+              <div class="alert flash-alert"><%= alert %></div>
+            <% end %>
+            <% flash.each do |type, message| %>
+              <% next if ['notice', 'alert'].include?(type.to_s) %>
+              <div class="alert flash-<%= type %>"><%= message %></div>
+            <% end %>
+
+            <%= yield %>
+          </div>
+        </main>
+      </div>
     <% else %>
       <!-- No current_user: render only login or public pages -->
       <div class="content-area" style="max-width: 480px; margin: 5rem auto;">

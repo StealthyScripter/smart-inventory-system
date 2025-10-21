@@ -1,5 +1,8 @@
 class SuppliersController < ApplicationController
-  before_action :set_supplier, only: [ :show, :edit, :update, :destroy ]
+  before_action :set_supplier, only: [:show, :edit, :update, :destroy]
+  before_action :require_create_permission, only: [:new, :create]
+  before_action :require_edit_permission, only: [:edit, :update]
+  before_action :require_admin_or_manager, only: [:destroy]
 
   def index
     @suppliers = Supplier.includes(:purchase_orders).order(:name)
@@ -35,7 +38,7 @@ class SuppliersController < ApplicationController
 
   def destroy
     if @supplier.products.any?
-      redirect_to @supplier, alert: "Cannot delete supplier with associated products. Please reassign products first."
+      redirect_to @supplier, alert: "Cannot delete supplier with associated products."
     else
       @supplier.destroy
       redirect_to suppliers_url, notice: "Supplier was successfully deleted."

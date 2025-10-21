@@ -1,8 +1,10 @@
 class SalesController < ApplicationController
-  before_action :set_sale, only: [ :show, :destroy ]
+  before_action :set_sale, only: [:show, :destroy]
+  before_action :require_sales_permission, only: [:new, :create]
+  before_action :require_admin_or_manager, only: [:destroy]
 
   def index
-    @recent_transactions = SalesTransaction.includes(:product, :location, :user)
+    @recent_transactions = scoped_sales_transactions
       .where("transaction_date >= ?", Date.current)
       .order(transaction_date: :desc)
     @sale = SalesTransaction.new
@@ -17,7 +19,14 @@ class SalesController < ApplicationController
   def create
     @sale = SalesTransaction.new(sale_params)
     @sale.transaction_date = Time.current
-    @sale.user ||= current_user # safer default
+    @sale.user ||= current_user
+
+    # Enforce location restrictions for employees and supervisors
+    unless can_access_location?(@sale.location)
+      @sale.errors.add(:location, "You can only make sales in your assigned location")
+      handle_sale_errors
+      return
+    end
 
     if valid_stock_for_sale?
       if @sale.save
@@ -52,7 +61,24 @@ class SalesController < ApplicationController
   private
 
   def set_sale
-    @sale = current_user.sales_transactions.find(params[:id])
+    @sale = scoped_sales_transactions.find(params[:id])
+  end
+
+  def scoped_sales_transactions
+    if admin? || manager?
+      SalesTransaction.includes(:product, :location, :user)
+    elsif supervisor? || employee?
+      SalesTransaction.includes(:product, :location, :user)
+        .where(location: current_user.location)
+    else
+      SalesTransaction.none
+    end
+  end
+
+  def can_access_location?(location)
+    return true if admin? || manager?
+    return location == current_user.location if supervisor? || employee?
+    false
   end
 
   def valid_stock_for_sale?
@@ -81,7 +107,7 @@ class SalesController < ApplicationController
     load_form_data
 
     if request.referer&.include?("sales") && !request.referer&.include?("new")
-      @recent_transactions = SalesTransaction.includes(:product, :location, :user)
+      @recent_transactions = scoped_sales_transactions
         .where("transaction_date >= ?", Date.current)
         .order(transaction_date: :desc)
       render :index, status: :unprocessable_content
@@ -92,7 +118,7 @@ class SalesController < ApplicationController
 
   def load_form_data
     @products = Product.includes(:stock_levels).order(:name)
-    @locations = Location.order(:name)
+    @locations = accessible_locations
     @users = User.order(:first_name, :last_name)
   end
 

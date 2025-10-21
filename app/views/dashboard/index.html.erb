@@ -1,15 +1,29 @@
 <% content_for :page_title, "Dashboard" %>
 
-<!-- Alerts -->
+<!-- Alerts with close buttons -->
 <% if @low_stock_products.any? %>
-  <div class="alert alert-warning">
-    <strong>⚠️ Low Stock Alert:</strong> <%= @low_stock_products.length %> products are below reorder point
+  <div class="alert alert-warning" id="low-stock-alert" style="display: flex; justify-content: space-between; align-items: center;">
+    <div>
+      <strong>⚠️ Low Stock Alert:</strong> <%= @low_stock_products.length %> products are below reorder point
+    </div>
+    <button onclick="dismissAlert('low-stock-alert')"
+            style="background: none; border: none; cursor: pointer; font-size: 1.5rem; color: #744210; padding: 0 0.5rem;"
+            aria-label="Close alert">
+      ×
+    </button>
   </div>
 <% end %>
 
 <% if @out_of_stock_count > 0 %>
-  <div class="alert alert-danger">
-    <strong>🚨 Critical:</strong> <%= @out_of_stock_count %> products are out of stock
+  <div class="alert alert-danger" id="out-of-stock-alert" style="display: flex; justify-content: space-between; align-items: center;">
+    <div>
+      <strong>🚨 Critical:</strong> <%= @out_of_stock_count %> products are out of stock
+    </div>
+    <button onclick="dismissAlert('out-of-stock-alert')"
+            style="background: none; border: none; cursor: pointer; font-size: 1.5rem; color: #742a2a; padding: 0 0.5rem;"
+            aria-label="Close alert">
+      ×
+    </button>
   </div>
 <% end %>
 
@@ -49,7 +63,9 @@
   <div class="table-container">
     <div class="table-header">
       <h3 class="table-title">Recent Sales</h3>
-      <%= link_to "View All", sales_path, class: "btn btn-secondary" %>
+      <% if can_make_sales? %>
+        <%= link_to "View All", sales_path, class: "btn btn-secondary" %>
+      <% end %>
     </div>
     <table>
       <thead>
@@ -121,3 +137,16 @@
     </table>
   </div>
 </div>
+
+<script>
+  function dismissAlert(alertId) {
+    const alert = document.getElementById(alertId);
+    if (alert) {
+      alert.style.transition = 'opacity 0.3s ease-out';
+      alert.style.opacity = '0';
+      setTimeout(() => {
+        alert.style.display = 'none';
+      }, 300);
+    }
+  }
+</script>

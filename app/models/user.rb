@@ -11,14 +11,45 @@ class User < ApplicationRecord
   validates :email, presence: true, uniqueness: true
   validates :first_name, :last_name, :role, presence: true
   validates :password, length: { minimum: 6 }, if: -> { password.present? }
+  validates :role, inclusion: { in: %w[admin manager supervisor employee guest] }
+
+  # Validate that supervisor and employee must have a location
+  validate :location_required_for_scoped_roles
 
   def full_name
     "#{first_name} #{last_name}"
   end
 
+  # Role check methods
+  def admin?
+    role == "admin"
+  end
+
+  def manager?
+    role == "manager"
+  end
+
+  def supervisor?
+    role == "supervisor"
+  end
+
+  def employee?
+    role == "employee"
+  end
+
+  def guest?
+    role == "guest"
+  end
+
   private
 
   def set_default_role
-    self.role ||= "employee"
+    self.role ||= "guest" # Changed from "employee" to "guest"
+  end
+
+  def location_required_for_scoped_roles
+    if (supervisor? || employee?) && location_id.blank?
+      errors.add(:location, "must be assigned for #{role} role")
+    end
   end
 end

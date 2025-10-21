@@ -1,0 +1,103 @@
+<% content_for :page_title, "Edit User Role" %>
+
+<div class="table-container">
+  <div class="table-header">
+    <h3 class="table-title">Edit User: <%= @user.full_name %></h3>
+    <%= link_to "Back to Users", admin_users_path, class: "btn btn-secondary" %>
+  </div>
+
+  <div style="padding: 2rem;">
+    <%= form_with model: @user, url: admin_user_path(@user), local: true do |form| %>
+      <% if @user.errors.any? %>
+        <div class="alert alert-danger">
+          <strong><%= pluralize(@user.errors.count, "error") %> prohibited this update:</strong>
+          <ul style="margin-top: 0.5rem;">
+            <% @user.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div class="grid-2" style="gap: 2rem;">
+        <div>
+          <h4 style="margin-bottom: 1rem;">User Information</h4>
+
+          <div class="form-group">
+            <%= form.label :first_name, class: "form-label" %>
+            <%= form.text_field :first_name, class: "form-input", required: true %>
+          </div>
+
+          <div class="form-group">
+            <%= form.label :last_name, class: "form-label" %>
+            <%= form.text_field :last_name, class: "form-input", required: true %>
+          </div>
+
+          <div class="form-group">
+            <%= form.label :email, class: "form-label" %>
+            <%= form.email_field :email, class: "form-input", required: true %>
+          </div>
+        </div>
+
+        <div>
+          <h4 style="margin-bottom: 1rem;">Role & Assignment</h4>
+
+          <div class="form-group">
+            <%= form.label :role, class: "form-label" %>
+            <%= form.select :role,
+                           [["Guest", "guest"], ["Employee", "employee"], ["Supervisor", "supervisor"], ["Manager", "manager"], ["Admin", "admin"]],
+                           {},
+                           { class: "form-select", required: true, id: "user_role" } %>
+            <small style="color: #718096; font-size: 0.875rem;">
+              <strong>Note:</strong> Supervisor and Employee roles require a location assignment.
+            </small>
+          </div>
+
+          <div class="form-group">
+            <%= form.label :location_id, "Location", class: "form-label" %>
+            <%= form.select :location_id,
+                           options_from_collection_for_select(@locations, :id, :name, @user.location_id),
+                           { prompt: "Select location (optional for Admin/Manager)..." },
+                           { class: "form-select", id: "user_location" } %>
+          </div>
+
+          <div class="alert alert-warning" style="margin-top: 1rem;">
+            <strong>⚠️ Role Permissions:</strong>
+            <ul style="margin-top: 0.5rem; margin-bottom: 0;">
+              <li><strong>Guest:</strong> View only (products, inventory, locations)</li>
+              <li><strong>Employee:</strong> Make sales in assigned location, view all</li>
+              <li><strong>Supervisor:</strong> Manage assigned location, create orders</li>
+              <li><strong>Manager:</strong> Full access, can assign roles</li>
+              <li><strong>Admin:</strong> Full access to all locations</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+        <%= form.submit "Update User", class: "btn btn-primary" %>
+        <%= link_to "Cancel", admin_users_path, class: "btn btn-secondary" %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  // Show warning if supervisor/employee selected without location
+  document.addEventListener('DOMContentLoaded', function() {
+    const roleSelect = document.getElementById('user_role');
+    const locationSelect = document.getElementById('user_location');
+
+    roleSelect.addEventListener('change', function() {
+      const role = this.value;
+      if (role === 'supervisor' || role === 'employee') {
+        locationSelect.setAttribute('required', 'required');
+        locationSelect.parentElement.querySelector('.form-label').innerHTML =
+          'Location <span style="color: #e53e3e;">*</span>';
+      } else {
+        locationSelect.removeAttribute('required');
+        locationSelect.parentElement.querySelector('.form-label').textContent = 'Location';
+      }
+    });
+  });
+</script>

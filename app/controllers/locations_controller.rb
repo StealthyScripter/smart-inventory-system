@@ -1,5 +1,8 @@
 class LocationsController < ApplicationController
   before_action :set_location, only: [:show, :edit, :update, :destroy]
+  before_action :require_create_permission, only: [:new, :create]
+  before_action :require_edit_permission, only: [:edit, :update]
+  before_action :require_admin_or_manager, only: [:destroy]
 
   def index
     @locations = Location.includes(:manager, :stock_levels).order(:name)

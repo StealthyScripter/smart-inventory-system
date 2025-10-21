@@ -35,11 +35,12 @@
         </div>
       </div>
 
-      <div class="form-group">
-        <%= form.label :role, class: "form-label" %>
-        <%= form.select :role, [["Staff", "staff"], ["Manager", "manager"]],
-                       { prompt: "Select role..." },
-                       { class: "form-select", required: true } %>
+      <!-- Hidden field for role - will default to 'guest' -->
+      <%= form.hidden_field :role, value: 'guest' %>
+
+      <div class="alert alert-warning" style="margin: 1rem 0;">
+        <strong>ℹ️ Note:</strong> New accounts start as <strong>Guest</strong> users with view-only access.
+        A manager can upgrade your role after account creation.
       </div>
 
       <div class="form-group">
