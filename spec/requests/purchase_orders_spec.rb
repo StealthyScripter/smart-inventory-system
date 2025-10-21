@@ -3,11 +3,11 @@ require 'rails_helper'
 RSpec.describe "Purchase Orders", type: :request do
   let(:authenticated_user) { create_authenticated_user }
   let(:supplier) { Supplier.create!(name: "Apple Inc.", default_lead_time_days: 7) }
-  let(:user) { User.create!(first_name: "John", last_name: "Doe", email: "john@example.com", role: "manager", password: "password123", password_confirmation: "password123") }
+  # Use the authenticated_user instead of creating a separate user
   let!(:purchase_order) {
     PurchaseOrder.create!(
       supplier: supplier,
-      user: user,
+      user: authenticated_user,  # Changed from 'user' to 'authenticated_user'
       order_number: "PO-001",
       order_date: Date.current,
       status: "pending"

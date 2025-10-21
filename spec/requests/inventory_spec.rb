@@ -4,7 +4,17 @@ RSpec.describe "Inventory", type: :request do
   let(:user) { create_authenticated_user }
   let(:category) { Category.create!(name: "Electronics") }
   let(:location) { Location.create!(name: "Main Store") }
-  let(:product) { Product.create!(name: "iPhone", sku: "IP001", category: category, reorder_point: 10, lead_time_days: 7) }
+  let(:product) {
+    Product.create!(
+      name: "iPhone",
+      sku: "IP001",
+      category: category,
+      reorder_point: 10,
+      lead_time_days: 7,
+      unit_cost: 799.00,          # Added unit_cost
+      selling_price: 999.00        # Added selling_price
+    )
+  }
   let!(:stock_level) { StockLevel.create!(product: product, location: location, current_quantity: 50) }
 
   before do
