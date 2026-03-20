@@ -1,6 +1,5 @@
 <% content_for :page_title, "Inventory Management" %>
 
-<!-- User Scope Indicator -->
 <div style="margin-bottom: 1rem;">
   <%= user_scope_indicator %>
 </div>
@@ -12,9 +11,9 @@
       <select class="form-select" id="location-filter">
         <option value="">All Locations</option>
         <% @locations.each do |location| %>
-          <option value="<%= location.id %>" <%= 'selected' if (supervisor? || employee?) && location == current_user.location %>>
+          <option value="<%= location.id %>" <%= "selected" if current_user&.location == location %>>
             <%= location.name %>
-            <% if (supervisor? || employee?) && location == current_user.location %>
+            <% if current_user&.location == location %>
               (Your Location)
             <% end %>
           </option>
@@ -23,13 +22,11 @@
     </div>
   </div>
   <div style="text-align: right;">
-    <% if can_edit? %>
-      <%= link_to "Stock Adjustment", "#", class: "btn btn-secondary",
-                  onclick: "alert('Stock Adjustment feature coming soon!'); return false;" %>
+    <% if can_adjust_inventory? %>
+      <span class="badge badge-info">Use row-level controls to adjust stock.</span>
     <% else %>
-      <span class="btn btn-secondary" style="opacity: 0.5; cursor: not-allowed;"
-            title="<%= permission_message(:edit) %>">
-        Stock Adjustment
+      <span class="btn btn-secondary" style="opacity: 0.5; cursor: not-allowed;" title="<%= permission_message(:inventory) %>">
+        Read Only
       </span>
     <% end %>
   </div>
@@ -38,7 +35,7 @@
 <div class="table-container">
   <div class="table-header">
     <h3 class="table-title">Current Stock Levels</h3>
-    <% if can_create? %>
+    <% if can_manage_products? %>
       <%= link_to "Add Product", new_product_path, class: "btn btn-primary" %>
     <% end %>
   </div>
@@ -52,45 +49,34 @@
         <th>Available</th>
         <th>Value</th>
         <th>Status</th>
-        <% if can_edit? %>
+        <% if can_adjust_inventory? %>
           <th>Actions</th>
         <% end %>
       </tr>
     </thead>
     <tbody>
       <% @stock_levels.each do |stock_level| %>
-        <tr data-location-id="<%= stock_level.location_id %>"
-            class="stock-row <%= 'user-location' if (supervisor? || employee?) && stock_level.location == current_user.location %>">
+        <tr data-location-id="<%= stock_level.location_id %>" class="stock-row <%= 'user-location' if current_user&.location == stock_level.location %>">
           <td>
             <%= link_to stock_level.product.name, product_path(stock_level.product) %>
             <% if stock_level.current_quantity < stock_level.product.reorder_point %>
-              <span style="color: #e53e3e; font-size: 0.875rem;"> ⚠️</span>
+              <span style="color: #e53e3e; font-size: 0.875rem;">⚠️</span>
             <% end %>
           </td>
-          <td>
-            <%= location_with_access(stock_level.location) %>
-          </td>
+          <td><%= location_with_access(stock_level.location) %></td>
           <td>
             <span class="<%= stock_level.current_quantity < stock_level.product.reorder_point ? 'stock-low' : '' %>">
               <%= stock_level.current_quantity %>
             </span>
           </td>
           <td><%= stock_level.reserved_quantity %></td>
-          <td>
-            <strong><%= stock_level.available_quantity %></strong>
-          </td>
-          <td>
-            <%= currency(stock_level.current_quantity * stock_level.product.unit_cost) %>
-          </td>
-          <td>
-            <%= stock_status_badge(stock_level.product, stock_level.location) %>
-          </td>
-          <% if can_edit? %>
+          <td><strong><%= stock_level.available_quantity %></strong></td>
+          <td><%= currency(stock_level.current_quantity * stock_level.product.unit_cost.to_f) %></td>
+          <td><%= stock_status_badge(stock_level.product, stock_level.location) %></td>
+          <% if can_adjust_inventory? %>
             <td>
               <% if can_operate_in_location?(stock_level.location) %>
-                <button class="btn btn-secondary"
-                        style="padding: 0.25rem 0.5rem; font-size: 0.875rem;"
-                        onclick="adjustStock(<%= stock_level.product.id %>, <%= stock_level.location.id %>, <%= stock_level.current_quantity %>)">
+                <button class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.875rem;" onclick="adjustStock(<%= stock_level.product.id %>, <%= stock_level.location.id %>, <%= stock_level.current_quantity %>)">
                   Adjust
                 </button>
               <% else %>
@@ -103,21 +89,18 @@
     </tbody>
     <tfoot>
       <tr style="font-weight: 700; background: #f7fafc;">
-        <td colspan="2">Total Value</td>
-        <td><%= @stock_levels.sum(:current_quantity) %></td>
-        <td><%= @stock_levels.sum(:reserved_quantity) %></td>
-        <td><%= @stock_levels.sum { |sl| sl.current_quantity - sl.reserved_quantity } %></td>
-        <td>
-          <%= currency(@stock_levels.sum { |sl| sl.current_quantity * sl.product.unit_cost }) %>
-        </td>
-        <td colspan="<%= can_edit? ? 2 : 1 %>"></td>
+        <td colspan="2">Totals</td>
+        <td><%= @stock_levels.sum(&:current_quantity) %></td>
+        <td><%= @stock_levels.sum(&:reserved_quantity) %></td>
+        <td><%= @stock_levels.sum(&:available_quantity) %></td>
+        <td><%= currency(@stock_levels.sum { |level| level.current_quantity * level.product.unit_cost.to_f }) %></td>
+        <td colspan="<%= can_adjust_inventory? ? 2 : 1 %>"></td>
       </tr>
     </tfoot>
   </table>
 </div>
 
-<!-- Stock Adjustment Modal (if user has edit permission) -->
-<% if can_edit? %>
+<% if can_adjust_inventory? %>
   <div id="adjust-stock-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
     <div style="background: white; padding: 2rem; border-radius: 0.5rem; max-width: 400px; width: 90%;">
       <h3 style="margin-bottom: 1rem;">Adjust Stock Level</h3>
@@ -186,39 +169,30 @@
 </style>
 
 <script>
-  // Location filter
-  document.getElementById('location-filter')?.addEventListener('change', function() {
+  document.getElementById("location-filter")?.addEventListener("change", function() {
     const locationId = this.value;
-    const rows = document.querySelectorAll('.stock-row');
+    const rows = document.querySelectorAll(".stock-row");
 
-    rows.forEach(row => {
-      if (locationId === '' || row.dataset.locationId === locationId) {
-        row.style.display = '';
-      } else {
-        row.style.display = 'none';
-      }
+    rows.forEach((row) => {
+      row.style.display = locationId === "" || row.dataset.locationId === locationId ? "" : "none";
     });
   });
 
-  <% if can_edit? %>
-  // Stock adjustment modal
+  <% if can_adjust_inventory? %>
   function adjustStock(productId, locationId, currentQuantity) {
-    document.getElementById('adjust_product_id').value = productId;
-    document.getElementById('adjust_location_id').value = locationId;
-    document.getElementById('adjust_current_quantity').value = currentQuantity;
-    document.getElementById('adjust_new_quantity').value = currentQuantity;
-
-    const modal = document.getElementById('adjust-stock-modal');
-    modal.style.display = 'flex';
+    document.getElementById("adjust_product_id").value = productId;
+    document.getElementById("adjust_location_id").value = locationId;
+    document.getElementById("adjust_current_quantity").value = currentQuantity;
+    document.getElementById("adjust_new_quantity").value = currentQuantity;
+    document.getElementById("adjust-stock-modal").style.display = "flex";
   }
 
   function closeAdjustModal() {
-    document.getElementById('adjust-stock-modal').style.display = 'none';
+    document.getElementById("adjust-stock-modal").style.display = "none";
   }
 
-  // Close modal on outside click
-  document.getElementById('adjust-stock-modal')?.addEventListener('click', function(e) {
-    if (e.target === this) {
+  document.getElementById("adjust-stock-modal")?.addEventListener("click", function(event) {
+    if (event.target === this) {
       closeAdjustModal();
     }
   });

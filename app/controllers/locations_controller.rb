@@ -1,8 +1,8 @@
 class LocationsController < ApplicationController
   before_action :set_location, only: [:show, :edit, :update, :destroy]
-  before_action :require_create_permission, only: [:new, :create]
-  before_action :require_edit_permission, only: [:edit, :update]
-  before_action :require_admin_or_manager, only: [:destroy]
+  before_action :require_location_management_permission, only: [:new, :create, :edit, :update]
+  before_action :require_delete_permission, only: [:destroy]
+  before_action :load_manager_options, only: [:new, :create, :edit, :update]
 
   def index
     @locations = Location.includes(:manager, :stock_levels).order(:name)
@@ -13,7 +13,6 @@ class LocationsController < ApplicationController
 
   def new
     @location = Location.new
-    @users = User.all.order(:first_name, :last_name)
   end
 
   def create
@@ -22,20 +21,17 @@ class LocationsController < ApplicationController
     if @location.save
       redirect_to @location, notice: "Location was successfully created."
     else
-      @users = User.all.order(:first_name, :last_name)
       render :new, status: :unprocessable_content
     end
   end
 
   def edit
-    @users = User.all.order(:first_name, :last_name)
   end
 
   def update
     if @location.update(location_params)
       redirect_to @location, notice: "Location was successfully updated."
     else
-      @users = User.all.order(:first_name, :last_name)
       render :edit, status: :unprocessable_content
     end
   end
@@ -49,6 +45,10 @@ class LocationsController < ApplicationController
 
   def set_location
     @location = Location.find(params[:id])
+  end
+
+  def load_manager_options
+    @users = User.with_roles("admin", "regional_manager", "location_manager").order(:first_name, :last_name)
   end
 
   def location_params

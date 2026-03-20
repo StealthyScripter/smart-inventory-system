@@ -3,15 +3,19 @@
 <div class="table-container">
   <div class="table-header">
     <h3 class="table-title">Locations</h3>
-    <%= link_to "Add Location", new_location_path, class: "btn btn-primary" %>
+    <% if can_manage_locations? %>
+      <%= link_to "Add Location", new_location_path, class: "btn btn-primary" %>
+    <% else %>
+      <span class="badge badge-secondary">Read Only</span>
+    <% end %>
   </div>
   <table>
     <thead>
       <tr>
         <th>Name</th>
         <th>Address</th>
-        <th>Manager</th>
-        <th>Total Products</th>
+        <th>Location Manager</th>
+        <th>Total Units</th>
         <th>Actions</th>
       </tr>
     </thead>
@@ -23,8 +27,12 @@
           <td><%= location.manager&.full_name || "Unassigned" %></td>
           <td><%= location.stock_levels.sum(:current_quantity) %></td>
           <td>
-            <%= link_to "Edit", edit_location_path(location), class: "btn btn-secondary",
-                        style: "padding: 0.25rem 0.5rem; font-size: 0.875rem;" %>
+            <% if can_manage_locations? %>
+              <%= link_to "Edit", edit_location_path(location), class: "btn btn-secondary",
+                          style: "padding: 0.25rem 0.5rem; font-size: 0.875rem;" %>
+            <% else %>
+              <span style="color: #718096; font-size: 0.875rem;">View</span>
+            <% end %>
           </td>
         </tr>
       <% end %>

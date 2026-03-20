@@ -30,9 +30,9 @@
       </div>
 
       <div class="form-group">
-        <%= form.label :manager_id, "Manager", class: "form-label" %>
+        <%= form.label :manager_id, "Location Manager", class: "form-label" %>
         <%= form.select :manager_id, options_from_collection_for_select(@users, :id, :full_name, @location.manager_id),
-                       { prompt: "Select a manager..." }, { class: "form-select" } %>
+                       { prompt: "Select a location manager..." }, { class: "form-select" } %>
       </div>
 
       <div style="margin-top: 2rem; display: flex; gap: 1rem;">

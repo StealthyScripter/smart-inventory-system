@@ -1,28 +1,23 @@
 module ApplicationHelper
-  # Role badge helper
   def role_badge(user)
-    badge_class = case user.role
-    when "admin", "manager"
+    badge_class = case user.normalized_role
+    when "admin"
       "badge-success"
-    when "supervisor"
+    when "regional_manager"
       "badge-info"
-    when "employee"
+    when "location_manager", "department_manager"
       "badge-warning"
     else
       "badge-secondary"
     end
 
-    content_tag :span, user.role.titleize, class: "badge #{badge_class}"
+    content_tag :span, user.role_name, class: "badge #{badge_class}"
   end
 
-  # Check if current user can perform action on specific location
   def can_operate_in_location?(location)
-    return true if current_user.admin? || current_user.manager?
-    return location == current_user.location if current_user.supervisor? || current_user.employee?
-    false
+    can_access_location?(location) && can_adjust_inventory?
   end
 
-  # Display location with access indicator
   def location_with_access(location)
     if can_operate_in_location?(location)
       content_tag(:span, location.name, class: "location-accessible") +
@@ -33,20 +28,6 @@ module ApplicationHelper
     end
   end
 
-  # Permission check helpers for views
-  def show_edit_button?(resource)
-    can_edit?
-  end
-
-  def show_delete_button?(resource)
-    can_delete?
-  end
-
-  def show_create_button?
-    can_create?
-  end
-
-  # Stock status badge
   def stock_status_badge(product, location = nil)
     stock_quantity = if location
       product.stock_levels.find_by(location: location)&.current_quantity || 0
@@ -63,43 +44,42 @@ module ApplicationHelper
     end
   end
 
-  # Format currency
   def currency(amount)
     number_to_currency(amount, precision: 2)
   end
 
-  # User scope indicator
   def user_scope_indicator
     return unless logged_in?
 
-    if current_user.admin? || current_user.manager?
+    if admin? || regional_manager?
       content_tag :div, class: "scope-indicator scope-all" do
         "🌐 All Locations"
       end
-    elsif current_user.supervisor? || current_user.employee?
+    elsif current_user.location.present? && (location_manager? || department_manager? || employee?)
       content_tag :div, class: "scope-indicator scope-single" do
         "📍 #{current_user.location&.name || "No Location Assigned"}"
       end
-    elsif current_user.guest?
+    elsif client? || supplier_user? || customer? || guest?
       content_tag :div, class: "scope-indicator scope-readonly" do
-        "👁 View Only Access"
+        "👁 Read-Only Access"
       end
     end
   end
 
-  # Permission message helper
   def permission_message(action)
     case action
-    when :create
-      "You need supervisor or higher permissions to create records."
-    when :edit
-      "You need supervisor or higher permissions to edit records."
+    when :products
+      "Only admins and regional managers can manage products."
+    when :locations
+      "Only admins and regional managers can manage locations."
+    when :suppliers
+      "Only admins and regional managers can manage suppliers."
+    when :inventory
+      "Only admins, regional managers, location managers, and department managers can adjust stock."
     when :delete
-      "You need manager or admin permissions to delete records."
+      "Only admins and regional managers can delete records."
     when :manage_users
-      "Only managers can assign user roles."
-    when :sales
-      "Guests cannot make sales. Please contact a manager to upgrade your account."
+      "Only admins and regional managers can assign user roles."
     else
       "You don't have permission to perform this action."
     end

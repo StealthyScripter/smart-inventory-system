@@ -4,7 +4,9 @@
   <div class="table-header">
     <h3 class="table-title">Product Details</h3>
     <div style="display: flex; gap: 1rem;">
-      <%= link_to "Edit Product", edit_product_path(@product), class: "btn btn-primary" %>
+      <% if can_manage_products? %>
+        <%= link_to "Edit Product", edit_product_path(@product), class: "btn btn-primary" %>
+      <% end %>
       <%= link_to "Back to Products", products_path, class: "btn btn-secondary" %>
     </div>
   </div>
@@ -95,13 +97,16 @@
     </div>
 
     <!-- Action Buttons -->
-    <div style="margin-top: 2rem; display: flex; gap: 1rem;">
-      <%= link_to "Edit Product", edit_product_path(@product), class: "btn btn-primary" %>
-      <%= link_to "Quick Sale", new_sale_path(product_id: @product.id), class: "btn btn-warning" %>
-      <%= button_to "Delete Product", product_path(@product),
-                    method: :delete,
-                    form: { data: { turbo_confirm: "Are you sure? This will delete all stock levels and cannot be undone." } },
-                    class: "btn btn-danger" %>
-    </div>
+    <% if can_manage_products? %>
+      <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+        <%= link_to "Edit Product", edit_product_path(@product), class: "btn btn-primary" %>
+        <% if can_delete? %>
+          <%= button_to "Delete Product", product_path(@product),
+                        method: :delete,
+                        form: { data: { turbo_confirm: "Are you sure? This will delete all stock levels and cannot be undone." } },
+                        class: "btn btn-danger" %>
+        <% end %>
+      </div>
+    <% end %>
   </div>
 </div>

@@ -1,4 +1,4 @@
-<% content_for :page_title, "Edit User Role" %>
+<% content_for :page_title, "Edit User Access" %>
 
 <div class="table-container">
   <div class="table-header">
@@ -40,35 +40,36 @@
         </div>
 
         <div>
-          <h4 style="margin-bottom: 1rem;">Role & Assignment</h4>
+          <h4 style="margin-bottom: 1rem;">Inventory Access</h4>
 
           <div class="form-group">
             <%= form.label :role, class: "form-label" %>
             <%= form.select :role,
-                           [["Guest", "guest"], ["Employee", "employee"], ["Supervisor", "supervisor"], ["Manager", "manager"], ["Admin", "admin"]],
-                           {},
-                           { class: "form-select", required: true, id: "user_role" } %>
+                            @assignable_roles.map { |role| [role.tr("_", " ").titleize, role] },
+                            { selected: @user.normalized_role },
+                            { class: "form-select", required: true, id: "user_role" } %>
             <small style="color: #718096; font-size: 0.875rem;">
-              <strong>Note:</strong> Supervisor and Employee roles require a location assignment.
+              Location managers, department managers, and employees require a location assignment.
             </small>
           </div>
 
           <div class="form-group">
-            <%= form.label :location_id, "Location", class: "form-label" %>
+            <%= form.label :location_id, "Location", class: "form-label", id: "user_location_label" %>
             <%= form.select :location_id,
-                           options_from_collection_for_select(@locations, :id, :name, @user.location_id),
-                           { prompt: "Select location (optional for Admin/Manager)..." },
-                           { class: "form-select", id: "user_location" } %>
+                            options_from_collection_for_select(@locations, :id, :name, @user.location_id),
+                            { prompt: "Select location when required..." },
+                            { class: "form-select", id: "user_location" } %>
           </div>
 
           <div class="alert alert-warning" style="margin-top: 1rem;">
-            <strong>⚠️ Role Permissions:</strong>
+            <strong>Hierarchy:</strong>
             <ul style="margin-top: 0.5rem; margin-bottom: 0;">
-              <li><strong>Guest:</strong> View only (products, inventory, locations)</li>
-              <li><strong>Employee:</strong> Make sales in assigned location, view all</li>
-              <li><strong>Supervisor:</strong> Manage assigned location, create orders</li>
-              <li><strong>Manager:</strong> Full access, can assign roles</li>
-              <li><strong>Admin:</strong> Full access to all locations</li>
+              <li>Admin</li>
+              <li>Regional Manager</li>
+              <li>Location Manager</li>
+              <li>Department Manager</li>
+              <li>Employee, Client, Supplier</li>
+              <li>Guest, Customer</li>
             </ul>
           </div>
         </div>
@@ -83,21 +84,23 @@
 </div>
 
 <script>
-  // Show warning if supervisor/employee selected without location
-  document.addEventListener('DOMContentLoaded', function() {
-    const roleSelect = document.getElementById('user_role');
-    const locationSelect = document.getElementById('user_location');
+  document.addEventListener("DOMContentLoaded", function() {
+    const roleSelect = document.getElementById("user_role");
+    const locationSelect = document.getElementById("user_location");
+    const locationLabel = document.getElementById("user_location_label");
+    const scopedRoles = ["location_manager", "department_manager", "employee"];
 
-    roleSelect.addEventListener('change', function() {
-      const role = this.value;
-      if (role === 'supervisor' || role === 'employee') {
-        locationSelect.setAttribute('required', 'required');
-        locationSelect.parentElement.querySelector('.form-label').innerHTML =
-          'Location <span style="color: #e53e3e;">*</span>';
+    function syncLocationRequirement() {
+      if (scopedRoles.includes(roleSelect.value)) {
+        locationSelect.setAttribute("required", "required");
+        locationLabel.innerHTML = 'Location <span style="color: #e53e3e;">*</span>';
       } else {
-        locationSelect.removeAttribute('required');
-        locationSelect.parentElement.querySelector('.form-label').textContent = 'Location';
+        locationSelect.removeAttribute("required");
+        locationLabel.textContent = "Location";
       }
-    });
+    }
+
+    roleSelect?.addEventListener("change", syncLocationRequirement);
+    syncLocationRequirement();
   });
 </script>

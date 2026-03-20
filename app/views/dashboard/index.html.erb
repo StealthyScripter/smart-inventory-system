@@ -1,113 +1,53 @@
 <% content_for :page_title, "Dashboard" %>
 
-<!-- Alerts with close buttons -->
 <% if @low_stock_products.any? %>
-  <div class="alert alert-warning" id="low-stock-alert" style="display: flex; justify-content: space-between; align-items: center;">
-    <div>
-      <strong>⚠️ Low Stock Alert:</strong> <%= @low_stock_products.length %> products are below reorder point
-    </div>
-    <button onclick="dismissAlert('low-stock-alert')"
-            style="background: none; border: none; cursor: pointer; font-size: 1.5rem; color: #744210; padding: 0 0.5rem;"
-            aria-label="Close alert">
-      ×
-    </button>
+  <div class="alert alert-warning">
+    <strong>Low stock alert:</strong>
+    <%= pluralize(@low_stock_products.count, "product") %> currently sits below its reorder point.
   </div>
 <% end %>
 
-<% if @out_of_stock_count > 0 %>
-  <div class="alert alert-danger" id="out-of-stock-alert" style="display: flex; justify-content: space-between; align-items: center;">
-    <div>
-      <strong>🚨 Critical:</strong> <%= @out_of_stock_count %> products are out of stock
-    </div>
-    <button onclick="dismissAlert('out-of-stock-alert')"
-            style="background: none; border: none; cursor: pointer; font-size: 1.5rem; color: #742a2a; padding: 0 0.5rem;"
-            aria-label="Close alert">
-      ×
-    </button>
-  </div>
-<% end %>
-
-<!-- Stats Grid -->
 <div class="stats-grid">
   <div class="stat-card">
     <div class="stat-header">
-      <span class="stat-title">Total Products</span>
+      <span class="stat-title">Products</span>
     </div>
     <div class="stat-value"><%= number_with_delimiter(@total_products) %></div>
   </div>
 
   <div class="stat-card">
     <div class="stat-header">
-      <span class="stat-title">Total Value</span>
+      <span class="stat-title">Locations</span>
     </div>
-    <div class="stat-value">$<%= number_with_delimiter(@total_value.round(2), delimiter: ',') %></div>
+    <div class="stat-value"><%= number_with_delimiter(@total_locations) %></div>
   </div>
 
   <div class="stat-card">
     <div class="stat-header">
-      <span class="stat-title">Low Stock Items</span>
+      <span class="stat-title">Inventory Units</span>
     </div>
-    <div class="stat-value"><%= @low_stock_products.length %></div>
+    <div class="stat-value"><%= number_with_delimiter(@inventory_units) %></div>
   </div>
 
   <div class="stat-card">
     <div class="stat-header">
-      <span class="stat-title">Pending Orders</span>
+      <span class="stat-title">Inventory Value</span>
     </div>
-    <div class="stat-value"><%= @pending_orders %></div>
+    <div class="stat-value"><%= currency(@total_value) %></div>
   </div>
 </div>
 
 <div class="grid-2">
-  <!-- Recent Sales -->
   <div class="table-container">
     <div class="table-header">
-      <h3 class="table-title">Recent Sales</h3>
-      <% if can_make_sales? %>
-        <%= link_to "View All", sales_path, class: "btn btn-secondary" %>
-      <% end %>
+      <h3 class="table-title">Low Stock Products</h3>
+      <%= link_to "View Inventory", inventory_path, class: "btn btn-secondary" %>
     </div>
     <table>
       <thead>
         <tr>
           <th>Product</th>
-          <th>Quantity</th>
-          <th>Amount</th>
-          <th>Date</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% if @recent_sales.any? %>
-          <% @recent_sales.limit(5).each do |sale| %>
-            <tr>
-              <td><%= sale.product.name %></td>
-              <td><%= sale.quantity %></td>
-              <td>$<%= number_with_delimiter(sale.total_amount.round(2)) %></td>
-              <td><%= time_ago_in_words(sale.transaction_date) %> ago</td>
-            </tr>
-          <% end %>
-        <% else %>
-          <tr>
-            <td colspan="4" style="text-align: center; color: #718096; font-style: italic;">
-              No recent sales
-            </td>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- Low Stock Alerts -->
-  <div class="table-container">
-    <div class="table-header">
-      <h3 class="table-title">Low Stock Alerts</h3>
-      <%= link_to "View All", products_path, class: "btn btn-primary" %>
-    </div>
-    <table>
-      <thead>
-        <tr>
-          <th>Product</th>
-          <th>Current</th>
+          <th>Stock</th>
           <th>Reorder Point</th>
           <th>Status</th>
         </tr>
@@ -115,21 +55,66 @@
       <tbody>
         <% if @low_stock_products.any? %>
           <% @low_stock_products.each do |product| %>
+            <% stock_quantity =
+                 if current_user&.location_id && (location_manager? || department_manager? || employee?)
+                   product.stock_levels.find { |level| level.location_id == current_user.location_id }&.current_quantity.to_i
+                 else
+                   product.total_stock
+                 end %>
             <tr>
               <td><%= link_to product.name, product_path(product) %></td>
-              <td class="stock-low"><%= product.total_stock %></td>
+              <td class="stock-low"><%= number_with_delimiter(stock_quantity) %></td>
               <td><%= product.reorder_point %></td>
               <td>
-                <span class="badge <%= product.total_stock == 0 ? 'badge-danger' : 'badge-warning' %>">
-                  <%= product.total_stock == 0 ? 'Critical' : 'Low' %>
-                </span>
+                <% if stock_quantity.zero? %>
+                  <span class="badge badge-danger">Out of Stock</span>
+                <% else %>
+                  <span class="badge badge-warning">Low Stock</span>
+                <% end %>
               </td>
             </tr>
           <% end %>
         <% else %>
           <tr>
             <td colspan="4" style="text-align: center; color: #718096; font-style: italic;">
-              All products are adequately stocked
+              No low stock products right now.
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="table-container">
+    <div class="table-header">
+      <h3 class="table-title">Recent Inventory Movements</h3>
+      <%= link_to "Inventory", inventory_path, class: "btn btn-primary" %>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Product</th>
+          <th>Location</th>
+          <th>Type</th>
+          <th>Quantity</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if @recent_movements.any? %>
+          <% @recent_movements.each do |movement| %>
+            <tr>
+              <td><%= movement.movement_date.strftime("%b %d, %H:%M") %></td>
+              <td><%= movement.product.name %></td>
+              <td><%= movement.destination_location&.name || movement.source_location&.name || "N/A" %></td>
+              <td><%= movement.movement_type.titleize %></td>
+              <td><%= movement.quantity %></td>
+            </tr>
+          <% end %>
+        <% else %>
+          <tr>
+            <td colspan="5" style="text-align: center; color: #718096; font-style: italic;">
+              No inventory activity available for your scope.
             </td>
           </tr>
         <% end %>
@@ -137,16 +122,3 @@
     </table>
   </div>
 </div>
-
-<script>
-  function dismissAlert(alertId) {
-    const alert = document.getElementById(alertId);
-    if (alert) {
-      alert.style.transition = 'opacity 0.3s ease-out';
-      alert.style.opacity = '0';
-      setTimeout(() => {
-        alert.style.display = 'none';
-      }, 300);
-    }
-  }
-</script>

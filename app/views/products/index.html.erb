@@ -3,16 +3,11 @@
 <div class="table-container">
   <div class="table-header">
     <h3 class="table-title">Product Catalog</h3>
-    <div style="display: flex; gap: 1rem;">
-      <input type="search" placeholder="Search products..." class="form-input" style="width: 300px;">
-      <select class="form-select" style="width: 200px;">
-        <option>All Categories</option>
-        <% Category.all.each do |category| %>
-          <option value="<%= category.id %>"><%= category.name %></option>
-        <% end %>
-      </select>
+    <% if can_manage_products? %>
       <%= link_to "Add Product", new_product_path, class: "btn btn-primary" %>
-    </div>
+    <% else %>
+      <span class="badge badge-secondary">Read Only</span>
+    <% end %>
   </div>
   <table>
     <thead>
@@ -20,6 +15,7 @@
         <th>SKU</th>
         <th>Name</th>
         <th>Category</th>
+        <th>Supplier</th>
         <th>Unit Cost</th>
         <th>Selling Price</th>
         <th>Stock</th>
@@ -33,23 +29,26 @@
           <td><%= product.sku %></td>
           <td><%= link_to product.name, product_path(product) %></td>
           <td><%= product.category.name %></td>
-          <td>$<%= number_with_delimiter(product.unit_cost.to_f.round(2)) %></td>
-          <td>$<%= number_with_delimiter(product.selling_price.to_f.round(2)) %></td>
+          <td><%= product.supplier&.name || "Unassigned" %></td>
+          <td><%= currency(product.unit_cost.to_f) %></td>
+          <td><%= currency(product.selling_price.to_f) %></td>
           <td class="<%= product.total_stock < product.reorder_point ? 'stock-low' : 'stock-ok' %>">
             <%= number_with_delimiter(product.total_stock) %>
           </td>
           <td><%= product.reorder_point %></td>
           <td>
-            <%= link_to "Edit", edit_product_path(product),
-                        class: "btn btn-secondary",
-                        style: "padding: 0.25rem 0.5rem; font-size: 0.875rem;" %>
+            <% if can_manage_products? %>
+              <%= link_to "Edit", edit_product_path(product), class: "btn btn-secondary", style: "padding: 0.25rem 0.5rem; font-size: 0.875rem;" %>
+            <% else %>
+              <span style="color: #718096; font-size: 0.875rem;">View</span>
+            <% end %>
           </td>
         </tr>
       <% end %>
       <% if @products.empty? %>
         <tr>
-          <td colspan="8" style="text-align: center; color: #718096; font-style: italic;">
-            No products found. <%= link_to "Add your first product", new_product_path %>.
+          <td colspan="9" style="text-align: center; color: #718096; font-style: italic;">
+            No products found.
           </td>
         </tr>
       <% end %>

@@ -1,11 +1,10 @@
 class SuppliersController < ApplicationController
   before_action :set_supplier, only: [:show, :edit, :update, :destroy]
-  before_action :require_create_permission, only: [:new, :create]
-  before_action :require_edit_permission, only: [:edit, :update]
-  before_action :require_admin_or_manager, only: [:destroy]
+  before_action :require_supplier_management_permission, only: [:new, :create, :edit, :update]
+  before_action :require_delete_permission, only: [:destroy]
 
   def index
-    @suppliers = Supplier.includes(:purchase_orders).order(:name)
+    @suppliers = Supplier.includes(:products).order(:name)
   end
 
   def show
@@ -37,7 +36,7 @@ class SuppliersController < ApplicationController
   end
 
   def destroy
-    if @supplier.products.any?
+    if @supplier.products.exists?
       redirect_to @supplier, alert: "Cannot delete supplier with associated products."
     else
       @supplier.destroy
@@ -52,7 +51,6 @@ class SuppliersController < ApplicationController
   end
 
   def supplier_params
-    params.require(:supplier).permit(:name, :contact_email, :contact_phone,
-    :address, :default_lead_time_days)
+    params.require(:supplier).permit(:name, :contact_email, :contact_phone, :address, :default_lead_time_days)
   end
 end

@@ -2,10 +2,7 @@ class Product < ApplicationRecord
   belongs_to :category
   belongs_to :supplier, optional: true
   has_many :stock_levels, dependent: :destroy
-  has_many :sales_transactions, dependent: :destroy
-  has_many :purchase_order_items, dependent: :destroy
   has_many :stock_movements, dependent: :destroy
-  has_many :demand_forecasts, dependent: :destroy
 
   validates :name, :sku, presence: true
   validates :sku, uniqueness: true
@@ -18,11 +15,5 @@ class Product < ApplicationRecord
 
   def available_stock
     stock_levels.sum("current_quantity - reserved_quantity")
-  end
-
-  def customer_email_list
-    email_list = []
-    email_list << sales_transactions.joins(:user).pluck("users.email").uniq
-    email_list.flatten
   end
 end

@@ -33,18 +33,19 @@
       </div>
 
       <div class="form-group">
-        <%= form.label :manager_id, "Manager", class: "form-label" %>
+        <%= form.label :manager_id, "Location Manager", class: "form-label" %>
         <%= form.select :manager_id, options_from_collection_for_select(@users, :id, :full_name, @location.manager_id),
-                       { prompt: "Select a manager..." }, { class: "form-select" } %>
+                       { prompt: "Select a location manager..." }, { class: "form-select" } %>
       </div>
 
       <div style="margin-top: 2rem; display: flex; gap: 1rem;">
         <%= form.submit "Update Location", class: "btn btn-primary" %>
         <%= link_to "Cancel", @location, class: "btn btn-secondary" %>
-        <%= button_to "Delete Location", @location,
-                      method: :delete,
-                      form: { data: { turbo_confirm: "Are you sure?" } },
+        <% if can_delete? %>
+          <%= link_to "Delete Location", @location,
+                      data: { turbo_method: :delete, turbo_confirm: "Are you sure?" },
                       class: "btn btn-danger" %>
+        <% end %>
       </div>
     <% end %>
   </div>

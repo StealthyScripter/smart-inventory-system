@@ -2,9 +2,9 @@ require 'rails_helper'
 
 RSpec.describe "Products CRUD", type: :request do
   let(:user) { create_authenticated_user }
-  let!(:category) { Category.create!(name: "Electronics") }  # Changed from let to let!
-  let!(:supplier) { Supplier.create!(name: "Apple Inc.", default_lead_time_days: 7) }  # Changed from let to let!
-  let(:location) { Location.create!(name: "Main Store") }
+  let!(:category) { Category.create!(name: "Electronics") }
+  let!(:supplier) { Supplier.create!(name: "Apple Inc.", default_lead_time_days: 7) }
+  let!(:location) { Location.create!(name: "Main Store") }
 
   before do
     login_as(user)
@@ -149,6 +149,18 @@ RSpec.describe "Products CRUD", type: :request do
     it "redirects to the products list" do
       delete product_path(product)
       expect(response).to redirect_to(products_url)
+    end
+  end
+
+  describe "department manager permissions" do
+    let(:scoped_user) { create_authenticated_user(role: "department_manager", location: Location.find_or_create_by!(name: "Scoped Location")) }
+    let!(:product) { Product.create!(valid_attributes) }
+
+    it "cannot edit the product catalog" do
+      login_as(scoped_user)
+
+      get edit_product_path(product)
+      expect(response).to redirect_to(root_path)
     end
   end
 end

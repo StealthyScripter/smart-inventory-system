@@ -1,4 +1,4 @@
-require 'rails_helper'
+require "rails_helper"
 
 RSpec.describe "Dashboard", type: :request do
   let(:user) { create_authenticated_user }
@@ -16,7 +16,7 @@ RSpec.describe "Dashboard", type: :request do
     it "displays dashboard content" do
       get dashboard_path
       expect(response.body).to include("Dashboard")
-      expect(response.body).to include("Total Products")
+      expect(response.body).to include("Inventory Value")
     end
   end
 

@@ -3,7 +3,11 @@
 <div class="table-container">
   <div class="table-header">
     <h3 class="table-title">Suppliers</h3>
-    <%= link_to "Add Supplier", new_supplier_path, class: "btn btn-primary" %>
+    <% if can_manage_suppliers? %>
+      <%= link_to "Add Supplier", new_supplier_path, class: "btn btn-primary" %>
+    <% else %>
+      <span class="badge badge-secondary">Read Only</span>
+    <% end %>
   </div>
   <table>
     <thead>
@@ -12,7 +16,7 @@
         <th>Contact Email</th>
         <th>Phone</th>
         <th>Lead Time</th>
-        <th>Active Orders</th>
+        <th>Linked Products</th>
         <th>Actions</th>
       </tr>
     </thead>
@@ -23,10 +27,14 @@
           <td><%= supplier.contact_email %></td>
           <td><%= supplier.contact_phone %></td>
           <td><%= supplier.default_lead_time_days %> days</td>
-          <td><%= supplier.purchase_orders.pending.count %></td>
+          <td><%= supplier.products.count %></td>
           <td>
-            <%= link_to "Edit", edit_supplier_path(supplier), class: "btn btn-secondary",
-                        style: "padding: 0.25rem 0.5rem; font-size: 0.875rem;" %>
+            <% if can_manage_suppliers? %>
+              <%= link_to "Edit", edit_supplier_path(supplier), class: "btn btn-secondary",
+                          style: "padding: 0.25rem 0.5rem; font-size: 0.875rem;" %>
+            <% else %>
+              <span style="color: #718096; font-size: 0.875rem;">View</span>
+            <% end %>
           </td>
         </tr>
       <% end %>

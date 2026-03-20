@@ -1,98 +1,55 @@
 class DashboardController < ApplicationController
   def index
     @total_products = Product.count
+    @total_locations = Location.count
+    @inventory_units = scoped_stock_levels.sum(:current_quantity)
     @total_value = calculate_total_inventory_value
     @low_stock_products = find_low_stock_products
-    @recent_sales = scoped_recent_sales
-    @pending_orders = scoped_pending_orders
-    @out_of_stock_count = count_out_of_stock_products
+    @recent_movements = scoped_recent_movements.limit(8)
   end
 
   private
 
+  def scoped_stock_levels
+    relation = StockLevel.joins(:product).includes(:product, :location)
+
+    return relation if admin? || regional_manager?
+    return relation.where(location_id: current_user.location_id) if current_user&.location_id && (location_manager? || department_manager? || employee?)
+
+    relation
+  end
+
   def calculate_total_inventory_value
-    if admin? || manager?
-      # Admin and manager see total across all locations
-      StockLevel.joins(:product)
-                .sum("stock_levels.current_quantity * products.unit_cost")
-                .to_f
-    elsif supervisor? || employee?
-      # Supervisor and employee only see their location's value
-      StockLevel.joins(:product)
-                .where(location: current_user.location)
-                .sum("stock_levels.current_quantity * products.unit_cost")
-                .to_f
-    else
-      # Guests see overall value
-      StockLevel.joins(:product)
-                .sum("stock_levels.current_quantity * products.unit_cost")
-                .to_f
-    end
+    scoped_stock_levels.sum("stock_levels.current_quantity * COALESCE(products.unit_cost, 0)").to_f
   end
 
   def find_low_stock_products
-    products = Product.includes(:stock_levels).all
+    products = Product.includes(:stock_levels).order(:name)
 
-    if admin? || manager?
-      # Show low stock across all locations
-      products.select { |product| product.total_stock < product.reorder_point }
-              .sort_by(&:total_stock)
-              .take(5)
-    elsif supervisor? || employee?
-      # Show low stock only in their location
-      products.select do |product|
-        location_stock = product.stock_levels.find_by(location: current_user.location)
-        location_stock && location_stock.current_quantity < product.reorder_point
+    if current_user&.location_id && (location_manager? || department_manager? || employee?)
+      products.filter_map do |product|
+        stock_level = product.stock_levels.find { |level| level.location_id == current_user.location_id }
+        product if stock_level && stock_level.current_quantity < product.reorder_point
       end.sort_by do |product|
-        product.stock_levels.find_by(location: current_user.location)&.current_quantity || 0
-      end.take(5)
+        product.stock_levels.find { |level| level.location_id == current_user.location_id }&.current_quantity || 0
+      end.first(5)
     else
-      # Guests see overall low stock
       products.select { |product| product.total_stock < product.reorder_point }
               .sort_by(&:total_stock)
-              .take(5)
+              .first(5)
     end
   end
 
-  def scoped_recent_sales
-    if admin? || manager?
-      # Show all recent sales
-      SalesTransaction.recent.includes(:product, :location, :user).limit(10)
-    elsif supervisor? || employee?
-      # Show only sales from their location
-      SalesTransaction.recent
-                      .includes(:product, :location, :user)
-                      .where(location: current_user.location)
-                      .limit(10)
-    else
-      # Guests cannot see sales
-      SalesTransaction.none
-    end
-  end
+  def scoped_recent_movements
+    relation = StockMovement.includes(:product, :destination_location, :source_location, :user)
+                            .order(movement_date: :desc)
 
-  def scoped_pending_orders
-    if admin? || manager? || supervisor?
-      # Can see purchase orders
-      PurchaseOrder.pending.count
+    if current_user&.location_id && (location_manager? || department_manager? || employee?)
+      relation.where("source_location_id = :location_id OR destination_location_id = :location_id", location_id: current_user.location_id)
+    elsif client? || supplier_user? || customer? || guest?
+      StockMovement.none
     else
-      # Employees and guests cannot see purchase orders
-      0
-    end
-  end
-
-  def count_out_of_stock_products
-    if admin? || manager?
-      # Count out of stock across all locations
-      Product.includes(:stock_levels).all.count { |product| product.total_stock == 0 }
-    elsif supervisor? || employee?
-      # Count out of stock in their location only
-      Product.includes(:stock_levels).all.count do |product|
-        location_stock = product.stock_levels.find_by(location: current_user.location)
-        location_stock && location_stock.current_quantity == 0
-      end
-    else
-      # Guests see overall out of stock
-      Product.includes(:stock_levels).all.count { |product| product.total_stock == 0 }
+      relation
     end
   end
 end

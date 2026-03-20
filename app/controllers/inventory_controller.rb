@@ -1,31 +1,31 @@
 class InventoryController < ApplicationController
+  before_action :require_inventory_adjustment_permission, only: [:adjust_stock]
+
   def index
     @stock_levels = scoped_stock_levels
     @locations = viewable_locations
   end
 
   def adjust_stock
-    # Only admin, manager, and supervisor can adjust stock
-    unless can_edit?
-      redirect_to inventory_path, alert: "You don't have permission to adjust stock."
-      return
-    end
-
     product = Product.find(params[:product_id])
     location = Location.find(params[:location_id])
 
-    # Check location access for supervisors
-    if supervisor? && location != current_user.location
+    unless can_access_location?(location)
       redirect_to inventory_path, alert: "You can only adjust stock in your assigned location."
       return
     end
 
     stock_level = StockLevel.find_or_initialize_by(product: product, location: location)
-    old_quantity = stock_level.current_quantity
+    old_quantity = stock_level.current_quantity.to_i
     new_quantity = params[:quantity].to_i
 
-    if stock_level.update(current_quantity: new_quantity)
-      # Create stock movement record
+    if new_quantity == old_quantity
+      redirect_to inventory_path, notice: "Stock level was already up to date."
+      return
+    end
+
+    StockLevel.transaction do
+      stock_level.update!(current_quantity: new_quantity)
       StockMovement.create!(
         product: product,
         destination_location: location,
@@ -35,32 +35,18 @@ class InventoryController < ApplicationController
         movement_date: Time.current,
         notes: "Stock adjusted from #{old_quantity} to #{new_quantity}"
       )
-
-      redirect_to inventory_path, notice: "Stock level updated successfully."
-    else
-      redirect_to inventory_path, alert: "Failed to update stock level."
     end
+
+    redirect_to inventory_path, notice: "Stock level updated successfully."
+  rescue ActiveRecord::RecordInvalid
+    redirect_to inventory_path, alert: "Failed to update stock level."
   end
 
   private
 
   def scoped_stock_levels
-    if admin? || manager?
-      # Show all stock levels across all locations
-      StockLevel.includes(:product, :location).order("products.name")
-    elsif supervisor? || employee?
-      # Show all stock levels but highlight their location
-      # They can VIEW all locations but can only OPERATE in their own
-      StockLevel.includes(:product, :location).order("products.name")
-    else
-      # Guests can view all stock levels (read-only)
-      StockLevel.includes(:product, :location).order("products.name")
-    end
-  end
-
-  def viewable_locations
-    # All users can view all locations (for inventory visibility)
-    # But supervisors and employees can only operate in their own
-    Location.all.order(:name)
+    StockLevel.joins(:product, :location)
+              .includes(:product, :location)
+              .order("products.name ASC, locations.name ASC")
   end
 end
