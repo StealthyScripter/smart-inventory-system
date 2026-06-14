@@ -1,0 +1,44 @@
+<div class="table-container">
+  <div class="table-header">
+    <h3 class="table-title"><%= submit_label %></h3>
+    <%= link_to "Back to Services", merchant_services_path, class: "btn btn-secondary" %>
+  </div>
+  <div style="padding: 2rem;">
+    <%= form_with model: service, url: service.persisted? ? merchant_service_path(service) : merchant_services_path, local: true do |form| %>
+      <% if service.errors.any? %>
+        <div class="alert alert-danger"><%= service.errors.full_messages.to_sentence %></div>
+      <% end %>
+      <div class="form-group">
+        <%= form.label :supplier_id, "Provider", class: "form-label" %>
+        <%= form.select :supplier_id, options_from_collection_for_select(@suppliers, :id, :name, service.supplier_id), {}, { class: "form-select" } %>
+      </div>
+      <div class="form-group">
+        <%= form.label :name, class: "form-label" %>
+        <%= form.text_field :name, class: "form-input", required: true %>
+      </div>
+      <div class="form-group">
+        <%= form.label :service_category, "Category", class: "form-label" %>
+        <%= form.select :service_category, options_for_select(@categories, service.service_category), {}, { class: "form-select" } %>
+      </div>
+      <div class="form-group">
+        <%= form.label :description, class: "form-label" %>
+        <%= form.text_area :description, rows: 4, class: "form-input" %>
+      </div>
+      <div class="grid-2">
+        <div class="form-group">
+          <%= form.label :starting_price, class: "form-label" %>
+          <%= form.number_field :starting_price, min: 0, step: 0.01, class: "form-input" %>
+        </div>
+        <div class="form-group">
+          <%= form.label :status, class: "form-label" %>
+          <%= form.select :status, options_for_select(ServiceListing::STATUSES.map { |status| [status.titleize, status] }, service.status), {}, { class: "form-select" } %>
+        </div>
+      </div>
+      <div class="form-group">
+        <%= form.label :image_url, "Image URL", class: "form-label" %>
+        <%= form.url_field :image_url, class: "form-input" %>
+      </div>
+      <%= form.submit submit_label, class: "btn btn-primary" %>
+    <% end %>
+  </div>
+</div>

@@ -1,0 +1,16 @@
+<% content_for :page_title, "Marketplace Analytics" %>
+
+<div class="stats-grid">
+  <% @summary.each do |label, value| %>
+    <div class="stat-card">
+      <div class="stat-header"><span class="stat-title"><%= label.to_s.titleize %></span></div>
+      <div class="stat-value">
+        <% if label == :sales_total %>
+          <%= currency(value.to_f) %>
+        <% else %>
+          <%= number_with_delimiter(value) %>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>

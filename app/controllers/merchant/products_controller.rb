@@ -82,7 +82,8 @@ module Merchant
         :lead_time_days,
         :category_id,
         :supplier_id,
-        :marketplace_status
+        :marketplace_status,
+        :listing_scope
       )
     end
   end

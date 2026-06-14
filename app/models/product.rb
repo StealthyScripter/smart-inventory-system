@@ -1,5 +1,6 @@
 class Product < ApplicationRecord
   MARKETPLACE_STATUSES = %w[draft public private archived].freeze
+  LISTING_SCOPES = %w[local marketplace both].freeze
 
   belongs_to :category
   belongs_to :supplier, optional: true
@@ -17,8 +18,11 @@ class Product < ApplicationRecord
   validates :unit_cost, :selling_price, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
   validates :reorder_point, :lead_time_days, numericality: { greater_than: 0 }
   validates :marketplace_status, inclusion: { in: MARKETPLACE_STATUSES }
+  validates :listing_scope, inclusion: { in: LISTING_SCOPES }
 
-  scope :publicly_listed, -> { where(marketplace_status: "public") }
+  scope :marketplace_available, -> { where(listing_scope: ["marketplace", "both"]) }
+  scope :local_only, -> { where(listing_scope: "local") }
+  scope :publicly_listed, -> { where(marketplace_status: "public").marketplace_available }
   scope :active_marketplace, -> { where.not(marketplace_status: "archived") }
   scope :owned_by_suppliers, ->(supplier_ids) { where(supplier_id: supplier_ids) }
   scope :search, lambda { |query|

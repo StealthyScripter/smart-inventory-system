@@ -7,6 +7,10 @@
   </div>
 
   <div style="padding: 1.5rem; border-bottom: 1px solid #e2e8f0;">
+    <% if @merchant.shop_image_url.present? %>
+      <img src="<%= @merchant.shop_image_url %>" alt="<%= @merchant.name %>" style="max-width: 100%; max-height: 220px; object-fit: cover; margin-bottom: 1rem;">
+    <% end %>
+    <p><%= @merchant.shop_description.presence || "No shop description provided." %></p>
     <p><strong>Email:</strong> <%= @merchant.contact_email.presence || "Not provided" %></p>
     <p><strong>Phone:</strong> <%= @merchant.contact_phone.presence || "Not provided" %></p>
     <p><strong>Rating:</strong> <%= number_with_precision(@merchant.average_rating, precision: 2) %> / 5</p>
@@ -35,6 +39,30 @@
           <td colspan="4" style="text-align: center; color: #718096; font-style: italic;">
             This merchant has no public products.
           </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+
+<div class="table-container" style="margin-top: 1.5rem;">
+  <div class="table-header">
+    <h3 class="table-title">Services</h3>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Service</th>
+        <th>Category</th>
+        <th>Starting Price</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @merchant.service_listings.publicly_listed.order(:name).each do |service| %>
+        <tr>
+          <td><%= link_to service.name, service_path(service) %></td>
+          <td><%= service.service_category %></td>
+          <td><%= currency(service.starting_price.to_f) %></td>
         </tr>
       <% end %>
     </tbody>

@@ -26,6 +26,7 @@
         </p>
         <p><strong>Description:</strong> <%= @product.description || "No description" %></p>
         <p><strong>Marketplace Status:</strong> <span class="badge badge-secondary"><%= @product.marketplace_status.titleize %></span></p>
+        <p><strong>Listing Scope:</strong> <span class="badge badge-secondary"><%= @product.listing_scope.titleize %></span></p>
       </div>
       <div>
         <h4>Pricing & Stock</h4>

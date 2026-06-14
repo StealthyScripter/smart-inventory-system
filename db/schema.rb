@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_14_005000) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_14_009000) do
   create_table "audit_logs", force: :cascade do |t|
     t.string "action", null: false
     t.integer "actor_id"
@@ -89,18 +89,24 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_14_005000) do
 
   create_table "order_items", force: :cascade do |t|
     t.datetime "created_at", null: false
+    t.datetime "delivered_at"
     t.string "fulfillment_status", default: "pending", null: false
+    t.text "merchant_notes"
     t.integer "order_id", null: false
     t.integer "product_id", null: false
     t.integer "quantity", null: false
+    t.datetime "shipped_at"
     t.integer "supplier_id", null: false
     t.decimal "total_amount", precision: 10, scale: 2, default: "0.0", null: false
+    t.string "tracking_carrier"
+    t.string "tracking_number"
     t.decimal "unit_price", precision: 10, scale: 2, default: "0.0", null: false
     t.datetime "updated_at", null: false
     t.index ["order_id"], name: "index_order_items_on_order_id"
     t.index ["product_id"], name: "index_order_items_on_product_id"
     t.index ["supplier_id", "fulfillment_status"], name: "index_order_items_on_supplier_id_and_fulfillment_status"
     t.index ["supplier_id"], name: "index_order_items_on_supplier_id"
+    t.index ["tracking_number"], name: "index_order_items_on_tracking_number"
   end
 
   create_table "orders", force: :cascade do |t|
@@ -135,6 +141,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_14_005000) do
     t.datetime "created_at", null: false
     t.text "description"
     t.integer "lead_time_days", default: 7
+    t.string "listing_scope", default: "both", null: false
     t.string "marketplace_status", default: "draft", null: false
     t.string "name", null: false
     t.integer "reorder_point", default: 10
@@ -144,6 +151,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_14_005000) do
     t.decimal "unit_cost", precision: 10, scale: 2
     t.datetime "updated_at", null: false
     t.index ["category_id"], name: "index_products_on_category_id"
+    t.index ["listing_scope"], name: "index_products_on_listing_scope"
     t.index ["marketplace_status"], name: "index_products_on_marketplace_status"
     t.index ["sku"], name: "index_products_on_sku", unique: true
     t.index ["supplier_id"], name: "index_products_on_supplier_id"
@@ -179,9 +187,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_14_005000) do
   create_table "reviews", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
-    t.integer "order_item_id", null: false
-    t.integer "product_id", null: false
+    t.integer "order_item_id"
+    t.integer "product_id"
     t.integer "rating", null: false
+    t.integer "service_listing_id"
     t.string "status", default: "published", null: false
     t.integer "supplier_id", null: false
     t.datetime "updated_at", null: false
@@ -189,6 +198,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_14_005000) do
     t.index ["order_item_id"], name: "index_reviews_on_order_item_id"
     t.index ["product_id", "status"], name: "index_reviews_on_product_id_and_status"
     t.index ["product_id"], name: "index_reviews_on_product_id"
+    t.index ["service_listing_id"], name: "index_reviews_on_service_listing_id"
     t.index ["supplier_id", "status"], name: "index_reviews_on_supplier_id_and_status"
     t.index ["supplier_id"], name: "index_reviews_on_supplier_id"
     t.index ["user_id", "order_item_id"], name: "index_reviews_on_user_id_and_order_item_id", unique: true
@@ -209,6 +219,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_14_005000) do
     t.index ["location_id"], name: "index_sales_transactions_on_location_id"
     t.index ["product_id"], name: "index_sales_transactions_on_product_id"
     t.index ["user_id"], name: "index_sales_transactions_on_user_id"
+  end
+
+  create_table "service_listings", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.string "image_url"
+    t.string "name", null: false
+    t.string "service_category", null: false
+    t.decimal "starting_price", precision: 10, scale: 2
+    t.string "status", default: "draft", null: false
+    t.integer "supplier_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["service_category"], name: "index_service_listings_on_service_category"
+    t.index ["supplier_id", "status"], name: "index_service_listings_on_supplier_id_and_status"
+    t.index ["supplier_id"], name: "index_service_listings_on_supplier_id"
   end
 
   create_table "stock_levels", force: :cascade do |t|
@@ -260,7 +285,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_14_005000) do
     t.datetime "created_at", null: false
     t.integer "default_lead_time_days", default: 7
     t.string "name", null: false
+    t.text "shop_description"
+    t.string "shop_image_url"
+    t.string "shop_slug"
+    t.string "shop_status", default: "draft", null: false
     t.datetime "updated_at", null: false
+    t.index ["shop_slug"], name: "index_suppliers_on_shop_slug", unique: true
+    t.index ["shop_status"], name: "index_suppliers_on_shop_status"
   end
 
   create_table "users", force: :cascade do |t|
@@ -308,11 +339,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_14_005000) do
   add_foreign_key "purchase_orders", "users"
   add_foreign_key "reviews", "order_items"
   add_foreign_key "reviews", "products"
+  add_foreign_key "reviews", "service_listings"
   add_foreign_key "reviews", "suppliers"
   add_foreign_key "reviews", "users"
   add_foreign_key "sales_transactions", "locations"
   add_foreign_key "sales_transactions", "products"
   add_foreign_key "sales_transactions", "users"
+  add_foreign_key "service_listings", "suppliers"
   add_foreign_key "stock_levels", "locations"
   add_foreign_key "stock_levels", "products"
   add_foreign_key "stock_movements", "locations", column: "destination_location_id"

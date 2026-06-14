@@ -1,0 +1,32 @@
+<% content_for :page_title, @service.name %>
+
+<div class="table-container">
+  <div class="table-header">
+    <h3 class="table-title"><%= @service.name %></h3>
+    <%= link_to "Back to Services", services_path, class: "btn btn-secondary" %>
+  </div>
+  <div style="padding: 1.5rem;">
+    <% if @service.image_url.present? %>
+      <img src="<%= @service.image_url %>" alt="<%= @service.name %>" style="max-width: 100%; max-height: 220px; object-fit: cover; margin-bottom: 1rem;">
+    <% end %>
+    <p><strong>Category:</strong> <%= @service.service_category %></p>
+    <p><strong>Provider:</strong> <%= link_to @service.supplier.name, merchant_storefront_path(@service.supplier) %></p>
+    <p><strong>Starting Price:</strong> <%= currency(@service.starting_price.to_f) %></p>
+    <p><strong>Rating:</strong> <%= number_with_precision(@service.average_rating, precision: 2) %> / 5</p>
+    <p><%= @service.description %></p>
+  </div>
+</div>
+
+<div class="table-container" style="margin-top: 1.5rem;">
+  <div class="table-header">
+    <h3 class="table-title">Recommended Services</h3>
+  </div>
+  <div style="padding: 1.5rem;">
+    <% @recommended_services.each do |service| %>
+      <p><%= link_to service.name, service_path(service) %> — <%= service.supplier.name %></p>
+    <% end %>
+    <% if @recommended_services.empty? %>
+      <p style="color: #718096; font-style: italic;">No recommendations yet.</p>
+    <% end %>
+  </div>
+</div>

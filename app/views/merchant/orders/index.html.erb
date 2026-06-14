@@ -29,6 +29,9 @@
             <% if next_statuses.any? %>
               <%= form_with url: merchant_order_path(item), method: :patch, local: true, style: "margin-top: 0.5rem;" do |form| %>
                 <%= form.select :fulfillment_status, options_for_select(next_statuses.map { |status| [status.titleize, status] }), {}, { class: "form-select" } %>
+                <%= form.text_field :tracking_carrier, value: item.tracking_carrier, placeholder: "Carrier", class: "form-input", style: "margin-top: 0.5rem;" %>
+                <%= form.text_field :tracking_number, value: item.tracking_number, placeholder: "Tracking #", class: "form-input", style: "margin-top: 0.5rem;" %>
+                <%= form.text_field :merchant_notes, value: item.merchant_notes, placeholder: "Notes", class: "form-input", style: "margin-top: 0.5rem;" %>
                 <%= form.submit "Update", class: "btn btn-secondary", style: "margin-top: 0.5rem;" %>
               <% end %>
             <% end %>

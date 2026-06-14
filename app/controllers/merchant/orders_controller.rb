@@ -6,6 +6,7 @@ module Merchant
 
     def update
       order_item = merchant_order_items.find(params[:id])
+      order_item.assign_attributes(tracking_params)
       FulfillmentService.new(order_item, actor: current_user).transition_to!(params[:fulfillment_status])
 
       redirect_to merchant_orders_path, notice: "Order item was updated."
@@ -18,6 +19,10 @@ module Merchant
     def merchant_order_items
       OrderItem.includes(:order, :product, :supplier)
                .where(supplier: merchant_suppliers)
+    end
+
+    def tracking_params
+      params.permit(:tracking_carrier, :tracking_number, :merchant_notes)
     end
   end
 end

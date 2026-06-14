@@ -1,0 +1,42 @@
+<% content_for :page_title, "Services" %>
+
+<div class="table-container">
+  <div class="table-header">
+    <h3 class="table-title">Marketplace Services</h3>
+  </div>
+  <div style="padding: 1rem 1.5rem; border-bottom: 1px solid #e2e8f0;">
+    <%= form_with url: services_path, method: :get, local: true, style: "display: grid; grid-template-columns: 2fr 1fr auto; gap: 0.75rem; align-items: end;" do |form| %>
+      <div class="form-group" style="margin-bottom: 0;">
+        <%= form.label :q, "Search", class: "form-label" %>
+        <%= form.text_field :q, value: params[:q], class: "form-input" %>
+      </div>
+      <div class="form-group" style="margin-bottom: 0;">
+        <%= form.label :category, class: "form-label" %>
+        <%= form.select :category, options_for_select(@categories, params[:category]), { include_blank: "All" }, { class: "form-select" } %>
+      </div>
+      <%= form.submit "Apply", class: "btn btn-primary" %>
+    <% end %>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Service</th>
+        <th>Category</th>
+        <th>Provider</th>
+        <th>Starting Price</th>
+        <th>Rating</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @services.each do |service| %>
+        <tr>
+          <td><%= link_to service.name, service_path(service) %></td>
+          <td><%= service.service_category %></td>
+          <td><%= link_to service.supplier.name, merchant_storefront_path(service.supplier) %></td>
+          <td><%= currency(service.starting_price.to_f) %></td>
+          <td><%= number_with_precision(service.average_rating, precision: 2) %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

@@ -3,14 +3,26 @@
 <div class="stats-grid">
   <div class="stat-card">
     <div class="stat-header"><span class="stat-title">Sales</span></div>
-    <div class="stat-value"><%= currency(@sales_total.to_f) %></div>
+    <div class="stat-value"><%= currency(@summary[:sales_total].to_f) %></div>
   </div>
   <div class="stat-card">
     <div class="stat-header"><span class="stat-title">Delivered Items</span></div>
-    <div class="stat-value"><%= number_with_delimiter(@delivered_count) %></div>
+    <div class="stat-value"><%= number_with_delimiter(@summary[:delivered_count]) %></div>
   </div>
   <div class="stat-card">
     <div class="stat-header"><span class="stat-title">Rating</span></div>
-    <div class="stat-value"><%= number_with_precision(@average_rating, precision: 2) %></div>
+    <div class="stat-value"><%= number_with_precision(@summary[:average_rating], precision: 2) %></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-header"><span class="stat-title">Public Products</span></div>
+    <div class="stat-value"><%= number_with_delimiter(@summary[:public_product_count]) %></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-header"><span class="stat-title">Public Services</span></div>
+    <div class="stat-value"><%= number_with_delimiter(@summary[:public_service_count]) %></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-header"><span class="stat-title">Reviews</span></div>
+    <div class="stat-value"><%= number_with_delimiter(@summary[:review_count]) %></div>
   </div>
 </div>

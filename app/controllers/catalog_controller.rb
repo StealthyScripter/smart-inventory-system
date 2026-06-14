@@ -9,6 +9,7 @@ class CatalogController < ApplicationController
 
   def show
     @product = Product.publicly_listed.includes(:category, :supplier).find(params[:id])
+    @recommended_products = RecommendationService.new.product_recommendations(@product)
   end
 
   private

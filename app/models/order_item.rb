@@ -17,11 +17,15 @@ class OrderItem < ApplicationRecord
   validates :quantity, numericality: { greater_than: 0 }
   validates :unit_price, :total_amount, numericality: { greater_than_or_equal_to: 0 }
   validates :fulfillment_status, inclusion: { in: FULFILLMENT_STATUSES }
+  validates :tracking_number, presence: true, if: -> { fulfillment_status == "shipped" && tracking_carrier.present? }
 
   def transition_to!(new_status)
     new_status = new_status.to_s
     raise ArgumentError, "invalid fulfillment transition" unless TRANSITIONS.fetch(fulfillment_status).include?(new_status)
 
-    update!(fulfillment_status: new_status)
+    assign_attributes(fulfillment_status: new_status)
+    self.shipped_at ||= Time.current if new_status == "shipped"
+    self.delivered_at ||= Time.current if new_status == "delivered"
+    save!
   end
 end

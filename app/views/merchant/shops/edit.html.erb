@@ -1,0 +1,60 @@
+<% content_for :page_title, "Shop Profile" %>
+
+<div class="table-container">
+  <div class="table-header">
+    <h3 class="table-title"><%= @shop.name %></h3>
+    <%= link_to "Back to Merchant Dashboard", merchant_root_path, class: "btn btn-secondary" %>
+  </div>
+
+  <div style="padding: 2rem;">
+    <%= form_with model: [:merchant, @shop], url: merchant_shop_path(@shop), local: true do |form| %>
+      <% if @shop.errors.any? %>
+        <div class="alert alert-danger"><%= @shop.errors.full_messages.to_sentence %></div>
+      <% end %>
+
+      <div class="grid-2" style="gap: 2rem;">
+        <div>
+          <div class="form-group">
+            <%= form.label :name, class: "form-label" %>
+            <%= form.text_field :name, class: "form-input", required: true %>
+          </div>
+          <div class="form-group">
+            <%= form.label :shop_slug, "Shop Slug", class: "form-label" %>
+            <%= form.text_field :shop_slug, class: "form-input" %>
+          </div>
+          <div class="form-group">
+            <%= form.label :shop_status, "Shop Status", class: "form-label" %>
+            <%= form.select :shop_status, options_for_select(Supplier::SHOP_STATUSES.map { |status| [status.titleize, status] }, @shop.shop_status), {}, { class: "form-select" } %>
+          </div>
+          <div class="form-group">
+            <%= form.label :shop_description, "Description", class: "form-label" %>
+            <%= form.text_area :shop_description, rows: 5, class: "form-input" %>
+          </div>
+        </div>
+
+        <div>
+          <div class="form-group">
+            <%= form.label :shop_image_url, "Image URL", class: "form-label" %>
+            <%= form.url_field :shop_image_url, class: "form-input" %>
+          </div>
+          <div class="form-group">
+            <%= form.label :contact_email, class: "form-label" %>
+            <%= form.email_field :contact_email, class: "form-input" %>
+          </div>
+          <div class="form-group">
+            <%= form.label :contact_phone, class: "form-label" %>
+            <%= form.telephone_field :contact_phone, class: "form-input" %>
+          </div>
+          <div class="form-group">
+            <%= form.label :address, class: "form-label" %>
+            <%= form.text_area :address, rows: 3, class: "form-input" %>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 2rem;">
+        <%= form.submit "Update Shop", class: "btn btn-primary" %>
+      </div>
+    <% end %>
+  </div>
+</div>

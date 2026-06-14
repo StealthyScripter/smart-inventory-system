@@ -1,0 +1,36 @@
+<% content_for :page_title, "Notifications" %>
+
+<div class="table-container">
+  <div class="table-header">
+    <h3 class="table-title">Notifications</h3>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Status</th>
+        <th>Title</th>
+        <th>Message</th>
+        <th>Received</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @notifications.each do |notification| %>
+        <tr>
+          <td><%= notification.read_at? ? "Read" : "Unread" %></td>
+          <td><%= notification.title %></td>
+          <td><%= notification.body %></td>
+          <td><%= notification.created_at.strftime("%b %d, %Y %H:%M") %></td>
+          <td>
+            <% unless notification.read_at? %>
+              <%= button_to "Mark Read", notification_path(notification), method: :patch, class: "btn btn-secondary" %>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+      <% if @notifications.empty? %>
+        <tr><td colspan="5" style="text-align: center; color: #718096; font-style: italic;">No notifications.</td></tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

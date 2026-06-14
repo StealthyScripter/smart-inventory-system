@@ -1,0 +1,33 @@
+<% content_for :page_title, "Merchant Services" %>
+
+<div class="table-container">
+  <div class="table-header">
+    <h3 class="table-title">Services</h3>
+    <%= link_to "Add Service", new_merchant_service_path, class: "btn btn-primary" %>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Category</th>
+        <th>Status</th>
+        <th>Starting Price</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @services.each do |service| %>
+        <tr>
+          <td><%= service.name %></td>
+          <td><%= service.service_category %></td>
+          <td><%= service.status.titleize %></td>
+          <td><%= currency(service.starting_price.to_f) %></td>
+          <td><%= link_to "Edit", edit_merchant_service_path(service), class: "btn btn-secondary" %></td>
+        </tr>
+      <% end %>
+      <% if @services.empty? %>
+        <tr><td colspan="5" style="text-align: center; color: #718096; font-style: italic;">No services found.</td></tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

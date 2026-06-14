@@ -46,10 +46,28 @@
   </div>
   <div style="padding: 1.5rem;">
     <% @product.reviews.published.includes(:user).each do |review| %>
-      <p><strong><%= review.rating %>/5</strong> <%= review.body %></p>
+      <p>
+        <strong><%= review.rating %>/5</strong>
+        <% if review.verified_purchase? %><span class="badge badge-success">Verified Purchase</span><% end %>
+        <%= review.body %>
+      </p>
     <% end %>
     <% if @product.reviews.published.empty? %>
       <p style="color: #718096; font-style: italic;">No reviews yet.</p>
+    <% end %>
+  </div>
+</div>
+
+<div class="table-container" style="margin-top: 1.5rem;">
+  <div class="table-header">
+    <h3 class="table-title">Recommended Products</h3>
+  </div>
+  <div style="padding: 1.5rem;">
+    <% @recommended_products.each do |product| %>
+      <p><%= link_to product.name, catalog_product_path(product) %> — <%= currency(product.selling_price.to_f) %></p>
+    <% end %>
+    <% if @recommended_products.empty? %>
+      <p style="color: #718096; font-style: italic;">No recommendations yet.</p>
     <% end %>
   </div>
 </div>

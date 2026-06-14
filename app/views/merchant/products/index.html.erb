@@ -12,6 +12,7 @@
         <th>Name</th>
         <th>Supplier</th>
         <th>Status</th>
+        <th>Scope</th>
         <th>Price</th>
         <th>Stock</th>
         <th>Actions</th>
@@ -24,6 +25,7 @@
           <td><%= product.name %></td>
           <td><%= product.supplier&.name %></td>
           <td><span class="badge badge-secondary"><%= product.marketplace_status.titleize %></span></td>
+          <td><span class="badge badge-secondary"><%= product.listing_scope.titleize %></span></td>
           <td><%= currency(product.selling_price.to_f) %></td>
           <td><%= number_with_delimiter(product.total_stock) %></td>
           <td><%= link_to "Edit", edit_merchant_product_path(product), class: "btn btn-secondary", style: "padding: 0.25rem 0.5rem; font-size: 0.875rem;" %></td>
@@ -31,7 +33,7 @@
       <% end %>
       <% if @products.empty? %>
         <tr>
-          <td colspan="7" style="text-align: center; color: #718096; font-style: italic;">No products found.</td>
+          <td colspan="8" style="text-align: center; color: #718096; font-style: italic;">No products found.</td>
         </tr>
       <% end %>
     </tbody>

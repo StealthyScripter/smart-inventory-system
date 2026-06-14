@@ -17,6 +17,7 @@
         <th>Category</th>
         <th>Supplier</th>
         <th>Marketplace</th>
+        <th>Scope</th>
         <th>Unit Cost</th>
         <th>Selling Price</th>
         <th>Stock</th>
@@ -32,6 +33,7 @@
           <td><%= product.category.name %></td>
           <td><%= product.supplier&.name || "Unassigned" %></td>
           <td><span class="badge badge-secondary"><%= product.marketplace_status.titleize %></span></td>
+          <td><span class="badge badge-secondary"><%= product.listing_scope.titleize %></span></td>
           <td><%= currency(product.unit_cost.to_f) %></td>
           <td><%= currency(product.selling_price.to_f) %></td>
           <td class="<%= product.total_stock < product.reorder_point ? 'stock-low' : 'stock-ok' %>">
@@ -49,7 +51,7 @@
       <% end %>
       <% if @products.empty? %>
         <tr>
-          <td colspan="10" style="text-align: center; color: #718096; font-style: italic;">
+          <td colspan="11" style="text-align: center; color: #718096; font-style: italic;">
             No products found.
           </td>
         </tr>

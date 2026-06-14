@@ -26,6 +26,13 @@
           <td><%= item.quantity %></td>
           <td><%= item.fulfillment_status.titleize %></td>
           <td>
+            <% if item.tracking_number.present? %>
+              <%= [item.tracking_carrier, item.tracking_number].compact.join(" ") %>
+            <% else %>
+              Not available
+            <% end %>
+          </td>
+          <td>
             <% if item.fulfillment_status == "delivered" && item.reviews.where(user: current_user).empty? %>
               <%= form_with url: reviews_path, method: :post, local: true do |form| %>
                 <%= hidden_field_tag :order_item_id, item.id %>
