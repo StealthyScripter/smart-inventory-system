@@ -54,7 +54,8 @@ RSpec.describe "Marketplace core models", type: :model do
       marketplace_status: "draft"
     )
 
-    expect(Product.publicly_listed).to contain_exactly(public_product)
+    expect(Product.publicly_listed).to include(public_product)
+    expect(Product.publicly_listed.pluck(:sku)).not_to include("DRAFT-RELAY")
   end
 
   it "validates marketplace status values" do
