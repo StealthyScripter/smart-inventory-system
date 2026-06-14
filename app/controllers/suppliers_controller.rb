@@ -1,4 +1,5 @@
 class SuppliersController < ApplicationController
+  before_action :require_back_office_access
   before_action :set_supplier, only: [:show, :edit, :update, :destroy]
   before_action :require_supplier_management_permission, only: [:new, :create, :edit, :update]
   before_action :require_delete_permission, only: [:destroy]

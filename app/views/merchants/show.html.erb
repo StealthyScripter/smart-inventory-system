@@ -1,0 +1,42 @@
+<% content_for :page_title, @merchant.name %>
+
+<div class="table-container">
+  <div class="table-header">
+    <h3 class="table-title"><%= @merchant.name %></h3>
+    <%= link_to "Back to Catalog", catalog_path, class: "btn btn-secondary" %>
+  </div>
+
+  <div style="padding: 1.5rem; border-bottom: 1px solid #e2e8f0;">
+    <p><strong>Email:</strong> <%= @merchant.contact_email.presence || "Not provided" %></p>
+    <p><strong>Phone:</strong> <%= @merchant.contact_phone.presence || "Not provided" %></p>
+    <p><strong>Rating:</strong> <%= number_with_precision(@merchant.average_rating, precision: 2) %> / 5</p>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Product</th>
+        <th>Category</th>
+        <th>Price</th>
+        <th>Available</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @products.each do |product| %>
+        <tr>
+          <td><%= link_to product.name, catalog_product_path(product) %></td>
+          <td><%= product.category.name %></td>
+          <td><%= currency(product.selling_price.to_f) %></td>
+          <td><%= number_with_delimiter(product.available_stock) %></td>
+        </tr>
+      <% end %>
+      <% if @products.empty? %>
+        <tr>
+          <td colspan="4" style="text-align: center; color: #718096; font-style: italic;">
+            This merchant has no public products.
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

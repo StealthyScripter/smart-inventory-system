@@ -11,9 +11,33 @@ Rails.application.routes.draw do
     resources :users, only: [:index, :edit, :update]
   end
 
+  namespace :merchant do
+    root "dashboard#index"
+    resources :products, only: [:index, :new, :create, :edit, :update]
+    get "inventory", to: "inventory#index"
+    resources :orders, only: [:index, :update]
+    get "analytics", to: "analytics#index"
+  end
+
+  namespace :customer do
+    resources :orders, only: [:index, :show]
+    get "analytics", to: "analytics#index"
+  end
+
   resources :products
   resources :suppliers
   resources :locations
+
+  get "catalog", to: "catalog#index"
+  get "catalog/:id", to: "catalog#show", as: :catalog_product
+  get "merchants/:id", to: "merchants#show", as: :merchant_storefront
+  resource :cart, only: [:show, :create, :update, :destroy]
+  resource :checkout, only: [:show, :create]
+  resources :payments, only: [:create]
+  resources :reviews, only: [:create]
+  namespace :webhooks do
+    post "payments/manual", to: "payments#create"
+  end
 
   get "dashboard", to: "dashboard#index"
   root "dashboard#index"

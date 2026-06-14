@@ -1,0 +1,70 @@
+<% content_for :page_title, "Merchant Dashboard" %>
+
+<div style="margin-bottom: 1rem;">
+  <span class="badge badge-info"><%= merchant_suppliers.map(&:name).to_sentence %></span>
+</div>
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-header"><span class="stat-title">Products</span></div>
+    <div class="stat-value"><%= number_with_delimiter(@product_count) %></div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-header"><span class="stat-title">Public Products</span></div>
+    <div class="stat-value"><%= number_with_delimiter(@public_product_count) %></div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-header"><span class="stat-title">Draft / Private</span></div>
+    <div class="stat-value"><%= number_with_delimiter(@non_public_product_count) %></div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-header"><span class="stat-title">Pending Orders</span></div>
+    <div class="stat-value"><%= number_with_delimiter(@pending_orders_count) %></div>
+  </div>
+</div>
+
+<div class="grid-2">
+  <div class="table-container">
+    <div class="table-header">
+      <h3 class="table-title">Low Stock Items</h3>
+      <%= link_to "Inventory", merchant_inventory_path, class: "btn btn-secondary" %>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Stock</th>
+          <th>Reorder Point</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @low_stock_products.each do |product| %>
+          <tr>
+            <td><%= product.name %></td>
+            <td class="stock-low"><%= number_with_delimiter(product.total_stock) %></td>
+            <td><%= product.reorder_point %></td>
+          </tr>
+        <% end %>
+        <% if @low_stock_products.empty? %>
+          <tr>
+            <td colspan="3" style="text-align: center; color: #718096; font-style: italic;">No low stock items.</td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="table-container">
+    <div class="table-header">
+      <h3 class="table-title">Merchant Tools</h3>
+    </div>
+    <div style="padding: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+      <%= link_to "Products", merchant_products_path, class: "btn btn-primary" %>
+      <%= link_to "Inventory", merchant_inventory_path, class: "btn btn-secondary" %>
+      <%= link_to "Orders", merchant_orders_path, class: "btn btn-secondary" %>
+    </div>
+  </div>
+</div>

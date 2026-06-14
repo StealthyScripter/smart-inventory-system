@@ -36,6 +36,19 @@ RSpec.describe "Inventory", type: :request do
       expect(response.body).to include("Inventory Management")
       expect(response.body).to include("Current Stock Levels")
     end
+
+    it "only lists stock levels for the user's assigned location" do
+      other_location = Location.create!(name: "Secondary Store")
+      StockLevel.find_or_create_by!(product: product, location: other_location).update!(
+        current_quantity: 12,
+        reserved_quantity: 0
+      )
+
+      get inventory_path
+
+      expect(response.body).to include(%(data-location-id="#{location.id}"))
+      expect(response.body).not_to include(%(data-location-id="#{other_location.id}"))
+    end
   end
 
   describe "POST /inventory/adjust" do

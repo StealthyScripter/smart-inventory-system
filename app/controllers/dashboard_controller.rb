@@ -1,4 +1,6 @@
 class DashboardController < ApplicationController
+  before_action :require_back_office_access
+
   def index
     @total_products = Product.count
     @total_locations = Location.count

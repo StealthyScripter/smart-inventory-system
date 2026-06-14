@@ -6,7 +6,8 @@ module Authorization
     :employee?, :client?, :supplier_user?, :customer?, :guest?,
     :can_manage_users?, :can_manage_products?, :can_manage_locations?,
     :can_manage_suppliers?, :can_adjust_inventory?, :can_delete?,
-    :can_access_location?, :accessible_locations, :viewable_locations
+    :can_access_back_office?, :can_access_product_catalog?, :can_manage_product?,
+    :can_access_location?, :accessible_locations, :viewable_locations, :manageable_suppliers
   end
 
   def admin?
@@ -50,7 +51,7 @@ module Authorization
   end
 
   def can_manage_products?
-    admin? || regional_manager?
+    admin? || regional_manager? || (supplier_user? && current_user.suppliers.exists?)
   end
 
   def can_manage_locations?
@@ -67,6 +68,22 @@ module Authorization
 
   def can_delete?
     admin? || regional_manager?
+  end
+
+  def can_access_back_office?
+    admin? || regional_manager? || location_manager? || department_manager? || employee? || client?
+  end
+
+  def can_access_product_catalog?
+    can_access_back_office? || (supplier_user? && current_user.suppliers.exists?)
+  end
+
+  def can_manage_product?(product)
+    return true if admin? || regional_manager?
+    return false unless supplier_user?
+    return false unless product&.supplier_id
+
+    current_user.suppliers.exists?(id: product.supplier_id)
   end
 
   def can_access_location?(location)
@@ -88,7 +105,26 @@ module Authorization
   end
 
   def viewable_locations
-    logged_in? ? Location.order(:name) : Location.none
+    can_access_back_office? ? Location.order(:name) : Location.none
+  end
+
+  def manageable_suppliers
+    return Supplier.order(:name) if admin? || regional_manager?
+    return current_user.suppliers.order(:name) if supplier_user?
+
+    Supplier.none
+  end
+
+  def require_back_office_access
+    return if can_access_back_office?
+
+    render plain: "You don't have permission to access inventory management.", status: :forbidden
+  end
+
+  def require_product_catalog_access
+    return if can_access_product_catalog?
+
+    render plain: "You don't have permission to access product management.", status: :forbidden
   end
 
   def require_user_management_permission
@@ -97,6 +133,12 @@ module Authorization
 
   def require_product_management_permission
     redirect_to root_path, alert: "You don't have permission to manage products." unless can_manage_products?
+  end
+
+  def require_product_ownership_permission
+    return if can_manage_product?(@product)
+
+    redirect_to products_path, alert: "You can only manage products for your supplier account."
   end
 
   def require_location_management_permission

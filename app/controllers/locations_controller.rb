@@ -1,4 +1,5 @@
 class LocationsController < ApplicationController
+  before_action :require_back_office_access
   before_action :set_location, only: [:show, :edit, :update, :destroy]
   before_action :require_location_management_permission, only: [:new, :create, :edit, :update]
   before_action :require_delete_permission, only: [:destroy]

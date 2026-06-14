@@ -1,0 +1,55 @@
+<% content_for :page_title, @product.name %>
+
+<div class="table-container">
+  <div class="table-header">
+    <h3 class="table-title"><%= @product.name %></h3>
+    <%= link_to "Back to Catalog", catalog_path, class: "btn btn-secondary" %>
+  </div>
+
+  <div style="padding: 1.5rem;">
+    <div class="grid-2">
+      <div>
+        <h4>Product</h4>
+        <p><strong>SKU:</strong> <%= @product.sku %></p>
+        <p><strong>Category:</strong> <%= @product.category.name %></p>
+        <p><strong>Merchant:</strong>
+          <% if @product.supplier %>
+            <%= link_to @product.supplier.name, merchant_storefront_path(@product.supplier) %>
+          <% else %>
+            Marketplace
+          <% end %>
+        </p>
+        <p><strong>Description:</strong> <%= @product.description.presence || "No description available." %></p>
+      </div>
+
+      <div>
+        <h4>Availability</h4>
+        <p><strong>Price:</strong> <%= currency(@product.selling_price.to_f) %></p>
+        <p><strong>Available Stock:</strong> <%= number_with_delimiter(@product.available_stock) %></p>
+        <p><strong>Rating:</strong> <%= number_with_precision(@product.average_rating, precision: 2) %> / 5</p>
+        <%= form_with url: cart_path, method: :post, local: true, style: "margin-top: 1rem;" do |form| %>
+          <%= form.hidden_field :product_id, value: @product.id %>
+          <div class="form-group">
+            <%= form.label :quantity, class: "form-label" %>
+            <%= form.number_field :quantity, value: 1, min: 1, class: "form-input" %>
+          </div>
+          <%= form.submit "Add to Cart", class: "btn btn-primary" %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="table-container" style="margin-top: 1.5rem;">
+  <div class="table-header">
+    <h3 class="table-title">Reviews</h3>
+  </div>
+  <div style="padding: 1.5rem;">
+    <% @product.reviews.published.includes(:user).each do |review| %>
+      <p><strong><%= review.rating %>/5</strong> <%= review.body %></p>
+    <% end %>
+    <% if @product.reviews.published.empty? %>
+      <p style="color: #718096; font-style: italic;">No reviews yet.</p>
+    <% end %>
+  </div>
+</div>

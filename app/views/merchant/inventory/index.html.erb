@@ -1,0 +1,36 @@
+<% content_for :page_title, "Merchant Inventory" %>
+
+<div class="table-container">
+  <div class="table-header">
+    <h3 class="table-title">Inventory</h3>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Product</th>
+        <th>Supplier</th>
+        <th>Location</th>
+        <th>Current</th>
+        <th>Reserved</th>
+        <th>Available</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @stock_levels.each do |stock_level| %>
+        <tr>
+          <td><%= stock_level.product.name %></td>
+          <td><%= stock_level.product.supplier&.name %></td>
+          <td><%= stock_level.location.name %></td>
+          <td><%= number_with_delimiter(stock_level.current_quantity) %></td>
+          <td><%= number_with_delimiter(stock_level.reserved_quantity) %></td>
+          <td><strong><%= number_with_delimiter(stock_level.available_quantity) %></strong></td>
+        </tr>
+      <% end %>
+      <% if @stock_levels.empty? %>
+        <tr>
+          <td colspan="6" style="text-align: center; color: #718096; font-style: italic;">No inventory found.</td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

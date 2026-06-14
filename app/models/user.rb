@@ -24,6 +24,15 @@ class User < ApplicationRecord
   belongs_to :location, optional: true
   has_many :stock_movements, dependent: :destroy
   has_many :managed_locations, class_name: "Location", foreign_key: "manager_id"
+  has_many :purchase_orders, dependent: :restrict_with_error
+  has_many :sales_transactions, dependent: :restrict_with_error
+  has_many :audit_logs, foreign_key: "actor_id", dependent: :nullify, inverse_of: :actor
+  has_many :supplier_users, dependent: :destroy
+  has_many :suppliers, through: :supplier_users
+  has_many :carts, dependent: :destroy
+  has_many :orders, dependent: :restrict_with_error
+  has_many :reviews, dependent: :destroy
+  has_many :notifications, dependent: :destroy
 
   before_validation :normalize_role
   before_validation :set_default_role, on: :create
@@ -99,6 +108,10 @@ class User < ApplicationRecord
     normalized_role == "guest"
   end
 
+  def merchant_supplier_ids
+    suppliers.select(:id)
+  end
+
   # Backward-compatible aliases while the rest of the app is cleaned up.
   def manager?
     regional_manager?
@@ -125,6 +138,17 @@ class User < ApplicationRecord
   end
 
   def log_role_change
+    AuditLog.record!(
+      actor: self,
+      auditable: self,
+      action: "user.role_changed",
+      details: {
+        from: role_before_last_save,
+        to: role,
+        changed_at: updated_at
+      }
+    )
+
     Rails.logger.warn(
       "SECURITY: User role changed - " \
       "User ID: #{id}, " \

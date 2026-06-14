@@ -1,4 +1,5 @@
 class InventoryController < ApplicationController
+  before_action :require_back_office_access
   before_action :require_inventory_adjustment_permission, only: [:adjust_stock]
 
   def index
@@ -47,6 +48,7 @@ class InventoryController < ApplicationController
   def scoped_stock_levels
     StockLevel.joins(:product, :location)
               .includes(:product, :location)
+              .where(location: accessible_locations)
               .order("products.name ASC, locations.name ASC")
   end
 end

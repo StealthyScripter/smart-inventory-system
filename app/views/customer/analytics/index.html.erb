@@ -1,0 +1,16 @@
+<% content_for :page_title, "Purchase Analytics" %>
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-header"><span class="stat-title">Orders</span></div>
+    <div class="stat-value"><%= number_with_delimiter(@order_count) %></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-header"><span class="stat-title">Purchases</span></div>
+    <div class="stat-value"><%= currency(@purchase_total.to_f) %></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-header"><span class="stat-title">Reviews</span></div>
+    <div class="stat-value"><%= number_with_delimiter(@review_count) %></div>
+  </div>
+</div>

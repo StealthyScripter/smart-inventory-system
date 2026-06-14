@@ -1,0 +1,45 @@
+<% content_for :page_title, @order.order_number %>
+
+<div class="table-container">
+  <div class="table-header">
+    <h3 class="table-title">Order <%= @order.order_number %></h3>
+    <%= link_to "Back to Orders", customer_orders_path, class: "btn btn-secondary" %>
+  </div>
+  <div style="padding: 1.5rem;">
+    <p><strong>Status:</strong> <%= @order.status.titleize %></p>
+    <p><strong>Total:</strong> <%= currency(@order.total_amount.to_f) %></p>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Product</th>
+        <th>Merchant</th>
+        <th>Quantity</th>
+        <th>Fulfillment</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @order.order_items.each do |item| %>
+        <tr>
+          <td><%= item.product.name %></td>
+          <td><%= item.supplier.name %></td>
+          <td><%= item.quantity %></td>
+          <td><%= item.fulfillment_status.titleize %></td>
+          <td>
+            <% if item.fulfillment_status == "delivered" && item.reviews.where(user: current_user).empty? %>
+              <%= form_with url: reviews_path, method: :post, local: true do |form| %>
+                <%= hidden_field_tag :order_item_id, item.id %>
+                <%= hidden_field_tag :order_id, @order.id %>
+                <%= form.fields_for :review do |review_form| %>
+                  <%= review_form.number_field :rating, min: 1, max: 5, value: 5, class: "form-input", style: "width: 5rem;" %>
+                  <%= review_form.text_field :body, class: "form-input", placeholder: "Review" %>
+                <% end %>
+                <%= form.submit "Review", class: "btn btn-secondary" %>
+              <% end %>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
