@@ -28,7 +28,11 @@ RSpec.describe NotificationEmailJob, type: :job do
   it "enqueues notification email delivery" do
     expect do
       described_class.perform_later("OrderMailer", "shipped", order)
-    end.to have_enqueued_job(described_class).with("OrderMailer", "shipped", order)
+    end.to have_enqueued_job(described_class).with("OrderMailer", "shipped", order).on_queue("mailers")
+  end
+
+  it "uses the mailers queue" do
+    expect(described_class.queue_name).to eq("mailers")
   end
 
   it "delivers through the requested mailer action" do

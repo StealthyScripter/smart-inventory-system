@@ -2,7 +2,7 @@ class SearchController < ApplicationController
   skip_before_action :require_login
 
   def index
-    @search = SearchService.new(search_params)
+    @search = SearchService.new(search_params.merge(page: params[:page]))
     @products = @search.products
     @services = @search.services
     @merchants = @search.merchants
@@ -15,6 +15,6 @@ class SearchController < ApplicationController
   private
 
   def search_params
-    params.permit(:q, :category_id, :service_category, :merchant_id, :supplier_id, :sort)
+    params.permit(:q, :category_id, :service_category, :merchant_id, :supplier_id, :sort, :page)
   end
 end

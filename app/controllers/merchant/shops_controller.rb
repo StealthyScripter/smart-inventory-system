@@ -28,7 +28,9 @@ module Merchant
         :shop_slug,
         :shop_status,
         :shop_description,
-        :shop_image_url
+        :shop_image_url,
+        :logo,
+        :banner
       )
     end
   end

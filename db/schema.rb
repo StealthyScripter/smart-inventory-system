@@ -10,7 +10,36 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_14_014000) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_14_016000) do
+  create_table "active_storage_attachments", force: :cascade do |t|
+    t.integer "blob_id", null: false
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.integer "record_id", null: false
+    t.string "record_type", null: false
+    t.index ["blob_id"], name: "index_active_storage_attachments_on_blob_id"
+    t.index ["record_type", "record_id", "name", "blob_id"], name: "index_active_storage_attachments_uniqueness", unique: true
+  end
+
+  create_table "active_storage_blobs", force: :cascade do |t|
+    t.bigint "byte_size", null: false
+    t.string "checksum"
+    t.string "content_type"
+    t.datetime "created_at", null: false
+    t.string "filename", null: false
+    t.string "key", null: false
+    t.text "metadata"
+    t.string "service_name", null: false
+    t.index ["key"], name: "index_active_storage_blobs_on_key", unique: true
+  end
+
+  create_table "active_storage_variant_records", force: :cascade do |t|
+    t.integer "blob_id", null: false
+    t.string "variation_digest", null: false
+    t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+    t.index ["blob_id"], name: "index_active_storage_variant_records_on_blob_id"
+  end
+
   create_table "audit_logs", force: :cascade do |t|
     t.string "action", null: false
     t.integer "actor_id"
@@ -190,9 +219,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_14_014000) do
   end
 
   create_table "products", force: :cascade do |t|
+    t.string "barcode_value"
     t.integer "category_id", null: false
     t.datetime "created_at", null: false
     t.text "description"
+    t.datetime "discarded_at"
     t.integer "lead_time_days", default: 7
     t.string "listing_scope", default: "both", null: false
     t.string "marketplace_status", default: "draft", null: false
@@ -204,8 +235,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_14_014000) do
     t.integer "supplier_id"
     t.decimal "unit_cost", precision: 10, scale: 2
     t.datetime "updated_at", null: false
+    t.index ["barcode_value"], name: "index_products_on_barcode_value", unique: true
     t.index ["category_id", "marketplace_status"], name: "index_products_on_category_and_marketplace_status"
     t.index ["category_id"], name: "index_products_on_category_id"
+    t.index ["discarded_at"], name: "index_products_on_discarded_at"
     t.index ["listing_scope"], name: "index_products_on_listing_scope"
     t.index ["marketplace_status", "listing_scope", "supplier_id"], name: "index_products_on_marketplace_discovery"
     t.index ["marketplace_status"], name: "index_products_on_marketplace_status"
@@ -258,6 +291,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_14_014000) do
   create_table "reviews", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
+    t.datetime "discarded_at"
     t.integer "order_item_id"
     t.integer "product_id"
     t.integer "rating", null: false
@@ -266,6 +300,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_14_014000) do
     t.integer "supplier_id", null: false
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
+    t.index ["discarded_at"], name: "index_reviews_on_discarded_at"
     t.index ["order_item_id"], name: "index_reviews_on_order_item_id"
     t.index ["product_id", "status"], name: "index_reviews_on_product_id_and_status"
     t.index ["product_id"], name: "index_reviews_on_product_id"
@@ -325,6 +360,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_14_014000) do
   create_table "service_listings", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "description"
+    t.datetime "discarded_at"
     t.string "image_url"
     t.string "name", null: false
     t.text "search_tags"
@@ -333,6 +369,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_14_014000) do
     t.string "status", default: "draft", null: false
     t.integer "supplier_id", null: false
     t.datetime "updated_at", null: false
+    t.index ["discarded_at"], name: "index_service_listings_on_discarded_at"
     t.index ["service_category"], name: "index_service_listings_on_service_category"
     t.index ["status", "service_category", "supplier_id"], name: "index_services_on_discovery_fields"
     t.index ["supplier_id", "status"], name: "index_service_listings_on_supplier_id_and_status"
@@ -387,6 +424,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_14_014000) do
     t.string "contact_phone"
     t.datetime "created_at", null: false
     t.integer "default_lead_time_days", default: 7
+    t.datetime "discarded_at"
     t.string "name", null: false
     t.text "search_tags"
     t.text "shop_description"
@@ -394,6 +432,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_14_014000) do
     t.string "shop_slug"
     t.string "shop_status", default: "draft", null: false
     t.datetime "updated_at", null: false
+    t.index ["discarded_at"], name: "index_suppliers_on_discarded_at"
     t.index ["shop_slug"], name: "index_suppliers_on_shop_slug", unique: true
     t.index ["shop_status"], name: "index_suppliers_on_shop_status"
   end
@@ -422,6 +461,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_14_014000) do
     t.index ["provider", "external_id"], name: "index_webhook_events_on_provider_and_external_id", unique: true
   end
 
+  add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "audit_logs", "users", column: "actor_id"
   add_foreign_key "availability_slots", "suppliers"
   add_foreign_key "cart_items", "carts"

@@ -1,1 +1,4 @@
 Booking <%= @booking.booking_number %> has been accepted.
+
+Provider: <%= @booking.supplier.name %>
+Schedule: <%= [@booking.scheduled_date, @booking.scheduled_time&.strftime("%H:%M")].compact.join(" ") %>

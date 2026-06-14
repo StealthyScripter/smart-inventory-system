@@ -13,6 +13,7 @@
         <th>Current</th>
         <th>Reserved</th>
         <th>Available</th>
+        <th>Adjust</th>
       </tr>
     </thead>
     <tbody>
@@ -24,11 +25,17 @@
           <td><%= number_with_delimiter(stock_level.current_quantity) %></td>
           <td><%= number_with_delimiter(stock_level.reserved_quantity) %></td>
           <td><strong><%= number_with_delimiter(stock_level.available_quantity) %></strong></td>
+          <td>
+            <%= form_with model: stock_level, url: merchant_inventory_item_path(stock_level), method: :patch, local: true, style: "display: flex; gap: 0.5rem;" do |form| %>
+              <%= form.number_field :current_quantity, min: 0, class: "form-input", style: "max-width: 7rem;" %>
+              <%= form.submit "Save", class: "btn btn-secondary" %>
+            <% end %>
+          </td>
         </tr>
       <% end %>
       <% if @stock_levels.empty? %>
         <tr>
-          <td colspan="6" style="text-align: center; color: #718096; font-style: italic;">No inventory found.</td>
+          <td colspan="7" style="text-align: center; color: #718096; font-style: italic;">No inventory found.</td>
         </tr>
       <% end %>
     </tbody>

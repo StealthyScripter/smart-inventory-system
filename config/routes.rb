@@ -18,11 +18,20 @@ Rails.application.routes.draw do
   namespace :merchant do
     root "dashboard#index"
     resources :products, only: [:index, :new, :create, :edit, :update]
+    post "products/bulk_update", to: "product_operations#bulk_update", as: :product_bulk_update
+    post "products/:product_id/duplicate", to: "product_operations#duplicate", as: :product_duplicate
+    get "products_export", to: "product_operations#export", as: :products_export
+    post "products_import", to: "product_operations#import", as: :products_import
     resources :services, only: [:index, :new, :create, :edit, :update]
-    resources :service_bookings, only: [:index, :update]
+    resources :service_bookings, only: [:index, :update] do
+      member do
+        get :estimate
+      end
+    end
     resources :conversations, only: [:index]
     resources :shops, only: [:edit, :update]
     get "inventory", to: "inventory#index"
+    patch "inventory/:id", to: "inventory#update", as: :inventory_item
     resources :orders, only: [:index, :update]
     get "analytics", to: "analytics#index"
   end
@@ -34,7 +43,12 @@ Rails.application.routes.draw do
     get "analytics", to: "analytics#index"
   end
 
-  resources :products
+  resources :products do
+    member do
+      get :barcode
+      get :qr_code
+    end
+  end
   resources :suppliers
   resources :locations
 

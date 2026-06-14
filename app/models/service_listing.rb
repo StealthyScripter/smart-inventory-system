@@ -1,4 +1,7 @@
 class ServiceListing < ApplicationRecord
+  include SoftDeletable
+  include ImageAttachmentValidatable
+
   CATEGORIES = [
     "Interior design",
     "Plumbing",
@@ -18,11 +21,15 @@ class ServiceListing < ApplicationRecord
   has_many :service_bookings, through: :service_booking_items
   has_many :reports, as: :reportable, dependent: :destroy
   has_many :moderation_actions, as: :moderatable, dependent: :destroy
+  has_many_attached :gallery_images
+  has_many_attached :before_images
+  has_many_attached :after_images
 
   validates :name, :service_category, presence: true
   validates :service_category, inclusion: { in: CATEGORIES }
   validates :status, inclusion: { in: STATUSES }
   validates :starting_price, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
+  validates_image_attachments :gallery_images, :before_images, :after_images
 
   scope :publicly_listed, -> { where(status: "public") }
   scope :for_supplier, ->(supplier_ids) { where(supplier_id: supplier_ids) }
@@ -59,5 +66,13 @@ class ServiceListing < ApplicationRecord
 
   def average_rating
     reviews.published.average(:rating).to_f
+  end
+
+  def soft_delete!
+    update!(discarded_at: Time.current, status: "archived")
+  end
+
+  def restore!
+    update!(discarded_at: nil, status: "public")
   end
 end

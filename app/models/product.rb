@@ -1,4 +1,7 @@
 class Product < ApplicationRecord
+  include SoftDeletable
+  include ImageAttachmentValidatable
+
   MARKETPLACE_STATUSES = %w[draft public private archived].freeze
   LISTING_SCOPES = %w[local marketplace both].freeze
 
@@ -14,6 +17,8 @@ class Product < ApplicationRecord
   has_many :reviews, dependent: :destroy
   has_many :reports, as: :reportable, dependent: :destroy
   has_many :moderation_actions, as: :moderatable, dependent: :destroy
+  has_one_attached :featured_image
+  has_many_attached :images
 
   validates :name, :sku, presence: true
   validates :sku, uniqueness: true
@@ -21,6 +26,11 @@ class Product < ApplicationRecord
   validates :reorder_point, :lead_time_days, numericality: { greater_than: 0 }
   validates :marketplace_status, inclusion: { in: MARKETPLACE_STATUSES }
   validates :listing_scope, inclusion: { in: LISTING_SCOPES }
+  validates :barcode_value, uniqueness: true, allow_blank: true
+  validates_image_attachments :featured_image, :images
+
+  before_validation :assign_generated_sku, on: :create
+  before_validation :assign_barcode_value
 
   scope :marketplace_available, -> { where(listing_scope: ["marketplace", "both"]) }
   scope :local_only, -> { where(listing_scope: "local") }
@@ -59,10 +69,14 @@ class Product < ApplicationRecord
   end
 
   def total_stock
+    return stock_levels.sum(&:current_quantity) if stock_levels.loaded?
+
     stock_levels.sum(:current_quantity)
   end
 
   def available_stock
+    return stock_levels.sum { |stock_level| stock_level.current_quantity - stock_level.reserved_quantity } if stock_levels.loaded?
+
     stock_levels.sum("current_quantity - reserved_quantity")
   end
 
@@ -72,5 +86,23 @@ class Product < ApplicationRecord
 
   def average_rating
     reviews.published.average(:rating).to_f
+  end
+
+  def soft_delete!
+    update!(discarded_at: Time.current, marketplace_status: "archived")
+  end
+
+  def restore!
+    update!(discarded_at: nil, marketplace_status: "public")
+  end
+
+  private
+
+  def assign_generated_sku
+    self.sku = SkuGenerator.call(self) if sku.blank?
+  end
+
+  def assign_barcode_value
+    self.barcode_value = sku if barcode_value.blank? && sku.present?
   end
 end

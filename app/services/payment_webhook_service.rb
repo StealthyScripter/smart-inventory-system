@@ -1,8 +1,8 @@
 class PaymentWebhookService
-  SECRET_ENV_KEY = "MANUAL_PAYMENT_WEBHOOK_SECRET".freeze
+  SIGNATURE_KEY_ENV = "MANUAL_PAYMENT_WEBHOOK_SECRET".freeze
 
   def self.valid_signature?(payload, signature)
-    secret = ENV.fetch(SECRET_ENV_KEY, nil)
+    secret = ENV.fetch(SIGNATURE_KEY_ENV, nil)
     return false if secret.blank? || signature.blank?
 
     expected = OpenSSL::HMAC.hexdigest("SHA256", secret, payload)

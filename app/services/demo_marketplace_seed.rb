@@ -1,6 +1,4 @@
 class DemoMarketplaceSeed
-  PASSWORD = "password123"
-
   def self.call
     new.call
   end
@@ -143,10 +141,14 @@ class DemoMarketplaceSeed
         first_name: first_name,
         last_name: last_name,
         role: role,
-        password: PASSWORD,
-        password_confirmation: PASSWORD
+        password: demo_credential,
+        password_confirmation: demo_credential
       )
     end
+  end
+
+  def demo_credential
+    ENV.fetch("DEMO_SEED_CREDENTIAL", "password123")
   end
 
   def upsert_supplier(name, description, tags)

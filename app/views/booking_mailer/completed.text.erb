@@ -1,1 +1,4 @@
 Booking <%= @booking.booking_number %> has been completed.
+
+Provider: <%= @booking.supplier.name %>
+Services: <%= @booking.service_listings.map(&:name).to_sentence %>

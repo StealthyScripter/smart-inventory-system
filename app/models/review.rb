@@ -1,4 +1,7 @@
 class Review < ApplicationRecord
+  include SoftDeletable
+  include ImageAttachmentValidatable
+
   STATUSES = %w[published hidden].freeze
 
   belongs_to :user
@@ -8,10 +11,12 @@ class Review < ApplicationRecord
   belongs_to :service_listing, optional: true
   has_many :reports, as: :reportable, dependent: :destroy
   has_many :moderation_actions, as: :moderatable, dependent: :destroy
+  has_many_attached :photos
 
   validates :rating, numericality: { greater_than_or_equal_to: 1, less_than_or_equal_to: 5 }
   validates :status, inclusion: { in: STATUSES }
   validates :order_item_id, uniqueness: { scope: :user_id }
+  validates_image_attachments :photos
   validate :must_be_for_completed_purchase
   validate :must_review_product_or_service
 
@@ -19,6 +24,14 @@ class Review < ApplicationRecord
 
   def verified_purchase?
     order_item.present?
+  end
+
+  def soft_delete!
+    update!(discarded_at: Time.current, status: "hidden")
+  end
+
+  def restore!
+    update!(discarded_at: nil, status: "published")
   end
 
   private

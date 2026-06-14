@@ -3,11 +3,36 @@
 <div class="table-container">
   <div class="table-header">
     <h3 class="table-title">Products</h3>
-    <%= link_to "Add Product", new_merchant_product_path, class: "btn btn-primary" %>
+    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+      <%= link_to "Export CSV", merchant_products_export_path(format: :csv), class: "btn btn-secondary" %>
+      <%= link_to "Add Product", new_merchant_product_path, class: "btn btn-primary" %>
+    </div>
   </div>
+  <div style="padding: 1rem 1.5rem; border-bottom: 1px solid #e2e8f0;">
+    <%= form_with url: merchant_products_import_path, method: :post, local: true, multipart: true, style: "display: flex; gap: 0.75rem; align-items: end; flex-wrap: wrap;" do |form| %>
+      <div class="form-group" style="margin-bottom: 0;">
+        <%= form.label :file, "Import CSV", class: "form-label" %>
+        <%= form.file_field :file, accept: ".csv,text/csv", class: "form-input" %>
+      </div>
+      <%= form.submit "Import", class: "btn btn-secondary" %>
+    <% end %>
+  </div>
+  <%= form_with url: merchant_product_bulk_update_path, method: :post, local: true do |form| %>
+    <div style="padding: 1rem 1.5rem; border-bottom: 1px solid #e2e8f0; display: flex; gap: 0.75rem; align-items: end; flex-wrap: wrap;">
+      <div class="form-group" style="margin-bottom: 0;">
+        <%= form.label :marketplace_status, "Status", class: "form-label" %>
+        <%= form.select :marketplace_status, options_for_select(Product::MARKETPLACE_STATUSES.map { |status| [status.titleize, status] }), { include_blank: "No change" }, { class: "form-select" } %>
+      </div>
+      <div class="form-group" style="margin-bottom: 0;">
+        <%= form.label :listing_scope, "Scope", class: "form-label" %>
+        <%= form.select :listing_scope, options_for_select(Product::LISTING_SCOPES.map { |scope| [scope.titleize, scope] }), { include_blank: "No change" }, { class: "form-select" } %>
+      </div>
+      <%= form.submit "Apply to Selected", class: "btn btn-secondary" %>
+    </div>
   <table>
     <thead>
       <tr>
+        <th></th>
         <th>SKU</th>
         <th>Name</th>
         <th>Supplier</th>
@@ -21,6 +46,7 @@
     <tbody>
       <% @products.each do |product| %>
         <tr>
+          <td><%= check_box_tag "product_ids[]", product.id, false, id: "product_ids_#{product.id}" %></td>
           <td><%= product.sku %></td>
           <td><%= product.name %></td>
           <td><%= product.supplier&.name %></td>
@@ -28,7 +54,10 @@
           <td><span class="badge badge-secondary"><%= product.listing_scope.titleize %></span></td>
           <td><%= currency(product.selling_price.to_f) %></td>
           <td><%= number_with_delimiter(product.total_stock) %></td>
-          <td><%= link_to "Edit", edit_merchant_product_path(product), class: "btn btn-secondary", style: "padding: 0.25rem 0.5rem; font-size: 0.875rem;" %></td>
+          <td>
+            <%= link_to "Edit", edit_merchant_product_path(product), class: "btn btn-secondary", style: "padding: 0.25rem 0.5rem; font-size: 0.875rem;" %>
+            <%= button_to "Duplicate", merchant_product_duplicate_path(product), method: :post, class: "btn btn-secondary", style: "padding: 0.25rem 0.5rem; font-size: 0.875rem; margin-top: 0.25rem;" %>
+          </td>
         </tr>
       <% end %>
       <% if @products.empty? %>
@@ -38,4 +67,5 @@
       <% end %>
     </tbody>
   </table>
+  <% end %>
 </div>

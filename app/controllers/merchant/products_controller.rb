@@ -83,7 +83,9 @@ module Merchant
         :category_id,
         :supplier_id,
         :marketplace_status,
-        :listing_scope
+        :listing_scope,
+        :featured_image,
+        images: []
       )
     end
   end

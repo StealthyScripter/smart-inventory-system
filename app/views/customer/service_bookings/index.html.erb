@@ -1,4 +1,7 @@
 <% content_for :page_title, "Service Bookings" %>
+<% content_for :breadcrumbs do %>
+  Customer / Bookings
+<% end %>
 
 <div class="table-container">
   <div class="table-header"><h3 class="table-title">Bookings</h3></div>
@@ -20,6 +23,9 @@
             <% end %>
           </td>
         </tr>
+      <% end %>
+      <% if @bookings.empty? %>
+        <tr><td colspan="6" class="empty-state">No service bookings yet.</td></tr>
       <% end %>
     </tbody>
   </table>

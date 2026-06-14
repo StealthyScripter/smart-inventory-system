@@ -1,6 +1,53 @@
 <% content_for :page_title, "Service Bookings" %>
 
 <div class="table-container">
+  <div class="table-header"><h3 class="table-title">Booking Queue</h3></div>
+  <table>
+    <tbody>
+      <% @booking_queue.each do |booking| %>
+        <tr>
+          <td><%= booking.booking_number %></td>
+          <td><%= booking.user.full_name %></td>
+          <td><%= booking.status.titleize %></td>
+        </tr>
+      <% end %>
+      <% if @booking_queue.empty? %>
+        <tr><td style="color: #718096; font-style: italic;">No bookings waiting for action.</td></tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+
+<div class="table-container">
+  <div class="table-header"><h3 class="table-title">Upcoming Jobs</h3></div>
+  <table>
+    <tbody>
+      <% @upcoming_jobs.each do |booking| %>
+        <tr>
+          <td><%= booking.scheduled_date %></td>
+          <td><%= booking.scheduled_time&.strftime("%H:%M") %></td>
+          <td><%= booking.service_listings.map(&:name).to_sentence %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+
+<div class="table-container">
+  <div class="table-header"><h3 class="table-title">Calendar</h3></div>
+  <table>
+    <tbody>
+      <% @calendar_bookings.each do |date, bookings| %>
+        <tr>
+          <td><strong><%= date %></strong></td>
+          <td><%= bookings.map(&:booking_number).to_sentence %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+
+<div class="table-container">
   <div class="table-header"><h3 class="table-title">Service Bookings</h3></div>
   <table>
     <thead>
@@ -15,6 +62,7 @@
           <td><%= booking.status.titleize %></td>
           <td><%= [booking.scheduled_date, booking.scheduled_time&.strftime("%H:%M")].compact.join(" ") %></td>
           <td>
+            <%= link_to "Estimate PDF", estimate_merchant_service_booking_path(booking), class: "btn btn-secondary", style: "margin-bottom: 0.5rem;" %>
             <% next_statuses = ServiceBooking::TRANSITIONS.fetch(booking.status) %>
             <% if next_statuses.any? %>
               <%= form_with url: merchant_service_booking_path(booking), method: :patch, local: true do |form| %>

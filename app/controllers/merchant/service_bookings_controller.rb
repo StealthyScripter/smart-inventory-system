@@ -2,6 +2,9 @@ module Merchant
   class ServiceBookingsController < BaseController
     def index
       @bookings = ServiceBooking.includes(:user, :service_listings).where(supplier: merchant_suppliers).order(created_at: :desc)
+      @booking_queue = @bookings.where(status: ["requested", "accepted"])
+      @upcoming_jobs = @bookings.where(status: ["scheduled", "in_progress"]).where("scheduled_date >= ?", Date.current).order(:scheduled_date, :scheduled_time)
+      @calendar_bookings = @bookings.where.not(scheduled_date: nil).group_by(&:scheduled_date)
     end
 
     def update
@@ -19,6 +22,22 @@ module Merchant
       redirect_to merchant_service_bookings_path, notice: "Booking was updated."
     rescue ArgumentError, ActiveRecord::RecordInvalid
       redirect_to merchant_service_bookings_path, alert: "Booking could not be updated."
+    end
+
+    def estimate
+      booking = ServiceBooking.includes(:user, :supplier, service_booking_items: :service_listing).where(supplier: merchant_suppliers).find(params[:id])
+      lines = [
+        "Customer: #{booking.user.full_name}",
+        "Provider: #{booking.supplier.name}",
+        "Status: #{booking.status.titleize}",
+        "Schedule: #{[booking.scheduled_date, booking.scheduled_time&.strftime('%H:%M')].compact.join(' ')}"
+      ] + booking.service_booking_items.map do |item|
+        "#{item.service_listing.name} - #{helpers.currency((item.quoted_price || item.service_listing.starting_price).to_f)}"
+      end
+      send_data SimplePdfRenderer.render("Service Estimate #{booking.booking_number}", lines),
+                filename: "#{booking.booking_number}-estimate.pdf",
+                type: "application/pdf",
+                disposition: "inline"
     end
 
     private

@@ -10,11 +10,22 @@
       <%= link_to "Back to Products", products_path, class: "btn btn-secondary" %>
     </div>
   </div>
+  <% if @product.featured_image.attached? || @product.images.attached? %>
+    <div style="padding: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+      <% if @product.featured_image.attached? %>
+        <%= image_tag @product.featured_image, alt: @product.name, style: "max-width: 220px; max-height: 180px; object-fit: cover;" %>
+      <% end %>
+      <% @product.images.each do |image| %>
+        <%= image_tag image, alt: @product.name, style: "max-width: 160px; max-height: 140px; object-fit: cover;" %>
+      <% end %>
+    </div>
+  <% end %>
   <div style="padding: 1.5rem;">
     <div class="grid-2">
       <div>
         <h4>Basic Information</h4>
         <p><strong>SKU:</strong> <%= @product.sku %></p>
+        <p><strong>Barcode:</strong> <%= @product.barcode_value %></p>
         <p><strong>Name:</strong> <%= @product.name %></p>
         <p><strong>Category:</strong> <%= @product.category.name %></p>
         <p><strong>Supplier:</strong>
@@ -102,6 +113,8 @@
     <% if can_manage_products? %>
       <div style="margin-top: 2rem; display: flex; gap: 1rem;">
         <%= link_to "Edit Product", edit_product_path(@product), class: "btn btn-primary" %>
+        <%= link_to "Barcode", barcode_product_path(@product), class: "btn btn-secondary" %>
+        <%= link_to "QR Code", qr_code_product_path(@product), class: "btn btn-secondary" %>
         <% if can_delete? %>
           <%= button_to "Delete Product", product_path(@product),
                         method: :delete,

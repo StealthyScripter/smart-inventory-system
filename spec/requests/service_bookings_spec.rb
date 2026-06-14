@@ -65,6 +65,17 @@ RSpec.describe "Service bookings", type: :request do
     expect(booking.reload.status).to eq("cancelled")
   end
 
+  it "prevents customers from cancelling another customer's booking" do
+    other_customer = create_authenticated_user(role: "customer", email: "booking.other.customer@example.com")
+    booking = ServiceBooking.create!(user: other_customer, supplier: supplier, status: "requested")
+    login_as(customer)
+
+    patch customer_service_booking_path(booking)
+
+    expect(response).to have_http_status(:not_found)
+    expect(booking.reload.status).to eq("requested")
+  end
+
   it "redirects guests who try to book" do
     post service_bookings_path, params: { service_listing_id: service.id }
 

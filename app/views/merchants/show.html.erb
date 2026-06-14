@@ -10,6 +10,12 @@
     <% if @merchant.shop_image_url.present? %>
       <img src="<%= @merchant.shop_image_url %>" alt="<%= @merchant.name %>" style="max-width: 100%; max-height: 220px; object-fit: cover; margin-bottom: 1rem;">
     <% end %>
+    <% if @merchant.banner.attached? %>
+      <%= image_tag @merchant.banner, alt: "#{@merchant.name} banner", style: "width: 100%; max-height: 240px; object-fit: cover; margin-bottom: 1rem;" %>
+    <% end %>
+    <% if @merchant.logo.attached? %>
+      <%= image_tag @merchant.logo, alt: "#{@merchant.name} logo", style: "max-width: 120px; max-height: 120px; object-fit: cover; margin-bottom: 1rem;" %>
+    <% end %>
     <p><%= @merchant.shop_description.presence || "No shop description provided." %></p>
     <p><strong>Email:</strong> <%= @merchant.contact_email.presence || "Not provided" %></p>
     <p><strong>Phone:</strong> <%= @merchant.contact_phone.presence || "Not provided" %></p>

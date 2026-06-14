@@ -63,6 +63,16 @@ RSpec.describe "Notification mailers", type: :mailer do
     expect(mail.body.encoded).to include(message.body)
   end
 
+  it "renders daily notification digest email" do
+    customer.notifications.create!(event_type: "digest.test", title: "Digest Notice", body: "Review your account")
+
+    mail = NotificationDigestMailer.daily(customer)
+
+    expect(mail.to).to contain_exactly(customer.email)
+    expect(mail.subject).to eq("Your Smart Inventory daily digest")
+    expect(mail.body.encoded).to include("Digest Notice", "Review your account")
+  end
+
   def create_user(attributes = {})
     User.create!(
       {

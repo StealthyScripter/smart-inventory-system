@@ -1,6 +1,6 @@
 class ProductsController < ApplicationController
   before_action :require_product_catalog_access
-  before_action :set_product, only: [:show, :edit, :update, :destroy]
+  before_action :set_product, only: [:show, :edit, :update, :destroy, :barcode, :qr_code]
   before_action :require_product_read_permission, only: [:show]
   before_action :require_product_management_permission, only: [:new, :create, :edit, :update]
   before_action :require_product_ownership_permission, only: [:edit, :update]
@@ -63,6 +63,20 @@ class ProductsController < ApplicationController
     redirect_to products_url, notice: "Product was successfully deleted."
   end
 
+  def barcode
+    send_data CodeImageService.barcode_svg(@product.barcode_value || @product.sku),
+              filename: "#{@product.sku}-barcode.svg",
+              type: "image/svg+xml",
+              disposition: "inline"
+  end
+
+  def qr_code
+    send_data CodeImageService.qr_svg(product_url(@product)),
+              filename: "#{@product.sku}-qr.svg",
+              type: "image/svg+xml",
+              disposition: "inline"
+  end
+
   private
 
   def set_product
@@ -112,7 +126,8 @@ class ProductsController < ApplicationController
       :category_id,
       :supplier_id,
       :marketplace_status,
-      :listing_scope
+      :listing_scope,
+      :barcode_value
     )
   end
 end

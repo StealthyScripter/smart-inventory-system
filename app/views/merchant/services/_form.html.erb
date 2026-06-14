@@ -38,6 +38,20 @@
         <%= form.label :image_url, "Image URL", class: "form-label" %>
         <%= form.url_field :image_url, class: "form-input" %>
       </div>
+      <div class="grid-3">
+        <div class="form-group">
+          <%= form.label :gallery_images, "Gallery", class: "form-label" %>
+          <%= form.file_field :gallery_images, multiple: true, accept: "image/*", class: "form-input" %>
+        </div>
+        <div class="form-group">
+          <%= form.label :before_images, "Before Images", class: "form-label" %>
+          <%= form.file_field :before_images, multiple: true, accept: "image/*", class: "form-input" %>
+        </div>
+        <div class="form-group">
+          <%= form.label :after_images, "After Images", class: "form-label" %>
+          <%= form.file_field :after_images, multiple: true, accept: "image/*", class: "form-input" %>
+        </div>
+      </div>
       <%= form.submit submit_label, class: "btn btn-primary" %>
     <% end %>
   </div>

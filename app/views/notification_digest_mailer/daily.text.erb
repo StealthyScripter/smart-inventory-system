@@ -1,0 +1,7 @@
+Hello <%= @user.full_name %>,
+
+You have <%= @notifications.count %> unread marketplace notifications.
+
+<% @notifications.each do |notification| %>
+- <%= notification.title %>: <%= notification.body %>
+<% end %>

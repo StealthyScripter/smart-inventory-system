@@ -48,6 +48,22 @@ module ApplicationHelper
     number_to_currency(amount, precision: 2)
   end
 
+  def page_number
+    [params[:page].to_i, 1].max
+  end
+
+  def pagination_controls(collection)
+    return if collection.size < 25 && page_number == 1
+
+    content_tag :div, class: "pagination" do
+      safe_join([
+        (link_to("Previous", url_for(request.query_parameters.merge(page: page_number - 1)), class: "btn btn-secondary") if page_number > 1),
+        content_tag(:span, "Page #{page_number}", class: "pagination-label"),
+        (link_to("Next", url_for(request.query_parameters.merge(page: page_number + 1)), class: "btn btn-secondary") if collection.size >= 25)
+      ].compact, " ")
+    end
+  end
+
   def user_scope_indicator
     return unless logged_in?
 

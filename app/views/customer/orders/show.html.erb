@@ -1,13 +1,20 @@
 <% content_for :page_title, @order.order_number %>
+<% content_for :breadcrumbs do %>
+  Customer / Orders / <%= @order.order_number %>
+<% end %>
 
 <div class="table-container">
   <div class="table-header">
     <h3 class="table-title">Order <%= @order.order_number %></h3>
-    <%= link_to "Back to Orders", customer_orders_path, class: "btn btn-secondary" %>
+    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+      <%= link_to "PDF Receipt", customer_order_path(@order, format: :pdf), class: "btn btn-secondary" %>
+      <%= link_to "Back to Orders", customer_orders_path, class: "btn btn-secondary" %>
+    </div>
   </div>
   <div style="padding: 1.5rem;">
     <p><strong>Status:</strong> <%= @order.status.titleize %></p>
     <p><strong>Total:</strong> <%= currency(@order.total_amount.to_f) %></p>
+    <p><strong>Submitted:</strong> <%= @order.submitted_at&.to_date || @order.created_at.to_date %></p>
   </div>
   <table>
     <thead>
@@ -16,6 +23,8 @@
         <th>Merchant</th>
         <th>Quantity</th>
         <th>Fulfillment</th>
+        <th>Tracking</th>
+        <th>Review</th>
       </tr>
     </thead>
     <tbody>
@@ -40,6 +49,7 @@
                 <%= form.fields_for :review do |review_form| %>
                   <%= review_form.number_field :rating, min: 1, max: 5, value: 5, class: "form-input", style: "width: 5rem;" %>
                   <%= review_form.text_field :body, class: "form-input", placeholder: "Review" %>
+                  <%= review_form.file_field :photos, multiple: true, accept: "image/*", class: "form-input" %>
                 <% end %>
                 <%= form.submit "Review", class: "btn btn-secondary" %>
               <% end %>
@@ -49,4 +59,7 @@
       <% end %>
     </tbody>
   </table>
+  <% if @order.order_items.empty? %>
+    <div class="empty-state">No order items are attached to this order.</div>
+  <% end %>
 </div>

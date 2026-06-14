@@ -60,7 +60,18 @@ module Merchant
     end
 
     def service_params
-      params.require(:service_listing).permit(:supplier_id, :name, :service_category, :description, :starting_price, :image_url, :status)
+      params.require(:service_listing).permit(
+        :supplier_id,
+        :name,
+        :service_category,
+        :description,
+        :starting_price,
+        :image_url,
+        :status,
+        gallery_images: [],
+        before_images: [],
+        after_images: []
+      )
     end
   end
 end

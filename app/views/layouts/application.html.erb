@@ -82,6 +82,8 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
       }
       .header-title {
         font-size: 1.875rem;
@@ -92,6 +94,7 @@
         display: flex;
         align-items: center;
         gap: 1rem;
+        flex-wrap: wrap;
       }
       .content-area {
         padding: 2rem;
@@ -139,6 +142,36 @@
             <h1>📦 Smart Inventory</h1>
           </div>
           <ul class="nav-menu">
+            <li class="nav-item">
+              <%= link_to search_path, class: "nav-link #{'active' if current_page?(search_path)}" do %>
+                <svg class="nav-icon" viewBox="0 0 24 24"><path d="M9.5 3a6.5 6.5 0 015.18 10.43l4.45 4.44-1.41 1.41-4.44-4.45A6.5 6.5 0 119.5 3zm0 2a4.5 4.5 0 100 9 4.5 4.5 0 000-9z"/></svg>
+                Search
+              <% end %>
+            </li>
+
+            <li class="nav-item">
+              <%= link_to catalog_path, class: "nav-link #{'active' if current_page?(catalog_path)}" do %>
+                <svg class="nav-icon" viewBox="0 0 24 24"><path d="M7 4h10l1 4h3v2h-1l-1 10H5L4 10H3V8h3l1-4zm2 2l-.5 2h7L15 6H9z"/></svg>
+                Catalog
+              <% end %>
+            </li>
+
+            <li class="nav-item">
+              <%= link_to services_path, class: "nav-link #{'active' if current_page?(services_path)}" do %>
+                <svg class="nav-icon" viewBox="0 0 24 24"><path d="M22 19.59L20.59 21l-6.3-6.3a7 7 0 01-8.99-8.99l4.24 4.24 2.12-2.12-4.24-4.24a7 7 0 018.99 8.99L22 19.59z"/></svg>
+                Services
+              <% end %>
+            </li>
+
+            <% if current_user.supplier_user? && current_user.suppliers.exists? %>
+              <li class="nav-item">
+                <%= link_to merchant_root_path, class: "nav-link #{'active' if request.path.start_with?('/merchant')}" do %>
+                  <svg class="nav-icon" viewBox="0 0 24 24"><path d="M4 4h16l1 5v11H3V9l1-5zm2 7v7h12v-7H6zm.5-5l-.4 2h11.8l-.4-2H6.5z"/></svg>
+                  Merchant
+                <% end %>
+              </li>
+            <% end %>
+
             <li class="nav-item">
               <%= link_to root_path, class: "nav-link #{'active' if current_page?(root_path)}" do %>
                 <svg class="nav-icon" viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
@@ -191,6 +224,9 @@
             <h1 class="header-title"><%= yield(:page_title) || "Dashboard" %></h1>
             <div class="user-info">
               <% if logged_in? %>
+                <%= form_with url: search_path, method: :get, local: true, class: "global-search" do |form| %>
+                  <%= form.search_field :q, value: params[:q], placeholder: "Search marketplace", class: "form-input" %>
+                <% end %>
                 <span>Welcome, <%= current_user.full_name %></span>
                 <%= link_to "Notifications (#{current_user.notifications.unread.count})", notifications_path, class: "btn btn-secondary" %>
                 <% if current_user.customer? %>
@@ -212,6 +248,9 @@
           </header>
 
           <div class="content-area">
+            <% if content_for?(:breadcrumbs) %>
+              <nav class="breadcrumbs"><%= yield :breadcrumbs %></nav>
+            <% end %>
             <% flash.each do |type, message| %>
               <div class="alert flash-<%= type %>"><%= message %></div>
             <% end %>
@@ -224,6 +263,9 @@
       <div class="content-area" style="max-width: 480px; margin: 5rem auto;">
         <% flash.each do |type, message| %>
           <div class="alert flash-<%= type %>"><%= message %></div>
+        <% end %>
+        <% if content_for?(:breadcrumbs) %>
+          <nav class="breadcrumbs"><%= yield :breadcrumbs %></nav>
         <% end %>
         <%= yield %>
       </div>

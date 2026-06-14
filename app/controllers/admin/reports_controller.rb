@@ -5,7 +5,7 @@ module Admin
     end
 
     def update
-      report = Report.find(params[:id])
+      report = Report.where(id: params[:id]).take!
       report.update!(status: params.require(:report).permit(:status)[:status])
       ModerationAction.create!(
         actor: current_user,

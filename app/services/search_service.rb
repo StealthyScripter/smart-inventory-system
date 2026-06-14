@@ -12,6 +12,7 @@ class SearchService
            .for_supplier(merchant_id)
            .includes(:category, :supplier)
            .catalog_sorted(sort)
+           .offset(offset(limit))
            .limit(limit)
   end
 
@@ -22,6 +23,7 @@ class SearchService
                   .for_supplier(merchant_id)
                   .includes(:supplier)
                   .catalog_sorted(sort)
+                  .offset(offset(limit))
                   .limit(limit)
   end
 
@@ -31,6 +33,7 @@ class SearchService
             .left_joins(:reviews)
             .group("suppliers.id")
             .order(merchant_order)
+            .offset(offset(limit))
             .limit(limit)
   end
 
@@ -39,6 +42,7 @@ class SearchService
             .merge(Product.publicly_listed.search(query))
             .distinct
             .order(:name)
+            .offset(offset(limit))
             .limit(limit)
   end
 
@@ -88,5 +92,9 @@ class SearchService
     return { created_at: :desc } if sort == "newest"
 
     :name
+  end
+
+  def offset(limit)
+    ([params[:page].to_i, 1].max - 1) * limit
   end
 end

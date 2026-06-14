@@ -1,4 +1,7 @@
 <% content_for :page_title, "Merchant Dashboard" %>
+<% content_for :breadcrumbs do %>
+  Merchant / Dashboard
+<% end %>
 
 <div style="margin-bottom: 1rem;">
   <span class="badge badge-info"><%= merchant_suppliers.map(&:name).to_sentence %></span>
@@ -23,6 +26,16 @@
   <div class="stat-card">
     <div class="stat-header"><span class="stat-title">Pending Orders</span></div>
     <div class="stat-value"><%= number_with_delimiter(@pending_orders_count) %></div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-header"><span class="stat-title">Services</span></div>
+    <div class="stat-value"><%= number_with_delimiter(@service_count) %></div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-header"><span class="stat-title">Sales</span></div>
+    <div class="stat-value"><%= currency(@sales_summary[:sales_total].to_f) %></div>
   </div>
 </div>
 
@@ -70,6 +83,77 @@
       <% end %>
       <%= link_to "Inventory", merchant_inventory_path, class: "btn btn-secondary" %>
       <%= link_to "Orders", merchant_orders_path, class: "btn btn-secondary" %>
+      <%= link_to "Analytics", merchant_analytics_path, class: "btn btn-secondary" %>
     </div>
+  </div>
+</div>
+
+<div class="table-container">
+  <div class="table-header">
+    <h3 class="table-title">Recent Activity</h3>
+  </div>
+  <table>
+    <tbody>
+      <% @booking_queue.each do |booking| %>
+        <tr>
+          <td>Booking requested</td>
+          <td><%= booking.booking_number %></td>
+          <td><%= booking.created_at.to_fs(:short) %></td>
+        </tr>
+      <% end %>
+      <% @low_stock_products.each do |product| %>
+        <tr>
+          <td>Low stock</td>
+          <td><%= product.name %></td>
+          <td><%= number_with_delimiter(product.total_stock) %> on hand</td>
+        </tr>
+      <% end %>
+      <% if @booking_queue.empty? && @low_stock_products.empty? %>
+        <tr><td class="empty-state">No recent activity requiring attention.</td></tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+
+<div class="grid-2">
+  <div class="table-container">
+    <div class="table-header">
+      <h3 class="table-title">Booking Queue</h3>
+      <%= link_to "Bookings", merchant_service_bookings_path, class: "btn btn-secondary" %>
+    </div>
+    <table>
+      <tbody>
+        <% @booking_queue.each do |booking| %>
+          <tr>
+            <td><%= booking.booking_number %></td>
+            <td><%= booking.user.full_name %></td>
+            <td><%= booking.status.titleize %></td>
+          </tr>
+        <% end %>
+        <% if @booking_queue.empty? %>
+          <tr><td style="color: #718096; font-style: italic;">No bookings waiting for action.</td></tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="table-container">
+    <div class="table-header">
+      <h3 class="table-title">Upcoming Jobs</h3>
+    </div>
+    <table>
+      <tbody>
+        <% @upcoming_jobs.each do |booking| %>
+          <tr>
+            <td><%= booking.scheduled_date %></td>
+            <td><%= booking.service_listings.map(&:name).to_sentence %></td>
+            <td><%= booking.status.titleize %></td>
+          </tr>
+        <% end %>
+        <% if @upcoming_jobs.empty? %>
+          <tr><td style="color: #718096; font-style: italic;">No upcoming jobs scheduled.</td></tr>
+        <% end %>
+      </tbody>
+    </table>
   </div>
 </div>

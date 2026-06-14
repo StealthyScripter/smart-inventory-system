@@ -5,6 +5,16 @@
     <h3 class="table-title"><%= @product.name %></h3>
     <%= link_to "Back to Catalog", catalog_path, class: "btn btn-secondary" %>
   </div>
+  <% if @product.featured_image.attached? || @product.images.attached? %>
+    <div style="padding: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+      <% if @product.featured_image.attached? %>
+        <%= image_tag @product.featured_image, alt: @product.name, style: "max-width: 260px; max-height: 220px; object-fit: cover;" %>
+      <% end %>
+      <% @product.images.each do |image| %>
+        <%= image_tag image, alt: @product.name, style: "max-width: 180px; max-height: 150px; object-fit: cover;" %>
+      <% end %>
+    </div>
+  <% end %>
 
   <div style="padding: 1.5rem;">
     <div class="grid-2">

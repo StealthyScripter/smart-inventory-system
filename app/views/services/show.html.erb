@@ -9,6 +9,13 @@
     <% if @service.image_url.present? %>
       <img src="<%= @service.image_url %>" alt="<%= @service.name %>" style="max-width: 100%; max-height: 220px; object-fit: cover; margin-bottom: 1rem;">
     <% end %>
+    <% if @service.gallery_images.attached? || @service.before_images.attached? || @service.after_images.attached? %>
+      <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;">
+        <% (@service.gallery_images.to_a + @service.before_images.to_a + @service.after_images.to_a).each do |image| %>
+          <%= image_tag image, alt: @service.name, style: "max-width: 180px; max-height: 150px; object-fit: cover;" %>
+        <% end %>
+      </div>
+    <% end %>
     <p><strong>Category:</strong> <%= @service.service_category %></p>
     <p><strong>Provider:</strong> <%= link_to @service.supplier.name, merchant_storefront_path(@service.supplier) %></p>
     <p><strong>Starting Price:</strong> <%= currency(@service.starting_price.to_f) %></p>

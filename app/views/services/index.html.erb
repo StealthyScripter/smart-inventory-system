@@ -1,4 +1,7 @@
 <% content_for :page_title, "Services" %>
+<% content_for :breadcrumbs do %>
+  Marketplace / Services
+<% end %>
 
 <div class="table-container">
   <div class="table-header">
@@ -39,4 +42,5 @@
       <% end %>
     </tbody>
   </table>
+  <%= pagination_controls(@services) %>
 </div>

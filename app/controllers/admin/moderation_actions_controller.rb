@@ -39,6 +39,10 @@ module Admin
         moderatable.update!(marketplace_status: "archived")
       when ["Product", "approve"]
         moderatable.update!(marketplace_status: "public")
+      when ["Product", "soft_delete"], ["ServiceListing", "soft_delete"], ["Supplier", "soft_delete"], ["Review", "soft_delete"]
+        moderatable.soft_delete!
+      when ["Product", "restore"], ["ServiceListing", "restore"], ["Supplier", "restore"], ["Review", "restore"]
+        moderatable.restore!
       when ["ServiceListing", "hide"]
         moderatable.update!(status: "archived")
       when ["ServiceListing", "approve"]

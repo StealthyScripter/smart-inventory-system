@@ -1,4 +1,7 @@
 class Supplier < ApplicationRecord
+  include SoftDeletable
+  include ImageAttachmentValidatable
+
   SHOP_STATUSES = %w[draft public paused].freeze
 
   has_many :products, dependent: :nullify
@@ -13,12 +16,15 @@ class Supplier < ApplicationRecord
   has_many :conversations, dependent: :destroy
   has_many :reports, as: :reportable, dependent: :destroy
   has_many :moderation_actions, as: :moderatable, dependent: :destroy
+  has_one_attached :logo
+  has_one_attached :banner
 
   validates :name, presence: true
   validates :default_lead_time_days, presence: true, numericality: { greater_than: 0 }
   validates :shop_status, inclusion: { in: SHOP_STATUSES }
   validates :shop_slug, uniqueness: true, allow_blank: true
   validates :shop_slug, format: { with: /\A[a-z0-9-]+\z/ }, allow_blank: true
+  validates_image_attachments :logo, :banner
 
   before_validation :normalize_shop_slug
 
@@ -38,6 +44,14 @@ class Supplier < ApplicationRecord
 
   def public_shop?
     shop_status == "public"
+  end
+
+  def soft_delete!
+    update!(discarded_at: Time.current, shop_status: "paused")
+  end
+
+  def restore!
+    update!(discarded_at: nil, shop_status: "public")
   end
 
   private
