@@ -193,6 +193,11 @@
               <% if logged_in? %>
                 <span>Welcome, <%= current_user.full_name %></span>
                 <%= link_to "Notifications (#{current_user.notifications.unread.count})", notifications_path, class: "btn btn-secondary" %>
+                <% if current_user.customer? %>
+                  <%= link_to "Inbox", customer_conversations_path, class: "btn btn-secondary" %>
+                <% elsif current_user.supplier_user? && current_user.suppliers.exists? %>
+                  <%= link_to "Inbox", merchant_conversations_path, class: "btn btn-secondary" %>
+                <% end %>
                 <%= role_badge(current_user) %>
                 <%= button_to "Logout", logout_path,
                               method: :delete,

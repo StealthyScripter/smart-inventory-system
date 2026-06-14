@@ -1,0 +1,127 @@
+<% content_for :page_title, "Marketplace Search" %>
+
+<div class="table-container">
+  <div class="table-header">
+    <h3 class="table-title">Marketplace Search</h3>
+  </div>
+
+  <div style="padding: 1rem 1.5rem; border-bottom: 1px solid #e2e8f0;">
+    <%= form_with url: search_path, method: :get, local: true, style: "display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 0.75rem; align-items: end;" do |form| %>
+      <div class="form-group" style="margin-bottom: 0;">
+        <%= form.label :q, "Search", class: "form-label" %>
+        <%= form.text_field :q, value: params[:q], class: "form-input" %>
+      </div>
+      <div class="form-group" style="margin-bottom: 0;">
+        <%= form.label :service_category, "Service", class: "form-label" %>
+        <%= form.select :service_category, options_for_select(@service_categories, params[:service_category]),
+                        { include_blank: "All services" }, { class: "form-select" } %>
+      </div>
+      <div class="form-group" style="margin-bottom: 0;">
+        <%= form.label :merchant_id, "Merchant", class: "form-label" %>
+        <%= form.select :merchant_id, options_from_collection_for_select(@merchant_options, :id, :name, params[:merchant_id]),
+                        { include_blank: "All merchants" }, { class: "form-select" } %>
+      </div>
+      <div class="form-group" style="margin-bottom: 0;">
+        <%= form.label :sort, "Sort", class: "form-label" %>
+        <%= form.select :sort,
+                        options_for_select([["Name", ""], ["Price: Low to High", "price_asc"], ["Price: High to Low", "price_desc"], ["Highest Rated", "rating"], ["Newest", "newest"]], params[:sort]),
+                        {}, { class: "form-select" } %>
+      </div>
+      <%= form.submit "Search", class: "btn btn-primary" %>
+    <% end %>
+  </div>
+
+  <% if @suggestions.any? %>
+    <div style="padding: 1rem 1.5rem; border-bottom: 1px solid #e2e8f0;">
+      <strong>Suggestions:</strong>
+      <%= @suggestions.join(", ") %>
+    </div>
+  <% end %>
+</div>
+
+<div class="table-container">
+  <div class="table-header"><h3 class="table-title">Products</h3></div>
+  <table>
+    <thead>
+      <tr>
+        <th>Product</th>
+        <th>Category</th>
+        <th>Merchant</th>
+        <th>Price</th>
+        <th>Rating</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @products.each do |product| %>
+        <tr>
+          <td><%= link_to product.name, catalog_product_path(product) %></td>
+          <td><%= product.category.name %></td>
+          <td><%= product.supplier ? link_to(product.supplier.name, merchant_storefront_path(product.supplier)) : "Marketplace" %></td>
+          <td><%= currency(product.selling_price.to_f) %></td>
+          <td><%= number_with_precision(product.average_rating, precision: 2) %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+
+<div class="table-container">
+  <div class="table-header"><h3 class="table-title">Services</h3></div>
+  <table>
+    <thead>
+      <tr>
+        <th>Service</th>
+        <th>Category</th>
+        <th>Provider</th>
+        <th>Starting Price</th>
+        <th>Rating</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @services.each do |service| %>
+        <tr>
+          <td><%= link_to service.name, service_path(service) %></td>
+          <td><%= service.service_category %></td>
+          <td><%= link_to service.supplier.name, merchant_storefront_path(service.supplier) %></td>
+          <td><%= currency(service.starting_price.to_f) %></td>
+          <td><%= number_with_precision(service.average_rating, precision: 2) %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+
+<div class="table-container">
+  <div class="table-header"><h3 class="table-title">Merchants</h3></div>
+  <table>
+    <thead>
+      <tr>
+        <th>Merchant</th>
+        <th>Description</th>
+        <th>Rating</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @merchants.each do |merchant| %>
+        <tr>
+          <td><%= link_to merchant.name, merchant_storefront_path(merchant) %></td>
+          <td><%= merchant.shop_description %></td>
+          <td><%= number_with_precision(merchant.average_rating, precision: 2) %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+
+<div class="table-container">
+  <div class="table-header"><h3 class="table-title">Categories</h3></div>
+  <table>
+    <tbody>
+      <% @categories.each do |category| %>
+        <tr>
+          <td><%= link_to category.name, catalog_path(category_id: category.id, q: params[:q]) %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

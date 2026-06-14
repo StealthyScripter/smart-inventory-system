@@ -17,6 +17,7 @@ class ReviewsController < ApplicationController
         title: "New review received",
         body: "#{review.rating}/5 review for #{review.product&.name || review.service_listing&.name}"
       )
+      NotificationEmailJob.perform_later("ReviewMailer", "created", review)
       redirect_to customer_order_path(order_item.order), notice: "Review was submitted."
     else
       redirect_to customer_order_path(order_item&.order || params[:order_id]), alert: review.errors.full_messages.to_sentence

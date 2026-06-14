@@ -12,6 +12,8 @@ class Product < ApplicationRecord
   has_many :cart_items, dependent: :destroy
   has_many :order_items, dependent: :restrict_with_error
   has_many :reviews, dependent: :destroy
+  has_many :reports, as: :reportable, dependent: :destroy
+  has_many :moderation_actions, as: :moderatable, dependent: :destroy
 
   validates :name, :sku, presence: true
   validates :sku, uniqueness: true
@@ -32,7 +34,7 @@ class Product < ApplicationRecord
     left_joins(:category, :supplier)
       .where(
         "products.name LIKE :pattern OR products.sku LIKE :pattern OR products.description LIKE :pattern OR " \
-        "categories.name LIKE :pattern OR suppliers.name LIKE :pattern",
+        "products.search_tags LIKE :pattern OR categories.name LIKE :pattern OR suppliers.name LIKE :pattern",
         pattern: pattern
       )
   }
@@ -47,6 +49,10 @@ class Product < ApplicationRecord
       order(Arel.sql("COALESCE(products.selling_price, 0) DESC"), :name)
     when "newest"
       order(created_at: :desc)
+    when "rating"
+      left_joins(:reviews)
+        .group("products.id")
+        .order(Arel.sql("AVG(reviews.rating) DESC"), :name)
     else
       order(:name)
     end

@@ -4,21 +4,11 @@ class CatalogController < ApplicationController
   def index
     @categories = Category.joins(:products).merge(Product.publicly_listed).distinct.order(:name)
     @suppliers = Supplier.joins(:products).merge(Product.publicly_listed).distinct.order(:name)
-    @products = catalog_scope.includes(:category, :supplier)
+    @products = SearchService.new(params.permit(:q, :category_id, :supplier_id, :sort)).products(limit: 100)
   end
 
   def show
     @product = Product.publicly_listed.includes(:category, :supplier).find(params[:id])
     @recommended_products = RecommendationService.new.product_recommendations(@product)
-  end
-
-  private
-
-  def catalog_scope
-    Product.publicly_listed
-           .search(params[:q])
-           .for_category(params[:category_id])
-           .for_supplier(params[:supplier_id])
-           .catalog_sorted(params[:sort])
   end
 end

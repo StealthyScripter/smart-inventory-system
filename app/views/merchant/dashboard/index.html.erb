@@ -64,6 +64,7 @@
     <div style="padding: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap;">
       <%= link_to "Products", merchant_products_path, class: "btn btn-primary" %>
       <%= link_to "Services", merchant_services_path, class: "btn btn-secondary" %>
+      <%= link_to "Bookings", merchant_service_bookings_path, class: "btn btn-secondary" %>
       <% merchant_suppliers.each do |supplier| %>
         <%= link_to "Shop: #{supplier.name}", edit_merchant_shop_path(supplier), class: "btn btn-secondary" %>
       <% end %>

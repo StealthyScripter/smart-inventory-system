@@ -6,6 +6,8 @@ class Review < ApplicationRecord
   belongs_to :supplier
   belongs_to :order_item, optional: true
   belongs_to :service_listing, optional: true
+  has_many :reports, as: :reportable, dependent: :destroy
+  has_many :moderation_actions, as: :moderatable, dependent: :destroy
 
   validates :rating, numericality: { greater_than_or_equal_to: 1, less_than_or_equal_to: 5 }
   validates :status, inclusion: { in: STATUSES }

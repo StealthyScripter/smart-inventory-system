@@ -3,11 +3,8 @@ class ServicesController < ApplicationController
 
   def index
     @categories = ServiceListing::CATEGORIES
-    @services = ServiceListing.publicly_listed
-                              .search(params[:q])
-                              .then { |scope| params[:category].present? ? scope.where(service_category: params[:category]) : scope }
-                              .includes(:supplier)
-                              .order(:service_category, :name)
+    search_params = params.permit(:q, :sort).merge(service_category: params[:category])
+    @services = SearchService.new(search_params).services(limit: 100)
   end
 
   def show

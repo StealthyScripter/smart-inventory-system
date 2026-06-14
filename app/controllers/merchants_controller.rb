@@ -3,6 +3,7 @@ class MerchantsController < ApplicationController
 
   def show
     @merchant = Supplier.find(params[:id])
-    @products = @merchant.products.publicly_listed.includes(:category).catalog_sorted(params[:sort])
+    @products = SearchService.new(params.permit(:q, :sort).merge(merchant_id: @merchant.id)).products(limit: 100)
+    @services = SearchService.new(params.permit(:q, :sort).merge(merchant_id: @merchant.id)).services(limit: 100)
   end
 end

@@ -14,6 +14,10 @@ class ServiceListing < ApplicationRecord
 
   belongs_to :supplier
   has_many :reviews, dependent: :destroy
+  has_many :service_booking_items, dependent: :destroy
+  has_many :service_bookings, through: :service_booking_items
+  has_many :reports, as: :reportable, dependent: :destroy
+  has_many :moderation_actions, as: :moderatable, dependent: :destroy
 
   validates :name, :service_category, presence: true
   validates :service_category, inclusion: { in: CATEGORIES }
@@ -26,8 +30,32 @@ class ServiceListing < ApplicationRecord
     return all if query.blank?
 
     pattern = "%#{sanitize_sql_like(query)}%"
-    where("name LIKE :pattern OR description LIKE :pattern OR service_category LIKE :pattern", pattern: pattern)
+    where(
+      "service_listings.name LIKE :pattern OR service_listings.description LIKE :pattern OR " \
+      "service_listings.service_category LIKE :pattern OR service_listings.search_tags LIKE :pattern",
+      pattern: pattern
+    )
   }
+
+  scope :for_category, ->(category) { category.present? ? where(service_category: category) : all }
+  scope :for_supplier, ->(supplier_id) { supplier_id.present? ? where(supplier_id: supplier_id) : all }
+
+  def self.catalog_sorted(sort)
+    case sort
+    when "price_asc"
+      order(Arel.sql("COALESCE(service_listings.starting_price, 0) ASC"), :name)
+    when "price_desc"
+      order(Arel.sql("COALESCE(service_listings.starting_price, 0) DESC"), :name)
+    when "newest"
+      order(created_at: :desc)
+    when "rating"
+      left_joins(:reviews)
+        .group("service_listings.id")
+        .order(Arel.sql("AVG(reviews.rating) DESC"), :name)
+    else
+      order(:service_category, :name)
+    end
+  end
 
   def average_rating
     reviews.published.average(:rating).to_f

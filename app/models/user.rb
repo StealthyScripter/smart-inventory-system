@@ -33,6 +33,11 @@ class User < ApplicationRecord
   has_many :orders, dependent: :restrict_with_error
   has_many :reviews, dependent: :destroy
   has_many :notifications, dependent: :destroy
+  has_many :reports, foreign_key: "reporter_id", dependent: :destroy, inverse_of: :reporter
+  has_many :moderation_actions, foreign_key: "actor_id", dependent: :restrict_with_error, inverse_of: :actor
+  has_many :service_bookings, dependent: :restrict_with_error
+  has_many :customer_conversations, class_name: "Conversation", foreign_key: "customer_id", dependent: :destroy
+  has_many :messages, foreign_key: "sender_id", dependent: :destroy
 
   before_validation :normalize_role
   before_validation :set_default_role, on: :create

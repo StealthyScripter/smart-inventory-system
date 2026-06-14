@@ -58,7 +58,7 @@
       </tr>
     </thead>
     <tbody>
-      <% @merchant.service_listings.publicly_listed.order(:name).each do |service| %>
+      <% @services.each do |service| %>
         <tr>
           <td><%= link_to service.name, service_path(service) %></td>
           <td><%= service.service_category %></td>

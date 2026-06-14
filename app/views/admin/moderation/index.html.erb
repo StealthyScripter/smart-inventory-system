@@ -1,0 +1,120 @@
+<% content_for :page_title, "Marketplace Governance" %>
+
+<div class="table-container">
+  <div class="table-header">
+    <h3 class="table-title">Open Reports</h3>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Reporter</th>
+        <th>Target</th>
+        <th>Reason</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @reports.each do |report| %>
+        <tr>
+          <td><%= report.reporter.full_name %></td>
+          <td><%= report.reportable_type %> #<%= report.reportable_id %></td>
+          <td><%= report.reason %></td>
+          <td><%= report.status.titleize %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+
+<div class="table-container">
+  <div class="table-header"><h3 class="table-title">Products</h3></div>
+  <table>
+    <tbody>
+      <% @products.each do |product| %>
+        <tr>
+          <td><%= product.name %></td>
+          <td><%= product.marketplace_status.titleize %></td>
+          <td>
+            <%= button_to "Hide", admin_moderation_actions_path,
+                          params: { moderation_action: { moderatable_type: "Product", moderatable_id: product.id, action_name: "hide" } },
+                          class: "btn btn-secondary" %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+
+<div class="table-container">
+  <div class="table-header"><h3 class="table-title">Services</h3></div>
+  <table>
+    <tbody>
+      <% @services.each do |service| %>
+        <tr>
+          <td><%= service.name %></td>
+          <td><%= service.status.titleize %></td>
+          <td>
+            <%= button_to "Hide", admin_moderation_actions_path,
+                          params: { moderation_action: { moderatable_type: "ServiceListing", moderatable_id: service.id, action_name: "hide" } },
+                          class: "btn btn-secondary" %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+
+<div class="table-container">
+  <div class="table-header"><h3 class="table-title">Reviews</h3></div>
+  <table>
+    <tbody>
+      <% @reviews.each do |review| %>
+        <tr>
+          <td><%= review.rating %>/5</td>
+          <td><%= review.body %></td>
+          <td><%= review.status.titleize %></td>
+          <td>
+            <%= button_to "Hide", admin_moderation_actions_path,
+                          params: { moderation_action: { moderatable_type: "Review", moderatable_id: review.id, action_name: "hide" } },
+                          class: "btn btn-secondary" %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+
+<div class="table-container">
+  <div class="table-header"><h3 class="table-title">Merchants</h3></div>
+  <table>
+    <tbody>
+      <% @suppliers.each do |supplier| %>
+        <tr>
+          <td><%= supplier.name %></td>
+          <td><%= supplier.shop_status.titleize %></td>
+          <td>
+            <%= button_to "Suspend", admin_moderation_actions_path,
+                          params: { moderation_action: { moderatable_type: "Supplier", moderatable_id: supplier.id, action_name: "suspend" } },
+                          class: "btn btn-secondary" %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+
+<div class="table-container">
+  <div class="table-header"><h3 class="table-title">Moderation Log</h3></div>
+  <table>
+    <tbody>
+      <% @moderation_actions.each do |action| %>
+        <tr>
+          <td><%= action.created_at.to_fs(:short) %></td>
+          <td><%= action.actor.full_name %></td>
+          <td><%= action.action_name.titleize %></td>
+          <td><%= action.moderatable_type %> #<%= action.moderatable_id %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

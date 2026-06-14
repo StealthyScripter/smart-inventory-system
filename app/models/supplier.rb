@@ -8,6 +8,11 @@ class Supplier < ApplicationRecord
   has_many :order_items, dependent: :restrict_with_error
   has_many :reviews, dependent: :destroy
   has_many :service_listings, dependent: :destroy
+  has_many :service_bookings, dependent: :restrict_with_error
+  has_many :availability_slots, dependent: :destroy
+  has_many :conversations, dependent: :destroy
+  has_many :reports, as: :reportable, dependent: :destroy
+  has_many :moderation_actions, as: :moderatable, dependent: :destroy
 
   validates :name, presence: true
   validates :default_lead_time_days, presence: true, numericality: { greater_than: 0 }
@@ -16,6 +21,16 @@ class Supplier < ApplicationRecord
   validates :shop_slug, format: { with: /\A[a-z0-9-]+\z/ }, allow_blank: true
 
   before_validation :normalize_shop_slug
+
+  scope :search, lambda { |query|
+    return all if query.blank?
+
+    pattern = "%#{sanitize_sql_like(query)}%"
+    where(
+      "name LIKE :pattern OR shop_description LIKE :pattern OR address LIKE :pattern OR search_tags LIKE :pattern",
+      pattern: pattern
+    )
+  }
 
   def average_rating
     reviews.published.average(:rating).to_f

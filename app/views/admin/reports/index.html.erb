@@ -1,0 +1,34 @@
+<% content_for :page_title, "Reports" %>
+
+<div class="table-container">
+  <div class="table-header">
+    <h3 class="table-title">User Reports</h3>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Reporter</th>
+        <th>Target</th>
+        <th>Reason</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @reports.each do |report| %>
+        <tr>
+          <td><%= report.reporter.full_name %></td>
+          <td><%= report.reportable_type %> #<%= report.reportable_id %></td>
+          <td><%= report.reason %></td>
+          <td><%= report.status.titleize %></td>
+          <td>
+            <%= form_with model: [:admin, report], method: :patch, local: true do |form| %>
+              <%= form.select :status, options_for_select(Report::STATUSES, report.status), {}, { class: "form-select" } %>
+              <%= form.submit "Update", class: "btn btn-primary" %>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
