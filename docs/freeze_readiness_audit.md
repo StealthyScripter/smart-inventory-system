@@ -124,3 +124,42 @@ Baseline and final verification:
 READY WITH MINOR TODOs
 
 The application is passing tests, style checks, autoload checks, migration checks, Brakeman, and seed verification. The remaining items are operational hardening or scale-oriented improvements, not blockers for entering stabilization mode.
+
+## Final Code Freeze Verification
+
+Release tag: `v1.0.0-freeze`
+
+Final commands:
+
+- `git status`
+- `git diff --stat`
+- `docker-compose run --rm -e RAILS_ENV=test app bundle exec rspec`
+- `docker-compose run --rm -e RAILS_ENV=test app bin/rubocop`
+- `docker-compose run --rm -e RAILS_ENV=test app bundle exec rails zeitwerk:check`
+- `docker-compose run --rm -e RAILS_ENV=test app bundle exec rails db:migrate:status`
+- `docker-compose run --rm app bin/rails db:seed`
+- `docker-compose run --rm app bundle exec brakeman`
+- `docker-compose run --rm app bundle exec bundle-audit check --update`
+
+Final results:
+
+- Initial worktree: clean before operational documentation and CI updates.
+- RSpec: `226 examples, 0 failures`
+- RuboCop: `204 files inspected, no offenses detected`
+- Zeitwerk: `All is good!`
+- Migration status: all migrations are `up` through `20260614016000_add_real_world_readiness_fields`
+- Seed check: passed.
+- Brakeman: `0` active security warnings, `0` errors, `1` ignored warning from existing ignore file.
+- Bundler Audit: not installed; add `bundle-audit` in a future security tooling pass if desired.
+
+Final known TODOs:
+
+- Add Bundler Audit or equivalent dependency vulnerability scanning.
+- Move production persistence from SQLite/local Active Storage to PostgreSQL and durable object storage before scale.
+- Add account verification, password reset, rate limiting, and optional MFA before public launch.
+- Configure production monitoring, backups, SSL, mail delivery, and restore testing.
+- Keep real payment providers, Jenga integration, push notifications, external search, RFQs, and auctions deferred.
+
+Final freeze recommendation:
+
+READY TO FREEZE AS v1.0.0-freeze
