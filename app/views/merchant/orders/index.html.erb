@@ -1,48 +1,44 @@
 <% content_for :page_title, "Merchant Orders" %>
 
-<div class="table-container">
-  <div class="table-header">
-    <h3 class="table-title">Incoming Orders</h3>
+<section class="page-section">
+  <div class="section-header">
+    <div>
+      <h2 class="section-title">Incoming Orders</h2>
+      <p class="section-subtitle">Fulfill customer order items assigned to your merchant account.</p>
+    </div>
   </div>
-  <table>
-    <thead>
-      <tr>
-        <th>Order Number</th>
-        <th>Supplier</th>
-        <th>Status</th>
-        <th>Order Date</th>
-        <th>Items</th>
-        <th>Total</th>
-      </tr>
-    </thead>
-    <tbody>
+
+  <% if @order_items.any? %>
+    <div class="card-grid">
       <% @order_items.each do |item| %>
-        <tr>
-          <td><%= item.order.order_number %></td>
-          <td><%= item.supplier.name %></td>
-          <td><span class="badge badge-secondary"><%= item.fulfillment_status.titleize %></span></td>
-          <td><%= item.order.created_at.to_date %></td>
-          <td><%= item.quantity %> x <%= item.product.name %></td>
-          <td>
-            <%= currency(item.total_amount.to_f) %>
-            <% next_statuses = OrderItem::TRANSITIONS.fetch(item.fulfillment_status) %>
-            <% if next_statuses.any? %>
-              <%= form_with url: merchant_order_path(item), method: :patch, local: true, style: "margin-top: 0.5rem;" do |form| %>
+        <article class="ui-card">
+          <div class="card-body">
+            <div class="card-kicker"><%= item.supplier.name %></div>
+            <h3 class="card-title"><%= item.order.order_number %></h3>
+            <p><strong><%= item.quantity %> x <%= item.product.marketplace_listing&.title.presence || item.product.name %></strong></p>
+            <div class="summary-row"><span>Order Date</span><strong><%= item.order.created_at.to_date %></strong></div>
+            <div class="summary-row"><span>Total</span><strong><%= currency(item.total_amount.to_f) %></strong></div>
+            <div class="summary-row">
+              <span>Fulfillment</span>
+              <%= render "shared/status_badge", status: item.fulfillment_status, label: item.fulfillment_status.titleize %>
+            </div>
+          </div>
+          <% next_statuses = OrderItem::TRANSITIONS.fetch(item.fulfillment_status) %>
+          <% if next_statuses.any? %>
+            <div class="card-actions">
+              <%= form_with url: merchant_order_path(item), method: :patch, local: true, style: "display: grid; gap: 0.5rem; width: 100%;" do |form| %>
                 <%= form.select :fulfillment_status, options_for_select(next_statuses.map { |status| [status.titleize, status] }), {}, { class: "form-select" } %>
-                <%= form.text_field :tracking_carrier, value: item.tracking_carrier, placeholder: "Carrier", class: "form-input", style: "margin-top: 0.5rem;" %>
-                <%= form.text_field :tracking_number, value: item.tracking_number, placeholder: "Tracking #", class: "form-input", style: "margin-top: 0.5rem;" %>
-                <%= form.text_field :merchant_notes, value: item.merchant_notes, placeholder: "Notes", class: "form-input", style: "margin-top: 0.5rem;" %>
-                <%= form.submit "Update", class: "btn btn-secondary", style: "margin-top: 0.5rem;" %>
+                <%= form.text_field :tracking_carrier, value: item.tracking_carrier, placeholder: "Carrier", class: "form-input" %>
+                <%= form.text_field :tracking_number, value: item.tracking_number, placeholder: "Tracking #", class: "form-input" %>
+                <%= form.text_field :merchant_notes, value: item.merchant_notes, placeholder: "Notes", class: "form-input" %>
+                <%= form.submit "Update", class: "btn btn-secondary" %>
               <% end %>
-            <% end %>
-          </td>
-        </tr>
+            </div>
+          <% end %>
+        </article>
       <% end %>
-      <% if @order_items.empty? %>
-        <tr>
-          <td colspan="6" style="text-align: center; color: #718096; font-style: italic;">No incoming orders found.</td>
-        </tr>
-      <% end %>
-    </tbody>
-  </table>
-</div>
+    </div>
+  <% else %>
+    <%= render "shared/empty_state", title: "No incoming orders found", message: "Customer orders will appear here when they include your listings." %>
+  <% end %>
+</section>

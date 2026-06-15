@@ -1,0 +1,9 @@
+<div class="empty-card">
+  <h3><%= local_assigns.fetch(:title, "Nothing here yet") %></h3>
+  <% if local_assigns[:message].present? %>
+    <p><%= local_assigns[:message] %></p>
+  <% end %>
+  <% if local_assigns[:path].present? && local_assigns[:action].present? %>
+    <%= link_to local_assigns[:action], local_assigns[:path], class: "btn btn-primary" %>
+  <% end %>
+</div>

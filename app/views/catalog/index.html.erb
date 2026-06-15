@@ -3,16 +3,19 @@
   Marketplace / Catalog
 <% end %>
 
-<div class="table-container">
-  <div class="table-header">
-    <h3 class="table-title">Marketplace Catalog</h3>
+<section class="page-section">
+  <div class="section-header">
+    <div>
+      <h2 class="section-title">Marketplace Catalog</h2>
+      <p class="section-subtitle">Browse public marketplace listings from verified merchants.</p>
+    </div>
   </div>
 
-  <div style="padding: 1rem 1.5rem; border-bottom: 1px solid #e2e8f0;">
-    <%= form_with url: catalog_path, method: :get, local: true, style: "display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 0.75rem; align-items: end;" do |form| %>
+  <div class="filter-card">
+    <%= form_with url: catalog_path, method: :get, local: true, class: "filter-grid" do |form| %>
       <div class="form-group" style="margin-bottom: 0;">
         <%= form.label :q, "Search", class: "form-label" %>
-        <%= form.text_field :q, value: params[:q], class: "form-input" %>
+        <%= form.text_field :q, value: params[:q], class: "form-input", placeholder: "Search products" %>
       </div>
       <div class="form-group" style="margin-bottom: 0;">
         <%= form.label :category_id, "Category", class: "form-label" %>
@@ -34,42 +37,16 @@
     <% end %>
   </div>
 
-  <table>
-    <thead>
-      <tr>
-        <th>Product</th>
-        <th>Category</th>
-        <th>Merchant</th>
-        <th>Price</th>
-        <th>Available</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% @product_listings.each do |listing| %>
-        <% product = listing.product %>
-        <tr>
-          <td><%= link_to listing.title, catalog_product_path(product) %></td>
-          <td><%= product.category.name %></td>
-          <td>
-            <% if product.supplier %>
-              <%= link_to product.supplier.name, merchant_storefront_path(product.supplier) %>
-            <% else %>
-              Marketplace
-            <% end %>
-          </td>
-          <td><%= currency(listing.current_price.to_f) %></td>
-          <td><%= listing.availability.titleize %></td>
-        </tr>
-      <% end %>
-
-      <% if @product_listings.empty? %>
-        <tr>
-          <td colspan="5" style="text-align: center; color: #718096; font-style: italic;">
-            No public products are available.
-          </td>
-        </tr>
-      <% end %>
-    </tbody>
-  </table>
-  <%= pagination_controls(@product_listings) %>
-</div>
+  <% if @product_listings.any? %>
+    <div class="card-grid">
+      <%= render partial: "shared/listing_card", collection: @product_listings, as: :listing %>
+    </div>
+    <%= pagination_controls(@product_listings) %>
+  <% else %>
+    <%= render "shared/empty_state",
+               title: "No public products found",
+               message: "Try a different search, category, merchant, or sort option.",
+               action: "Clear Filters",
+               path: catalog_path %>
+  <% end %>
+</section>

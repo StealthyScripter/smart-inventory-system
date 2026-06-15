@@ -1,34 +1,33 @@
 <% content_for :page_title, "Reports" %>
 
-<div class="table-container">
-  <div class="table-header">
-    <h3 class="table-title">User Reports</h3>
+<section class="page-section">
+  <div class="section-header">
+    <div>
+      <h2 class="section-title">User Reports</h2>
+      <p class="section-subtitle">Review and update marketplace report status.</p>
+    </div>
   </div>
-  <table>
-    <thead>
-      <tr>
-        <th>Reporter</th>
-        <th>Target</th>
-        <th>Reason</th>
-        <th>Status</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-    <tbody>
+
+  <% if @reports.any? %>
+    <div class="card-grid">
       <% @reports.each do |report| %>
-        <tr>
-          <td><%= report.reporter.full_name %></td>
-          <td><%= report.reportable_type %> #<%= report.reportable_id %></td>
-          <td><%= report.reason %></td>
-          <td><%= report.status.titleize %></td>
-          <td>
-            <%= form_with model: [:admin, report], method: :patch, local: true do |form| %>
+        <article class="ui-card">
+          <div class="card-body">
+            <div class="card-kicker"><%= report.reportable_type %> #<%= report.reportable_id %></div>
+            <h3 class="card-title"><%= report.reason %></h3>
+            <p class="card-meta">Reported by <%= report.reporter.full_name %></p>
+            <%= render "shared/status_badge", status: report.status, label: report.status.titleize %>
+          </div>
+          <div class="card-actions">
+            <%= form_with model: [:admin, report], method: :patch, local: true, style: "display: flex; gap: 0.5rem; flex-wrap: wrap;" do |form| %>
               <%= form.select :status, options_for_select(Report::STATUSES, report.status), {}, { class: "form-select" } %>
               <%= form.submit "Update", class: "btn btn-primary" %>
             <% end %>
-          </td>
-        </tr>
+          </div>
+        </article>
       <% end %>
-    </tbody>
-  </table>
-</div>
+    </div>
+  <% else %>
+    <%= render "shared/empty_state", title: "No user reports" %>
+  <% end %>
+</section>

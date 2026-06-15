@@ -281,6 +281,25 @@
             <% end %>
             <%= yield %>
           </div>
+          <% if current_user.customer? %>
+            <nav class="mobile-bottom-nav" aria-label="Customer navigation">
+              <%= link_to catalog_path, class: "#{'active' if current_page?(catalog_path) || current_page?(root_path)}" do %>
+                <span>Home</span>
+              <% end %>
+              <%= link_to search_path, class: "#{'active' if current_page?(search_path)}" do %>
+                <span>Search</span>
+              <% end %>
+              <%= link_to cart_path, class: "#{'active' if current_page?(cart_path)}" do %>
+                <span>Cart</span>
+              <% end %>
+              <%= link_to customer_orders_path, class: "#{'active' if request.path.start_with?('/customer/orders')}" do %>
+                <span>Orders</span>
+              <% end %>
+              <%= link_to notifications_path, class: "#{'active' if current_page?(notifications_path)}" do %>
+                <span>Account</span>
+              <% end %>
+            </nav>
+          <% end %>
         </main>
       </div>
     <% else %>

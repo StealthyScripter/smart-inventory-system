@@ -1,18 +1,30 @@
-<div class="table-container">
-  <div class="table-header"><h3 class="table-title">Conversations</h3></div>
-  <table>
-    <thead>
-      <tr><th>Subject</th><th>Merchant</th><th>Unread</th><th>Updated</th></tr>
-    </thead>
-    <tbody>
+<section class="page-section">
+  <div class="section-header">
+    <div>
+      <h2 class="section-title">Conversations</h2>
+      <p class="section-subtitle">Messages between customers and merchants.</p>
+    </div>
+  </div>
+
+  <% if conversations.any? %>
+    <div class="card-grid">
       <% conversations.each do |conversation| %>
-        <tr>
-          <td><%= link_to conversation.subject, conversation_path(conversation) %></td>
-          <td><%= conversation.supplier.name %></td>
-          <td><%= conversation.messages.where.not(sender: current_user).unread.count %></td>
-          <td><%= conversation.updated_at.strftime("%b %d, %Y %H:%M") %></td>
-        </tr>
+        <article class="ui-card">
+          <div class="card-body">
+            <div class="card-kicker"><%= conversation.supplier.name %></div>
+            <h3 class="card-title"><%= link_to conversation.subject, conversation_path(conversation) %></h3>
+            <div class="order-card-meta">
+              <%= render "shared/status_badge", status: "pending", label: "#{conversation.messages.where.not(sender: current_user).unread.count} unread" %>
+              <span class="muted-text"><%= conversation.updated_at.strftime("%b %d, %Y %H:%M") %></span>
+            </div>
+          </div>
+          <div class="card-actions">
+            <%= link_to "Open Conversation", conversation_path(conversation), class: "btn btn-secondary" %>
+          </div>
+        </article>
       <% end %>
-    </tbody>
-  </table>
-</div>
+    </div>
+  <% else %>
+    <%= render "shared/empty_state", title: "No conversations", message: "Messages with merchants will appear here." %>
+  <% end %>
+</section>

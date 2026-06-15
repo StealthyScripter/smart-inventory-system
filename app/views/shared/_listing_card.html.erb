@@ -1,0 +1,45 @@
+<% product = listing.product %>
+<% merchant = product&.supplier %>
+<% review_count = product&.reviews&.published&.count.to_i %>
+
+<article class="ui-card listing-card">
+  <%= link_to catalog_product_path(product), class: "card-media-link", aria: { label: "View #{listing.title}" } do %>
+    <% if listing.featured_media_url.present? %>
+      <img class="card-media" src="<%= listing.featured_media_url %>" alt="<%= listing.title %>">
+    <% elsif product&.featured_image&.attached? %>
+      <%= image_tag product.featured_image, class: "card-media", alt: listing.title %>
+    <% else %>
+      <div class="card-media placeholder-media" role="img" aria-label="<%= listing.title %> image placeholder">
+        <span><%= listing.title.to_s.first&.upcase || "P" %></span>
+      </div>
+    <% end %>
+  <% end %>
+
+  <div class="card-body">
+    <div class="card-kicker"><%= product&.category&.name || "Marketplace" %></div>
+    <h3 class="card-title"><%= link_to listing.title, catalog_product_path(product) %></h3>
+    <p class="card-meta">
+      <%= merchant ? link_to(merchant.name, merchant_storefront_path(merchant)) : "Marketplace" %>
+    </p>
+    <div class="rating-row" aria-label="Rating">
+      <span><%= number_with_precision(product&.average_rating.to_f, precision: 1) %> / 5</span>
+      <span class="muted-text">(<%= pluralize(review_count, "review") %>)</span>
+    </div>
+    <div class="price-row">
+      <% if listing.sale_price.present? %>
+        <span class="price"><%= currency(listing.sale_price) %></span>
+        <span class="list-price"><%= currency(listing.public_price) %></span>
+      <% else %>
+        <span class="price"><%= currency(listing.current_price.to_f) %></span>
+      <% end %>
+    </div>
+    <%= render "shared/status_badge", status: listing.availability, label: listing.availability.humanize %>
+  </div>
+
+  <div class="card-actions">
+    <%= link_to "View Details", catalog_product_path(product), class: "btn btn-secondary" %>
+    <% if current_user&.customer? %>
+      <%= button_to "Add to Cart", cart_path(product_id: product.id, quantity: 1), method: :post, class: "btn btn-primary" %>
+    <% end %>
+  </div>
+</article>
