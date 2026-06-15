@@ -42,6 +42,16 @@ RSpec.describe "Cart and checkout", type: :request do
     expect(response).to redirect_to(cart_path)
   end
 
+  it "renders the cart page for an authenticated customer" do
+    login_as(customer)
+
+    get cart_path
+
+    expect(response).to have_http_status(:success)
+    expect(response.body).to include("Your Cart")
+    expect(response.body).to include("Your cart is empty.")
+  end
+
   it "does not allow private products in the cart" do
     login_as(customer)
 
