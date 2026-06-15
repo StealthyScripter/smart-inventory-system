@@ -3,6 +3,7 @@ class Report < ApplicationRecord
 
   belongs_to :reporter, class_name: "User"
   belongs_to :reportable, polymorphic: true
+  belongs_to :account, optional: true
   has_many :moderation_actions, as: :moderatable, dependent: :destroy
 
   validates :reason, presence: true

@@ -7,6 +7,15 @@ Rails.application.routes.draw do
   post "login", to: "sessions#create"
   delete "logout", to: "sessions#destroy"
 
+  get "customers/sign_in", to: "sessions#new", defaults: { login_context: "customer" }, as: :customers_sign_in
+  post "customers/sign_in", to: "sessions#create", defaults: { login_context: "customer" }
+  get "customers/sign_up", to: "customer_registrations#new", as: :customers_sign_up
+  post "customers/sign_up", to: "customer_registrations#create"
+  get "merchants/sign_in", to: "sessions#new", defaults: { login_context: "merchant" }, as: :merchants_sign_in
+  post "merchants/sign_in", to: "sessions#create", defaults: { login_context: "merchant" }
+  get "merchants/sign_up", to: "merchant_registrations#new", as: :merchants_sign_up
+  post "merchants/sign_up", to: "merchant_registrations#create"
+
   namespace :admin do
     resources :users, only: [:index, :edit, :update]
     get "analytics", to: "analytics#index"
@@ -30,6 +39,12 @@ Rails.application.routes.draw do
     end
     resources :conversations, only: [:index]
     resources :shops, only: [:edit, :update]
+    resource :account_settings, only: [:edit, :update]
+    resources :members, only: [:index, :create, :update, :destroy] do
+      member do
+        patch :enable
+      end
+    end
     get "inventory", to: "inventory#index"
     patch "inventory/:id", to: "inventory#update", as: :inventory_item
     resources :orders, only: [:index, :update]
@@ -71,7 +86,7 @@ Rails.application.routes.draw do
   end
 
   get "dashboard", to: "dashboard#index"
-  root "dashboard#index"
+  root "catalog#index"
 
   get "inventory", to: "inventory#index"
   post "inventory/adjust", to: "inventory#adjust_stock"

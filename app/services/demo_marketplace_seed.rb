@@ -44,6 +44,7 @@ class DemoMarketplaceSeed
       electrical: upsert_user("merchant.electrical@example.com", "Elliot", "Electrical", "supplier"),
       plumbing: upsert_user("merchant.plumbing@example.com", "Parker", "Plumbing", "supplier"),
       ac: upsert_user("merchant.ac@example.com", "Avery", "Cooling", "supplier"),
+      hardware_employee: upsert_user("merchant.hardware.employee@example.com", "Hayden", "Associate", "supplier"),
       buyer: upsert_user("buyer.contractor@example.com", "Blake", "Contractor", "customer"),
       buyer_two: upsert_user("buyer.designer@example.com", "Drew", "Designer", "customer")
     }
@@ -62,8 +63,11 @@ class DemoMarketplaceSeed
 
   def link_supplier_users
     suppliers.each do |key, supplier|
+      next if key == :hardware_employee
+
       SupplierUser.find_or_create_by!(supplier: supplier, user: users.fetch(key))
     end
+    SupplierUser.find_or_create_by!(supplier: suppliers[:hardware], user: users[:hardware_employee])
   end
 
   def seed_products
@@ -125,6 +129,8 @@ class DemoMarketplaceSeed
     ) do |notification|
       notification.body = "Your demo construction supply order was delivered."
     end
+
+    AccountBackfill.call
   end
 
   def upsert_location(name, address)

@@ -16,6 +16,8 @@ class Supplier < ApplicationRecord
   has_many :conversations, dependent: :destroy
   has_many :reports, as: :reportable, dependent: :destroy
   has_many :moderation_actions, as: :moderatable, dependent: :destroy
+  has_one :merchant_profile, dependent: :nullify
+  has_one :merchant_account, through: :merchant_profile, source: :account
   has_one_attached :logo
   has_one_attached :banner
 

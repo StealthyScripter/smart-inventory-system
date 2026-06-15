@@ -11,6 +11,7 @@ class ServiceBooking < ApplicationRecord
 
   belongs_to :user
   belongs_to :supplier
+  belongs_to :account, optional: true
   has_many :service_booking_items, dependent: :destroy
   has_many :service_listings, through: :service_booking_items
 

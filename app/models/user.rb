@@ -27,6 +27,10 @@ class User < ApplicationRecord
   has_many :purchase_orders, dependent: :restrict_with_error
   has_many :sales_transactions, dependent: :restrict_with_error
   has_many :audit_logs, foreign_key: "actor_id", dependent: :nullify, inverse_of: :actor
+  has_many :created_accounts, class_name: "Account", foreign_key: "created_by_id", dependent: :nullify, inverse_of: :creator
+  has_many :account_memberships, dependent: :destroy
+  has_many :accounts, through: :account_memberships
+  has_one :customer_profile, dependent: :destroy
   has_many :supplier_users, dependent: :destroy
   has_many :suppliers, through: :supplier_users
   has_many :carts, dependent: :destroy
@@ -115,6 +119,22 @@ class User < ApplicationRecord
 
   def merchant_supplier_ids
     suppliers.select(:id)
+  end
+
+  def active_account_memberships
+    account_memberships.active
+  end
+
+  def customer_accounts
+    accounts.customers
+  end
+
+  def merchant_accounts
+    accounts.merchants
+  end
+
+  def account_merchant_supplier_ids
+    merchant_accounts.joins(:merchant_profile).select("merchant_profiles.supplier_id")
   end
 
   # Backward-compatible aliases while the rest of the app is cleaned up.

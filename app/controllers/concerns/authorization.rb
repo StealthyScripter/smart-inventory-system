@@ -7,7 +7,8 @@ module Authorization
     :can_manage_users?, :can_manage_products?, :can_manage_locations?,
     :can_manage_suppliers?, :can_adjust_inventory?, :can_delete?,
     :can_access_back_office?, :can_access_product_catalog?, :can_manage_product?,
-    :can_access_location?, :accessible_locations, :viewable_locations, :manageable_suppliers
+    :can_access_location?, :accessible_locations, :viewable_locations, :manageable_suppliers,
+    :can_manage_merchant?
   end
 
   def admin?
@@ -51,7 +52,7 @@ module Authorization
   end
 
   def can_manage_products?
-    admin? || regional_manager? || (supplier_user? && current_user.suppliers.exists?)
+    admin? || regional_manager? || manageable_suppliers.exists?
   end
 
   def can_manage_locations?
@@ -75,15 +76,14 @@ module Authorization
   end
 
   def can_access_product_catalog?
-    can_access_back_office? || (supplier_user? && current_user.suppliers.exists?)
+    can_access_back_office? || manageable_suppliers.exists?
   end
 
   def can_manage_product?(product)
     return true if admin? || regional_manager?
-    return false unless supplier_user?
     return false unless product&.supplier_id
 
-    current_user.suppliers.exists?(id: product.supplier_id)
+    manageable_suppliers.exists?(id: product.supplier_id)
   end
 
   def can_access_location?(location)
@@ -110,9 +110,16 @@ module Authorization
 
   def manageable_suppliers
     return Supplier.order(:name) if admin? || regional_manager?
-    return current_user.suppliers.order(:name) if supplier_user?
+    return merchant_compatible_suppliers.order(:name) if current_user
 
     Supplier.none
+  end
+
+  def can_manage_merchant?(permission)
+    return true if legacy_supplier_merchant?
+    return false unless current_merchant_account&.active?
+
+    current_account_membership(current_merchant_account)&.has_permission?(permission)
   end
 
   def require_back_office_access
@@ -155,5 +162,25 @@ module Authorization
 
   def require_delete_permission
     redirect_to root_path, alert: "You don't have permission to delete records." unless can_delete?
+  end
+
+  def require_merchant_permission(permission)
+    return if can_manage_merchant?(permission)
+
+    render plain: "You don't have permission to perform this merchant action.", status: :forbidden
+  end
+
+  def merchant_compatible_suppliers
+    supplier_ids = []
+    supplier_ids.concat(current_user.suppliers.select(:id).pluck(:id)) if supplier_user?
+
+    account_supplier_id = current_merchant_account&.merchant_profile&.supplier_id
+    supplier_ids << account_supplier_id if account_supplier_id.present?
+
+    Supplier.where(id: supplier_ids.compact.uniq)
+  end
+
+  def legacy_supplier_merchant?
+    current_merchant_account.blank? && supplier_user? && current_user.suppliers.exists?
   end
 end

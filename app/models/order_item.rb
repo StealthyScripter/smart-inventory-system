@@ -12,6 +12,7 @@ class OrderItem < ApplicationRecord
   belongs_to :order
   belongs_to :product
   belongs_to :supplier
+  belongs_to :account, optional: true
   has_many :reviews, dependent: :restrict_with_error
 
   validates :quantity, numericality: { greater_than: 0 }

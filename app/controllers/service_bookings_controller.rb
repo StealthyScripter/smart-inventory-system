@@ -5,6 +5,7 @@ class ServiceBookingsController < ApplicationController
     service = ServiceListing.publicly_listed.find(params[:service_listing_id])
     booking = current_user.service_bookings.create!(
       supplier: service.supplier,
+      account: service.merchant_account,
       scheduled_date: params[:scheduled_date],
       scheduled_time: params[:scheduled_time],
       duration_minutes: params[:duration_minutes],

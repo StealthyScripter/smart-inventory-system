@@ -254,10 +254,12 @@ movement_samples.each_with_index do |attributes, index|
 end
 
 puts "Seed complete."
+AccountBackfill.call
 puts "Categories: #{Category.count}"
 puts "Suppliers: #{Supplier.count}"
 puts "Locations: #{Location.count}"
 puts "Users: #{User.count}"
+puts "Accounts: #{Account.count}"
 
 puts "\nSeeding demo marketplace data...\n"
 DemoMarketplaceSeed.call

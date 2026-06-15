@@ -1,5 +1,8 @@
 module Merchant
   class OrdersController < BaseController
+    before_action -> { require_merchant_permission(:view_orders) }, only: [:index]
+    before_action -> { require_merchant_permission(:fulfill_orders) }, only: [:update]
+
     def index
       @order_items = merchant_order_items.order(created_at: :desc)
     end
@@ -17,8 +20,15 @@ module Merchant
     private
 
     def merchant_order_items
-      OrderItem.includes(:order, :product, :supplier)
-               .where(supplier: merchant_suppliers)
+      supplier_items = OrderItem.where(supplier: merchant_suppliers)
+      scoped_items =
+        if current_merchant_account
+          OrderItem.where(account: current_merchant_account).or(supplier_items)
+        else
+          supplier_items
+        end
+
+      scoped_items.includes(:order, :product, :supplier)
     end
 
     def tracking_params

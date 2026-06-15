@@ -7,6 +7,7 @@ class Product < ApplicationRecord
 
   belongs_to :category
   belongs_to :supplier, optional: true
+  belongs_to :account, optional: true
   has_many :stock_levels, dependent: :destroy
   has_many :stock_movements, dependent: :destroy
   has_many :purchase_order_items, dependent: :restrict_with_error
@@ -17,6 +18,7 @@ class Product < ApplicationRecord
   has_many :reviews, dependent: :destroy
   has_many :reports, as: :reportable, dependent: :destroy
   has_many :moderation_actions, as: :moderatable, dependent: :destroy
+  has_one :marketplace_listing, dependent: :destroy
   has_one_attached :featured_image
   has_many_attached :images
 
@@ -31,12 +33,14 @@ class Product < ApplicationRecord
 
   before_validation :assign_generated_sku, on: :create
   before_validation :assign_barcode_value
+  after_save :ensure_marketplace_listing
 
   scope :marketplace_available, -> { where(listing_scope: ["marketplace", "both"]) }
   scope :local_only, -> { where(listing_scope: "local") }
-  scope :publicly_listed, -> { where(marketplace_status: "public").marketplace_available }
+  scope :publicly_listed, -> { joins(:marketplace_listing).merge(MarketplaceListing.visible.products).marketplace_available }
   scope :active_marketplace, -> { where.not(marketplace_status: "archived") }
   scope :owned_by_suppliers, ->(supplier_ids) { where(supplier_id: supplier_ids) }
+  scope :owned_by_account, ->(account) { where(account: account) }
   scope :search, lambda { |query|
     return all if query.blank?
 
@@ -88,6 +92,10 @@ class Product < ApplicationRecord
     reviews.published.average(:rating).to_f
   end
 
+  def merchant_account
+    account || supplier&.merchant_account
+  end
+
   def soft_delete!
     update!(discarded_at: Time.current, marketplace_status: "archived")
   end
@@ -97,6 +105,21 @@ class Product < ApplicationRecord
   end
 
   private
+
+  def ensure_marketplace_listing
+    return unless marketplace_status == "public" && %w[marketplace both].include?(listing_scope)
+    return if marketplace_listing.present?
+
+    create_marketplace_listing!(
+      account: merchant_account,
+      title: name,
+      public_description: description,
+      public_price: selling_price,
+      status: "active",
+      visibility: "public",
+      listing_type: "product"
+    )
+  end
 
   def assign_generated_sku
     self.sku = SkuGenerator.call(self) if sku.blank?

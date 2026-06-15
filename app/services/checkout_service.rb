@@ -9,6 +9,7 @@ class CheckoutService
     Order.transaction do
       order = Order.create!(
         user: cart.user,
+        customer_account: cart.customer_account,
         status: "pending",
         total_amount: cart.total_amount,
         submitted_at: Time.current
@@ -18,6 +19,7 @@ class CheckoutService
         order.order_items.create!(
           product: item.product,
           supplier: item.product.supplier,
+          account: item.product.merchant_account,
           quantity: item.quantity,
           unit_price: item.product.selling_price.to_d,
           total_amount: item.total_amount

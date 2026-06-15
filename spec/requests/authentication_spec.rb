@@ -51,7 +51,7 @@ RSpec.describe "Authentication", type: :request do
 
     context "when not authenticated" do
       it "redirects inventory screens to login" do
-        get root_path
+        get dashboard_path
         expect(response).to redirect_to(login_path)
 
         get products_path
@@ -77,7 +77,7 @@ RSpec.describe "Authentication", type: :request do
       end
 
       it "allows access to the inventory management surface" do
-        get root_path
+        get dashboard_path
         expect(response).to have_http_status(:success)
 
         get products_path

@@ -33,9 +33,22 @@ docker-compose run --rm app bundle exec brakeman
 
 ## Marketplace Domain Overview
 
-- Products: inventory-backed goods with marketplace visibility and supplier ownership.
+- Accounts: customer, individual merchant, and enterprise merchant ownership boundary.
+- Account memberships: merchant account roles and permissions for enterprise access control.
+- Customer profiles: buyer-facing customer account profile data.
+- Merchant profiles: shop-facing merchant account data, linked to suppliers during the transition.
+- Marketplace listings: public listing layer for product discovery.
+- Products: inventory-backed goods with account ownership and legacy supplier compatibility.
 - Services: merchant/provider service listings with booking support.
-- Suppliers: merchant shops, profiles, media, and ownership boundary for merchant users.
+- Suppliers: procurement/vendor records and transitional merchant storefront aliases.
 - Customers: carts, orders, bookings, reviews, messages, and purchase analytics.
 - Orders and payments: marketplace order lifecycle with manual/test payment abstraction only.
 - Governance: reports, moderation actions, soft-delete/restore, and admin-only controls.
+
+## Account Model Notes
+
+- Keep platform roles on `User#role`; do not add enterprise permissions there.
+- Use `AccountMembership#role` for merchant account permissions.
+- Use `current_customer_account`, `current_merchant_account`, and `current_account_membership` in controllers.
+- Preserve `Supplier` and `SupplierUser` compatibility until a later cleanup release.
+- Run `rails accounts:backfill` after importing legacy supplier/customer data.

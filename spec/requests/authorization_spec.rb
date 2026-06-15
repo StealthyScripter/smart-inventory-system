@@ -35,7 +35,7 @@ RSpec.describe "Authorization", type: :request do
 
         login_as(user)
 
-        get root_path
+        get dashboard_path
         expect(response).to have_http_status(:forbidden)
 
         get products_path

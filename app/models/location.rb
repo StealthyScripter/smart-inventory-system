@@ -1,5 +1,6 @@
 class Location < ApplicationRecord
   belongs_to :manager, class_name: "User", optional: true
+  belongs_to :account, optional: true
   has_many :users, dependent: :nullify
   has_many :stock_levels, dependent: :destroy
   has_many :source_movements, class_name: "StockMovement", foreign_key: "source_location_id"

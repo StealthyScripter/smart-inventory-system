@@ -59,11 +59,45 @@ RSpec.describe "Merchant portal", type: :request do
         expect(response).to have_http_status(:forbidden)
       end
     end
+
+    it "allows account-backed merchant members through the mapped merchant profile" do
+      account_user = create_authenticated_user(role: "customer", email: "account.merchant@example.com")
+      account = Account.create_with_owner!(
+        creator: account_user,
+        name: "Account Merchant",
+        account_type: "enterprise_merchant"
+      )
+      MerchantProfile.create!(account: account, supplier: merchant_supplier, display_name: "Account Merchant")
+      login_as(account_user)
+
+      get merchant_root_path
+
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include("Merchant Dashboard")
+      expect(response.body).to include(merchant_supplier.name)
+    end
   end
 
   describe "GET /merchant/products" do
     it "shows only the merchant's products" do
       login_as(merchant_user)
+
+      get merchant_products_path
+
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include(merchant_product.name)
+      expect(response.body).not_to include(other_product.name)
+    end
+
+    it "shows mapped supplier products for account-backed merchant members" do
+      account_user = create_authenticated_user(role: "customer", email: "account.products@example.com")
+      account = Account.create_with_owner!(
+        creator: account_user,
+        name: "Account Product Merchant",
+        account_type: "individual_merchant"
+      )
+      MerchantProfile.create!(account: account, supplier: merchant_supplier, display_name: "Account Product Merchant")
+      login_as(account_user)
 
       get merchant_products_path
 

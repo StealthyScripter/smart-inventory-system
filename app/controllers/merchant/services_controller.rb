@@ -1,9 +1,10 @@
 module Merchant
   class ServicesController < BaseController
+    before_action -> { require_merchant_permission(:manage_services) }
     before_action :set_service, only: [:edit, :update]
 
     def index
-      @services = ServiceListing.for_supplier(merchant_suppliers.select(:id)).includes(:supplier).order(:name)
+      @services = merchant_services.includes(:supplier).order(:name)
     end
 
     def new
@@ -13,6 +14,7 @@ module Merchant
 
     def create
       @service = ServiceListing.new(service_params)
+      @service.account ||= current_merchant_account
       return unless supplier_allowed?(:new)
 
       if @service.save
@@ -29,6 +31,7 @@ module Merchant
 
     def update
       @service.assign_attributes(service_params)
+      @service.account ||= current_merchant_account
       return unless supplier_allowed?(:edit)
 
       if @service.save
@@ -42,7 +45,14 @@ module Merchant
     private
 
     def set_service
-      @service = ServiceListing.for_supplier(merchant_suppliers.select(:id)).find(params[:id])
+      @service = merchant_services.find(params[:id])
+    end
+
+    def merchant_services
+      supplier_services = ServiceListing.for_supplier(merchant_suppliers.select(:id))
+      return supplier_services unless current_merchant_account
+
+      ServiceListing.where(account: current_merchant_account).or(supplier_services)
     end
 
     def load_form_data

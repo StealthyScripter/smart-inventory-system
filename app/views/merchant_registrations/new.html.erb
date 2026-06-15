@@ -1,0 +1,65 @@
+<% content_for :page_title, "Merchant Sign Up" %>
+
+<div class="table-container" style="max-width: 640px; margin: 2rem auto;">
+  <div class="table-header">
+    <h3 class="table-title">Create Merchant Account</h3>
+  </div>
+
+  <div style="padding: 2rem;">
+    <%= form_with model: @user, url: merchants_sign_up_path, local: true do |form| %>
+      <% if @user.errors.any? %>
+        <div class="alert alert-danger">
+          <strong><%= pluralize(@user.errors.count, "error") %> prohibited this account from being created:</strong>
+          <ul style="margin-top: 0.5rem;">
+            <% @user.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div class="form-group">
+        <%= label_tag "merchant_shop_name", "Shop name", class: "form-label" %>
+        <%= text_field_tag "merchant[shop_name]", nil, class: "form-input", required: true, autofocus: true %>
+      </div>
+
+      <div class="form-group">
+        <%= label_tag "merchant_account_type", "Merchant type", class: "form-label" %>
+        <%= select_tag "merchant[account_type]",
+                       options_for_select([["Individual merchant", "individual_merchant"], ["Enterprise merchant", "enterprise_merchant"]]),
+                       class: "form-input" %>
+      </div>
+
+      <div class="form-group">
+        <%= form.label :email, class: "form-label" %>
+        <%= form.email_field :email, class: "form-input", required: true %>
+      </div>
+
+      <div class="grid-2" style="gap: 1rem;">
+        <div class="form-group">
+          <%= form.label :first_name, class: "form-label" %>
+          <%= form.text_field :first_name, class: "form-input", required: true %>
+        </div>
+
+        <div class="form-group">
+          <%= form.label :last_name, class: "form-label" %>
+          <%= form.text_field :last_name, class: "form-input", required: true %>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <%= form.label :password, class: "form-label" %>
+        <%= form.password_field :password, class: "form-input", required: true %>
+      </div>
+
+      <div class="form-group">
+        <%= form.label :password_confirmation, "Confirm Password", class: "form-label" %>
+        <%= form.password_field :password_confirmation, class: "form-input", required: true %>
+      </div>
+
+      <div style="margin-top: 2rem;">
+        <%= form.submit "Create Merchant Account", class: "btn btn-primary", style: "width: 100%;" %>
+      </div>
+    <% end %>
+  </div>
+</div>

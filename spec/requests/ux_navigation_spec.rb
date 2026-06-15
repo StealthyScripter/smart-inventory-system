@@ -35,6 +35,27 @@ RSpec.describe "UX navigation", type: :request do
     expect(response.body).to include("Customer / Bookings")
   end
 
+  it "renders buyer-focused navigation for customers" do
+    login_as(customer)
+
+    get catalog_path
+
+    expect(response).to have_http_status(:success)
+    expect(response.body).to include("Catalog")
+    expect(response.body).to include("Cart")
+    expect(response.body).to include("Orders")
+    expect(response.body).to include("Bookings")
+    expect(response.body).not_to include(">Inventory<")
+    expect(response.body).not_to include(">Suppliers<")
+  end
+
+  it "serves root as the public catalog for guests" do
+    get root_path
+
+    expect(response).to have_http_status(:success)
+    expect(response.body).to include("Marketplace / Catalog")
+  end
+
   it "renders catalog pagination controls when enough rows exist" do
     25.times do |index|
       Product.create!(

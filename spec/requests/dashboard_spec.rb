@@ -21,14 +21,14 @@ RSpec.describe "Dashboard", type: :request do
   end
 
   describe "GET /" do
-    it "returns http success for root path" do
+    it "returns http success for the public catalog root" do
       get root_path
       expect(response).to have_http_status(:success)
     end
 
-    it "redirects to dashboard" do
+    it "renders catalog content" do
       get root_path
-      expect(response.body).to include("Dashboard")
+      expect(response.body).to include("Marketplace / Catalog")
     end
   end
 
@@ -37,9 +37,9 @@ RSpec.describe "Dashboard", type: :request do
       delete logout_path
     end
 
-    it "redirects to login page" do
+    it "keeps the public catalog available" do
       get root_path
-      expect(response).to redirect_to(login_path)
+      expect(response).to have_http_status(:success)
     end
   end
 end

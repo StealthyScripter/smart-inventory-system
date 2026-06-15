@@ -7,7 +7,8 @@ class ReviewsController < ApplicationController
       user: current_user,
       order_item: order_item,
       product: order_item&.product,
-      supplier: order_item&.supplier
+      supplier: order_item&.supplier,
+      account: order_item&.account
     ))
 
     if review.save

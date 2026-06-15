@@ -1,6 +1,7 @@
 class StockLevel < ApplicationRecord
   belongs_to :product
   belongs_to :location
+  belongs_to :account, optional: true
 
   validates :current_quantity, :reserved_quantity, numericality: { greater_than_or_equal_to: 0 }
   validates :product_id, uniqueness: { scope: :location_id }

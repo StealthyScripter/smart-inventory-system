@@ -163,7 +163,7 @@
               <% end %>
             </li>
 
-            <% if current_user.supplier_user? && current_user.suppliers.exists? %>
+            <% if current_merchant_account.present? || (current_user.supplier_user? && current_user.suppliers.exists?) %>
               <li class="nav-item">
                 <%= link_to merchant_root_path, class: "nav-link #{'active' if request.path.start_with?('/merchant')}" do %>
                   <svg class="nav-icon" viewBox="0 0 24 24"><path d="M4 4h16l1 5v11H3V9l1-5zm2 7v7h12v-7H6zm.5-5l-.4 2h11.8l-.4-2H6.5z"/></svg>
@@ -172,40 +172,65 @@
               </li>
             <% end %>
 
-            <li class="nav-item">
-              <%= link_to root_path, class: "nav-link #{'active' if current_page?(root_path)}" do %>
-                <svg class="nav-icon" viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
-                Dashboard
-              <% end %>
-            </li>
+            <% if current_user.customer? %>
+              <li class="nav-item">
+                <%= link_to cart_path, class: "nav-link #{'active' if current_page?(cart_path)}" do %>
+                  <svg class="nav-icon" viewBox="0 0 24 24"><path d="M7 18c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zM7.2 14h7.45c.75 0 1.41-.41 1.75-1.03L20 6H5.21L4.27 4H1v2h2l3.6 7.59L5.25 16C4.52 17.33 5.48 19 7 19h12v-2H7l1.1-2z"/></svg>
+                  Cart
+                <% end %>
+              </li>
 
-            <li class="nav-item">
-              <%= link_to products_path, class: "nav-link #{'active' if current_page?(products_path)}" do %>
-                <svg class="nav-icon" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                Products
-              <% end %>
-            </li>
+              <li class="nav-item">
+                <%= link_to customer_orders_path, class: "nav-link #{'active' if current_page?(customer_orders_path)}" do %>
+                  <svg class="nav-icon" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14l4-4h12c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>
+                  Orders
+                <% end %>
+              </li>
 
-            <li class="nav-item">
-              <%= link_to inventory_path, class: "nav-link #{'active' if current_page?(inventory_path)}" do %>
-                <svg class="nav-icon" viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z"/></svg>
-                Inventory
-              <% end %>
-            </li>
+              <li class="nav-item">
+                <%= link_to customer_service_bookings_path, class: "nav-link #{'active' if current_page?(customer_service_bookings_path)}" do %>
+                  <svg class="nav-icon" viewBox="0 0 24 24"><path d="M7 2v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-2V2h-2v2H9V2H7zm12 8H5V8h14v2z"/></svg>
+                  Bookings
+                <% end %>
+              </li>
+            <% end %>
 
-            <li class="nav-item">
-              <%= link_to locations_path, class: "nav-link #{'active' if current_page?(locations_path)}" do %>
-                <svg class="nav-icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                Locations
-              <% end %>
-            </li>
+            <% if can_access_back_office? %>
+              <li class="nav-item">
+                <%= link_to dashboard_path, class: "nav-link #{'active' if current_page?(dashboard_path)}" do %>
+                  <svg class="nav-icon" viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+                  Dashboard
+                <% end %>
+              </li>
 
-            <li class="nav-item">
-              <%= link_to suppliers_path, class: "nav-link #{'active' if current_page?(suppliers_path)}" do %>
-                <svg class="nav-icon" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-                Suppliers
-              <% end %>
-            </li>
+              <li class="nav-item">
+                <%= link_to products_path, class: "nav-link #{'active' if current_page?(products_path)}" do %>
+                  <svg class="nav-icon" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                  Products
+                <% end %>
+              </li>
+
+              <li class="nav-item">
+                <%= link_to inventory_path, class: "nav-link #{'active' if current_page?(inventory_path)}" do %>
+                  <svg class="nav-icon" viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z"/></svg>
+                  Inventory
+                <% end %>
+              </li>
+
+              <li class="nav-item">
+                <%= link_to locations_path, class: "nav-link #{'active' if current_page?(locations_path)}" do %>
+                  <svg class="nav-icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                  Locations
+                <% end %>
+              </li>
+
+              <li class="nav-item">
+                <%= link_to suppliers_path, class: "nav-link #{'active' if current_page?(suppliers_path)}" do %>
+                  <svg class="nav-icon" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                  Suppliers
+                <% end %>
+              </li>
+            <% end %>
 
             <% if can_manage_users? %>
               <li class="nav-item">
@@ -231,7 +256,7 @@
                 <%= link_to "Notifications (#{current_user.notifications.unread.count})", notifications_path, class: "btn btn-secondary" %>
                 <% if current_user.customer? %>
                   <%= link_to "Inbox", customer_conversations_path, class: "btn btn-secondary" %>
-                <% elsif current_user.supplier_user? && current_user.suppliers.exists? %>
+                <% elsif current_merchant_account.present? || (current_user.supplier_user? && current_user.suppliers.exists?) %>
                   <%= link_to "Inbox", merchant_conversations_path, class: "btn btn-secondary" %>
                 <% end %>
                 <%= role_badge(current_user) %>
@@ -260,7 +285,7 @@
       </div>
     <% else %>
       <!-- No current_user: render only login or public pages -->
-      <div class="content-area" style="max-width: 480px; margin: 5rem auto;">
+      <div class="content-area" style="max-width: 1200px; margin: 2rem auto;">
         <% flash.each do |type, message| %>
           <div class="alert flash-<%= type %>"><%= message %></div>
         <% end %>

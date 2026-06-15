@@ -1,5 +1,6 @@
 module Merchant
   class ShopsController < BaseController
+    before_action -> { require_merchant_permission(:manage_account_settings) }
     before_action :set_shop
 
     def edit

@@ -1,5 +1,7 @@
 module Merchant
   class ProductOperationsController < BaseController
+    before_action -> { require_merchant_permission(:manage_catalog) }
+
     def bulk_update
       count = operations.bulk_update!(
         product_ids: params[:product_ids],

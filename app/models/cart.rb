@@ -2,6 +2,7 @@ class Cart < ApplicationRecord
   STATUSES = %w[active checked_out].freeze
 
   belongs_to :user
+  belongs_to :customer_account, class_name: "Account", optional: true
   has_many :cart_items, dependent: :destroy
   has_many :products, through: :cart_items
 

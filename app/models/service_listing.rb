@@ -16,11 +16,13 @@ class ServiceListing < ApplicationRecord
   STATUSES = %w[draft public paused archived].freeze
 
   belongs_to :supplier
+  belongs_to :account, optional: true
   has_many :reviews, dependent: :destroy
   has_many :service_booking_items, dependent: :destroy
   has_many :service_bookings, through: :service_booking_items
   has_many :reports, as: :reportable, dependent: :destroy
   has_many :moderation_actions, as: :moderatable, dependent: :destroy
+  has_one :marketplace_listing, dependent: :destroy
   has_many_attached :gallery_images
   has_many_attached :before_images
   has_many_attached :after_images
@@ -66,6 +68,10 @@ class ServiceListing < ApplicationRecord
 
   def average_rating
     reviews.published.average(:rating).to_f
+  end
+
+  def merchant_account
+    account || supplier&.merchant_account
   end
 
   def soft_delete!

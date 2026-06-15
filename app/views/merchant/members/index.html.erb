@@ -1,0 +1,56 @@
+<% content_for :page_title, "Team" %>
+
+<div class="table-container">
+  <div class="table-header">
+    <h1 class="table-title">Team</h1>
+  </div>
+
+  <div style="padding: 2rem;">
+    <%= form_with url: merchant_members_path, scope: :account_membership, local: true do |form| %>
+      <div class="grid-2" style="gap: 1rem;">
+        <div class="form-group">
+          <%= form.label :email, "User email", class: "form-label" %>
+          <%= form.email_field :email, class: "form-input", required: true %>
+        </div>
+
+        <div class="form-group" style="display: flex; align-items: end;">
+          <%= form.submit "Add Member", class: "btn btn-primary" %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <table class="inventory-table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Role</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @memberships.each do |membership| %>
+        <tr>
+          <td><%= membership.user.full_name %></td>
+          <td><%= membership.user.email %></td>
+          <td>
+            <%= form_with url: merchant_member_path(membership), method: :patch, scope: :account_membership, local: true do |form| %>
+              <%= form.select :role, AccountMembership::ROLES.map { |role| [role.titleize, role] }, { selected: membership.role }, class: "form-input" %>
+              <%= form.submit "Update", class: "btn btn-secondary" %>
+            <% end %>
+          </td>
+          <td><%= membership.active? ? "Active" : "Disabled" %></td>
+          <td>
+            <% if membership.active? %>
+              <%= button_to "Disable", merchant_member_path(membership), method: :delete, class: "btn btn-danger" %>
+            <% else %>
+              <%= button_to "Enable", enable_merchant_member_path(membership), method: :patch, class: "btn btn-secondary" %>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

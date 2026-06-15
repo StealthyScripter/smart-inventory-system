@@ -1,5 +1,6 @@
 module Merchant
   class ProductsController < BaseController
+    before_action -> { require_merchant_permission(:manage_catalog) }
     before_action :set_product, only: [:edit, :update]
 
     def index
@@ -13,12 +14,14 @@ module Merchant
 
     def create
       @product = Product.new(product_params)
+      @product.account ||= current_merchant_account
       return unless supplier_assignment_allowed?(:new)
 
       Product.transaction do
         @product.save!
         Location.find_each do |location|
           @product.stock_levels.find_or_create_by!(location: location) do |stock_level|
+            stock_level.account = current_merchant_account
             stock_level.current_quantity = 0
             stock_level.reserved_quantity = 0
           end
@@ -37,6 +40,7 @@ module Merchant
 
     def update
       @product.assign_attributes(product_params)
+      @product.account ||= current_merchant_account
       return unless supplier_assignment_allowed?(:edit)
 
       if @product.save

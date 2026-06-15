@@ -1,5 +1,8 @@
 module Merchant
   class InventoryController < BaseController
+    before_action -> { require_merchant_permission(:view_inventory) }, only: [:index]
+    before_action -> { require_merchant_permission(:adjust_stock) }, only: [:update]
+
     def index
       @stock_levels = merchant_stock_levels
     end
@@ -13,6 +16,7 @@ module Merchant
         stock_level.update!(current_quantity: quantity)
         StockMovement.create!(
           product: stock_level.product,
+          account: current_merchant_account,
           destination_location: stock_level.location,
           movement_type: "adjustment",
           quantity: (quantity - previous_quantity).abs,

@@ -1,14 +1,16 @@
 module Merchant
   class ServiceBookingsController < BaseController
+    before_action -> { require_merchant_permission(:manage_bookings) }
+
     def index
-      @bookings = ServiceBooking.includes(:user, :service_listings).where(supplier: merchant_suppliers).order(created_at: :desc)
+      @bookings = merchant_bookings.includes(:user, :service_listings).order(created_at: :desc)
       @booking_queue = @bookings.where(status: ["requested", "accepted"])
       @upcoming_jobs = @bookings.where(status: ["scheduled", "in_progress"]).where("scheduled_date >= ?", Date.current).order(:scheduled_date, :scheduled_time)
       @calendar_bookings = @bookings.where.not(scheduled_date: nil).group_by(&:scheduled_date)
     end
 
     def update
-      booking = ServiceBooking.where(supplier: merchant_suppliers).find(params[:id])
+      booking = merchant_bookings.find(params[:id])
       booking.assign_attributes(booking_params)
       booking.transition_to!(params[:status])
       Notification.create!(
@@ -25,7 +27,7 @@ module Merchant
     end
 
     def estimate
-      booking = ServiceBooking.includes(:user, :supplier, service_booking_items: :service_listing).where(supplier: merchant_suppliers).find(params[:id])
+      booking = merchant_bookings.includes(:user, :supplier, service_booking_items: :service_listing).find(params[:id])
       lines = [
         "Customer: #{booking.user.full_name}",
         "Provider: #{booking.supplier.name}",
@@ -44,6 +46,13 @@ module Merchant
 
     def booking_params
       params.permit(:scheduled_date, :scheduled_time, :duration_minutes, :notes)
+    end
+
+    def merchant_bookings
+      supplier_bookings = ServiceBooking.where(supplier: merchant_suppliers)
+      return supplier_bookings unless current_merchant_account
+
+      ServiceBooking.where(account: current_merchant_account).or(supplier_bookings)
     end
   end
 end

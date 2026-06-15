@@ -7,6 +7,7 @@ class Review < ApplicationRecord
   belongs_to :user
   belongs_to :product, optional: true
   belongs_to :supplier
+  belongs_to :account, optional: true
   belongs_to :order_item, optional: true
   belongs_to :service_listing, optional: true
   has_many :reports, as: :reportable, dependent: :destroy

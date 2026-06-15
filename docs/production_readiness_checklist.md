@@ -11,6 +11,7 @@
 ## Database
 
 - Migrations are up.
+- `rails accounts:backfill` has been run after legacy imports or seed refreshes.
 - Backups are configured.
 - Restore has been tested.
 - PostgreSQL migration is planned before marketplace scale.
@@ -33,8 +34,10 @@
 
 ## Marketplace Safety
 
-- Public catalog exposes only public marketplace records.
-- Merchant data is supplier-scoped.
-- Customer data is customer-scoped.
+- Public catalog exposes only visible marketplace listings.
+- Merchant data is account-scoped with supplier compatibility.
+- Customer data is customer-account/user scoped.
+- Individual merchant accounts have only one active membership.
+- Enterprise member roles and permissions are tested.
 - Admin governance is admin-only.
 - Local/private inventory is protected from public views.

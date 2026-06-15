@@ -10,7 +10,33 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_14_016000) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_15_006000) do
+  create_table "account_memberships", force: :cascade do |t|
+    t.integer "account_id", null: false
+    t.boolean "active", default: true, null: false
+    t.datetime "created_at", null: false
+    t.string "role", null: false
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["account_id", "role"], name: "index_account_memberships_on_account_id_and_role"
+    t.index ["account_id", "user_id"], name: "index_account_memberships_on_account_id_and_user_id", unique: true
+    t.index ["account_id"], name: "index_account_memberships_on_account_id"
+    t.index ["user_id", "active"], name: "index_account_memberships_on_user_id_and_active"
+    t.index ["user_id"], name: "index_account_memberships_on_user_id"
+  end
+
+  create_table "accounts", force: :cascade do |t|
+    t.string "account_type", null: false
+    t.datetime "created_at", null: false
+    t.integer "created_by_id"
+    t.string "name", null: false
+    t.string "status", default: "active", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_type"], name: "index_accounts_on_account_type"
+    t.index ["created_by_id"], name: "index_accounts_on_created_by_id"
+    t.index ["status"], name: "index_accounts_on_status"
+  end
+
   create_table "active_storage_attachments", force: :cascade do |t|
     t.integer "blob_id", null: false
     t.datetime "created_at", null: false
@@ -79,9 +105,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_14_016000) do
 
   create_table "carts", force: :cascade do |t|
     t.datetime "created_at", null: false
+    t.integer "customer_account_id"
     t.string "status", default: "active", null: false
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
+    t.index ["customer_account_id"], name: "index_carts_on_customer_account_id"
     t.index ["user_id", "status"], name: "index_carts_on_user_id_and_status"
     t.index ["user_id"], name: "index_carts_on_user_id"
   end
@@ -94,6 +122,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_14_016000) do
   end
 
   create_table "conversations", force: :cascade do |t|
+    t.integer "account_id"
     t.datetime "created_at", null: false
     t.integer "customer_id", null: false
     t.integer "order_id"
@@ -101,11 +130,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_14_016000) do
     t.string "subject", null: false
     t.integer "supplier_id", null: false
     t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_conversations_on_account_id"
     t.index ["customer_id", "supplier_id", "order_id", "service_booking_id"], name: "index_conversations_on_participants_and_context"
     t.index ["customer_id"], name: "index_conversations_on_customer_id"
     t.index ["order_id"], name: "index_conversations_on_order_id"
     t.index ["service_booking_id"], name: "index_conversations_on_service_booking_id"
     t.index ["supplier_id"], name: "index_conversations_on_supplier_id"
+  end
+
+  create_table "customer_profiles", force: :cascade do |t|
+    t.integer "account_id", null: false
+    t.datetime "created_at", null: false
+    t.string "display_name"
+    t.text "preferences"
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["account_id"], name: "index_customer_profiles_on_account_id", unique: true
+    t.index ["user_id"], name: "index_customer_profiles_on_user_id"
   end
 
   create_table "demand_forecasts", force: :cascade do |t|
@@ -123,12 +164,55 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_14_016000) do
   end
 
   create_table "locations", force: :cascade do |t|
+    t.integer "account_id"
     t.text "address"
     t.datetime "created_at", null: false
     t.integer "manager_id"
     t.string "name", null: false
     t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_locations_on_account_id"
     t.index ["manager_id"], name: "index_locations_on_manager_id"
+  end
+
+  create_table "marketplace_listings", force: :cascade do |t|
+    t.integer "account_id"
+    t.datetime "created_at", null: false
+    t.string "listing_type", default: "product", null: false
+    t.integer "product_id"
+    t.text "public_description"
+    t.decimal "public_price", precision: 10, scale: 2
+    t.decimal "sale_price", precision: 10, scale: 2
+    t.text "seo_keywords"
+    t.integer "service_listing_id"
+    t.boolean "shipping_eligible", default: true, null: false
+    t.string "status", default: "draft", null: false
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.string "visibility", default: "private", null: false
+    t.index ["account_id"], name: "index_marketplace_listings_on_account_id"
+    t.index ["product_id"], name: "index_marketplace_listings_on_product_id", unique: true
+    t.index ["service_listing_id"], name: "index_marketplace_listings_on_service_listing_id", unique: true
+    t.index ["status", "visibility", "listing_type"], name: "index_marketplace_listings_on_public_discovery"
+    t.index ["status"], name: "index_marketplace_listings_on_status"
+    t.index ["visibility"], name: "index_marketplace_listings_on_visibility"
+  end
+
+  create_table "merchant_profiles", force: :cascade do |t|
+    t.integer "account_id", null: false
+    t.datetime "created_at", null: false
+    t.integer "default_fulfillment_days", default: 3, null: false
+    t.string "default_inventory_policy", default: "track_stock", null: false
+    t.string "default_listing_status", default: "draft", null: false
+    t.text "description"
+    t.string "display_name", null: false
+    t.string "slug"
+    t.string "status", default: "draft", null: false
+    t.integer "supplier_id"
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_merchant_profiles_on_account_id", unique: true
+    t.index ["slug"], name: "index_merchant_profiles_on_slug", unique: true
+    t.index ["status"], name: "index_merchant_profiles_on_status"
+    t.index ["supplier_id"], name: "index_merchant_profiles_on_supplier_id", unique: true
   end
 
   create_table "messages", force: :cascade do |t|
@@ -158,6 +242,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_14_016000) do
   end
 
   create_table "notifications", force: :cascade do |t|
+    t.integer "account_id"
     t.text "body"
     t.datetime "created_at", null: false
     t.string "event_type", null: false
@@ -165,11 +250,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_14_016000) do
     t.string "title", null: false
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
+    t.index ["account_id"], name: "index_notifications_on_account_id"
     t.index ["user_id", "read_at"], name: "index_notifications_on_user_id_and_read_at"
     t.index ["user_id"], name: "index_notifications_on_user_id"
   end
 
   create_table "order_items", force: :cascade do |t|
+    t.integer "account_id"
     t.datetime "created_at", null: false
     t.datetime "delivered_at"
     t.string "fulfillment_status", default: "pending", null: false
@@ -184,6 +271,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_14_016000) do
     t.string "tracking_number"
     t.decimal "unit_price", precision: 10, scale: 2, default: "0.0", null: false
     t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_order_items_on_account_id"
     t.index ["order_id"], name: "index_order_items_on_order_id"
     t.index ["product_id"], name: "index_order_items_on_product_id"
     t.index ["supplier_id", "fulfillment_status"], name: "index_order_items_on_supplier_id_and_fulfillment_status"
@@ -193,12 +281,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_14_016000) do
 
   create_table "orders", force: :cascade do |t|
     t.datetime "created_at", null: false
+    t.integer "customer_account_id"
     t.string "order_number", null: false
     t.string "status", default: "pending", null: false
     t.datetime "submitted_at"
     t.decimal "total_amount", precision: 10, scale: 2, default: "0.0", null: false
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
+    t.index ["customer_account_id"], name: "index_orders_on_customer_account_id"
     t.index ["order_number"], name: "index_orders_on_order_number", unique: true
     t.index ["user_id", "status"], name: "index_orders_on_user_id_and_status"
     t.index ["user_id"], name: "index_orders_on_user_id"
@@ -219,6 +309,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_14_016000) do
   end
 
   create_table "products", force: :cascade do |t|
+    t.integer "account_id"
     t.string "barcode_value"
     t.integer "category_id", null: false
     t.datetime "created_at", null: false
@@ -235,6 +326,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_14_016000) do
     t.integer "supplier_id"
     t.decimal "unit_cost", precision: 10, scale: 2
     t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_products_on_account_id"
     t.index ["barcode_value"], name: "index_products_on_barcode_value", unique: true
     t.index ["category_id", "marketplace_status"], name: "index_products_on_category_and_marketplace_status"
     t.index ["category_id"], name: "index_products_on_category_id"
@@ -274,6 +366,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_14_016000) do
   end
 
   create_table "reports", force: :cascade do |t|
+    t.integer "account_id"
     t.datetime "created_at", null: false
     t.text "details"
     t.string "reason", null: false
@@ -282,6 +375,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_14_016000) do
     t.integer "reporter_id", null: false
     t.string "status", default: "open", null: false
     t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_reports_on_account_id"
     t.index ["reportable_type", "reportable_id", "status"], name: "index_reports_on_reportable_type_and_reportable_id_and_status"
     t.index ["reportable_type", "reportable_id"], name: "index_reports_on_reportable"
     t.index ["reporter_id"], name: "index_reports_on_reporter_id"
@@ -289,6 +383,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_14_016000) do
   end
 
   create_table "reviews", force: :cascade do |t|
+    t.integer "account_id"
     t.text "body"
     t.datetime "created_at", null: false
     t.datetime "discarded_at"
@@ -300,6 +395,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_14_016000) do
     t.integer "supplier_id", null: false
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
+    t.index ["account_id"], name: "index_reviews_on_account_id"
     t.index ["discarded_at"], name: "index_reviews_on_discarded_at"
     t.index ["order_item_id"], name: "index_reviews_on_order_item_id"
     t.index ["product_id", "status"], name: "index_reviews_on_product_id_and_status"
@@ -339,6 +435,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_14_016000) do
   end
 
   create_table "service_bookings", force: :cascade do |t|
+    t.integer "account_id"
     t.string "booking_number", null: false
     t.datetime "created_at", null: false
     t.integer "duration_minutes"
@@ -349,6 +446,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_14_016000) do
     t.integer "supplier_id", null: false
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
+    t.index ["account_id"], name: "index_service_bookings_on_account_id"
     t.index ["booking_number"], name: "index_service_bookings_on_booking_number", unique: true
     t.index ["status", "scheduled_date"], name: "index_service_bookings_on_status_and_scheduled_date"
     t.index ["supplier_id", "status"], name: "index_service_bookings_on_supplier_id_and_status"
@@ -358,6 +456,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_14_016000) do
   end
 
   create_table "service_listings", force: :cascade do |t|
+    t.integer "account_id"
     t.datetime "created_at", null: false
     t.text "description"
     t.datetime "discarded_at"
@@ -369,6 +468,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_14_016000) do
     t.string "status", default: "draft", null: false
     t.integer "supplier_id", null: false
     t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_service_listings_on_account_id"
     t.index ["discarded_at"], name: "index_service_listings_on_discarded_at"
     t.index ["service_category"], name: "index_service_listings_on_service_category"
     t.index ["status", "service_category", "supplier_id"], name: "index_services_on_discovery_fields"
@@ -377,18 +477,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_14_016000) do
   end
 
   create_table "stock_levels", force: :cascade do |t|
+    t.integer "account_id"
     t.datetime "created_at", null: false
     t.integer "current_quantity", default: 0
     t.integer "location_id", null: false
     t.integer "product_id", null: false
     t.integer "reserved_quantity", default: 0
     t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_stock_levels_on_account_id"
     t.index ["location_id"], name: "index_stock_levels_on_location_id"
     t.index ["product_id", "location_id"], name: "index_stock_levels_on_product_id_and_location_id", unique: true
     t.index ["product_id"], name: "index_stock_levels_on_product_id"
   end
 
   create_table "stock_movements", force: :cascade do |t|
+    t.integer "account_id"
     t.datetime "created_at", null: false
     t.integer "destination_location_id"
     t.datetime "movement_date", null: false
@@ -401,6 +504,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_14_016000) do
     t.integer "source_location_id"
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
+    t.index ["account_id"], name: "index_stock_movements_on_account_id"
     t.index ["destination_location_id"], name: "index_stock_movements_on_destination_location_id"
     t.index ["product_id"], name: "index_stock_movements_on_product_id"
     t.index ["reference_type", "reference_id"], name: "index_stock_movements_on_reference_type_and_reference_id"
@@ -461,36 +565,55 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_14_016000) do
     t.index ["provider", "external_id"], name: "index_webhook_events_on_provider_and_external_id", unique: true
   end
 
+  add_foreign_key "account_memberships", "accounts"
+  add_foreign_key "account_memberships", "users"
+  add_foreign_key "accounts", "users", column: "created_by_id"
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "audit_logs", "users", column: "actor_id"
   add_foreign_key "availability_slots", "suppliers"
   add_foreign_key "cart_items", "carts"
   add_foreign_key "cart_items", "products"
+  add_foreign_key "carts", "accounts", column: "customer_account_id"
   add_foreign_key "carts", "users"
+  add_foreign_key "conversations", "accounts"
   add_foreign_key "conversations", "orders"
   add_foreign_key "conversations", "service_bookings"
   add_foreign_key "conversations", "suppliers"
   add_foreign_key "conversations", "users", column: "customer_id"
+  add_foreign_key "customer_profiles", "accounts"
+  add_foreign_key "customer_profiles", "users"
   add_foreign_key "demand_forecasts", "locations"
   add_foreign_key "demand_forecasts", "products"
+  add_foreign_key "locations", "accounts"
   add_foreign_key "locations", "users", column: "manager_id"
+  add_foreign_key "marketplace_listings", "accounts"
+  add_foreign_key "marketplace_listings", "products"
+  add_foreign_key "marketplace_listings", "service_listings"
+  add_foreign_key "merchant_profiles", "accounts"
+  add_foreign_key "merchant_profiles", "suppliers"
   add_foreign_key "messages", "conversations"
   add_foreign_key "messages", "users", column: "sender_id"
   add_foreign_key "moderation_actions", "users", column: "actor_id"
+  add_foreign_key "notifications", "accounts"
   add_foreign_key "notifications", "users"
+  add_foreign_key "order_items", "accounts"
   add_foreign_key "order_items", "orders"
   add_foreign_key "order_items", "products"
   add_foreign_key "order_items", "suppliers"
+  add_foreign_key "orders", "accounts", column: "customer_account_id"
   add_foreign_key "orders", "users"
   add_foreign_key "payments", "orders"
+  add_foreign_key "products", "accounts"
   add_foreign_key "products", "categories"
   add_foreign_key "products", "suppliers"
   add_foreign_key "purchase_order_items", "products"
   add_foreign_key "purchase_order_items", "purchase_orders"
   add_foreign_key "purchase_orders", "suppliers"
   add_foreign_key "purchase_orders", "users"
+  add_foreign_key "reports", "accounts"
   add_foreign_key "reports", "users", column: "reporter_id"
+  add_foreign_key "reviews", "accounts"
   add_foreign_key "reviews", "order_items"
   add_foreign_key "reviews", "products"
   add_foreign_key "reviews", "service_listings"
@@ -501,11 +624,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_14_016000) do
   add_foreign_key "sales_transactions", "users"
   add_foreign_key "service_booking_items", "service_bookings"
   add_foreign_key "service_booking_items", "service_listings"
+  add_foreign_key "service_bookings", "accounts"
   add_foreign_key "service_bookings", "suppliers"
   add_foreign_key "service_bookings", "users"
+  add_foreign_key "service_listings", "accounts"
   add_foreign_key "service_listings", "suppliers"
+  add_foreign_key "stock_levels", "accounts"
   add_foreign_key "stock_levels", "locations"
   add_foreign_key "stock_levels", "products"
+  add_foreign_key "stock_movements", "accounts"
   add_foreign_key "stock_movements", "locations", column: "destination_location_id"
   add_foreign_key "stock_movements", "locations", column: "source_location_id"
   add_foreign_key "stock_movements", "products"

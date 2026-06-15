@@ -7,7 +7,9 @@
   </div>
 
   <div style="padding: 2rem;">
-    <%= form_with url: login_path, local: true do |form| %>
+    <%= form_with url: request.path, local: true do |form| %>
+      <%= hidden_field_tag :login_context, @login_context %>
+
       <div class="form-group">
         <%= form.label :email, class: "form-label" %>
         <%= form.email_field :email, class: "form-input", required: true, autofocus: true %>

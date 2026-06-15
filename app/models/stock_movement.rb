@@ -4,6 +4,7 @@ class StockMovement < ApplicationRecord
   belongs_to :destination_location, class_name: "Location", optional: true
   belongs_to :reference, polymorphic: true, optional: true
   belongs_to :user
+  belongs_to :account, optional: true
 
   validates :movement_type, :quantity, :movement_date, presence: true
   validates :quantity, numericality: { greater_than: 0 }

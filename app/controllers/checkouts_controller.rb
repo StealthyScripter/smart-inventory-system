@@ -21,6 +21,8 @@ class CheckoutsController < ApplicationController
   end
 
   def current_cart
-    @current_cart ||= Cart.find_or_create_by!(user: current_user, status: "active")
+    @current_cart ||= Cart.find_or_create_by!(user: current_user, status: "active") do |cart|
+      cart.customer_account = current_customer_account
+    end
   end
 end
