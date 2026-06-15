@@ -14,6 +14,7 @@ class ServiceListing < ApplicationRecord
     "Equipment rental"
   ].freeze
   STATUSES = %w[draft public paused archived].freeze
+  VISIBILITIES = %w[public private].freeze
 
   belongs_to :supplier
   belongs_to :account, optional: true
@@ -30,10 +31,11 @@ class ServiceListing < ApplicationRecord
   validates :name, :service_category, presence: true
   validates :service_category, inclusion: { in: CATEGORIES }
   validates :status, inclusion: { in: STATUSES }
+  validates :visibility, inclusion: { in: VISIBILITIES }
   validates :starting_price, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
   validates_image_attachments :gallery_images, :before_images, :after_images
 
-  scope :publicly_listed, -> { where(status: "public") }
+  scope :publicly_listed, -> { where(status: "public", visibility: "public") }
   scope :for_supplier, ->(supplier_ids) { where(supplier_id: supplier_ids) }
   scope :search, lambda { |query|
     return all if query.blank?

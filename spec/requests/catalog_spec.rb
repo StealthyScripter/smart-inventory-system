@@ -116,7 +116,24 @@ RSpec.describe "Catalog", type: :request do
 
       expect(response).to have_http_status(:success)
       expect(response.body).to include(public_product.name)
-      expect(response.body).to include(public_product.sku)
+      expect(response.body).not_to include(public_product.sku)
+    end
+
+    it "shows listing-specific public fields instead of internal inventory fields" do
+      public_product.marketplace_listing.update!(
+        title: "Customer Facing Bolt",
+        public_description: "Public listing copy",
+        public_price: 9.99,
+        availability: "preorder"
+      )
+
+      get catalog_product_path(public_product)
+
+      expect(response.body).to include("Customer Facing Bolt")
+      expect(response.body).to include("Public listing copy")
+      expect(response.body).to include("$9.99")
+      expect(response.body).to include("Preorder")
+      expect(response.body).not_to include(public_product.sku)
     end
 
     it "does not expose private product details" do

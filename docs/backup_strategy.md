@@ -2,19 +2,43 @@
 
 ## Database Backups
 
-Back up all production SQLite files under `storage/`, including primary, cache, queue, and cable databases if present. Schedule at least daily backups, with more frequent snapshots for active production usage.
+Production marketplace deployments should run PostgreSQL and use both managed
+snapshots and logical backups. Keep at least one restore-tested logical backup
+path so data can be recovered outside the hosting provider.
 
-For PostgreSQL future deployments, use managed snapshots plus logical backups with restore testing.
+Recommended schedule:
+
+- Staging: daily snapshots before QA windows and release candidates.
+- Production: hourly snapshots for active marketplaces.
+- Production: daily logical backups.
+- Production: weekly and monthly retained archives.
+
+SQLite production files under `storage/` are supported only for local/demo
+fallbacks. If used, back up the primary, cache, queue, and cable database files
+together with the Active Storage files.
 
 ## Uploaded Files and Media
 
-Back up Active Storage files under `storage/`. Database and media backups must be retained as matching restore points because Active Storage metadata lives in the database.
-
-## Frequency
-
-- Demo or staging: daily.
-- Production: hourly database snapshots for active marketplaces, daily full backups, and retained weekly/monthly archives.
+Back up object storage buckets with versioning or lifecycle-managed snapshots.
+Database and media backups must be restorable to the same point in time because
+Active Storage metadata lives in the database while blobs live in object
+storage.
 
 ## Restore Testing
 
-Test restore at least before each major release and after changing storage configuration. Verify login, catalog browsing, media display, orders, bookings, and merchant dashboards after restoration.
+Test restore before each major release and after changing database or storage
+configuration. Verify:
+
+- user login
+- catalog browsing
+- media display
+- cart and checkout
+- orders and bookings
+- merchant inventory and listings
+- admin moderation
+
+## Access Control
+
+Backup credentials must be separate from application runtime credentials where
+the hosting platform allows it. Store backup secrets in the deployment secret
+manager, not in the repository.

@@ -45,9 +45,10 @@
       </tr>
     </thead>
     <tbody>
-      <% @products.each do |product| %>
+      <% @product_listings.each do |listing| %>
+        <% product = listing.product %>
         <tr>
-          <td><%= link_to product.name, catalog_product_path(product) %></td>
+          <td><%= link_to listing.title, catalog_product_path(product) %></td>
           <td><%= product.category.name %></td>
           <td>
             <% if product.supplier %>
@@ -56,12 +57,12 @@
               Marketplace
             <% end %>
           </td>
-          <td><%= currency(product.selling_price.to_f) %></td>
-          <td><%= number_with_delimiter(product.available_stock) %></td>
+          <td><%= currency(listing.current_price.to_f) %></td>
+          <td><%= listing.availability.titleize %></td>
         </tr>
       <% end %>
 
-      <% if @products.empty? %>
+      <% if @product_listings.empty? %>
         <tr>
           <td colspan="5" style="text-align: center; color: #718096; font-style: italic;">
             No public products are available.
@@ -70,5 +71,5 @@
       <% end %>
     </tbody>
   </table>
-  <%= pagination_controls(@products) %>
+  <%= pagination_controls(@product_listings) %>
 </div>

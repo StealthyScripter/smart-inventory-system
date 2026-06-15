@@ -19,6 +19,7 @@ module Merchant
 
       Product.transaction do
         @product.save!
+        sync_marketplace_listing!
         Location.find_each do |location|
           @product.stock_levels.find_or_create_by!(location: location) do |stock_level|
             stock_level.account = current_merchant_account
@@ -44,6 +45,7 @@ module Merchant
       return unless supplier_assignment_allowed?(:edit)
 
       if @product.save
+        sync_marketplace_listing!
         redirect_to merchant_products_path, notice: "Product was successfully updated."
       else
         load_form_data
@@ -91,6 +93,36 @@ module Merchant
         :featured_image,
         images: []
       )
+    end
+
+    def marketplace_listing_params
+      params.fetch(:marketplace_listing, {}).permit(
+        :title,
+        :public_description,
+        :public_price,
+        :sale_price,
+        :availability,
+        :status,
+        :visibility,
+        :shipping_eligible,
+        :search_tags,
+        :featured_media_url
+      )
+    end
+
+    def sync_marketplace_listing!
+      listing_attributes = marketplace_listing_params
+      return if listing_attributes.blank?
+
+      listing = @product.marketplace_listing || @product.build_marketplace_listing(
+        account: @product.merchant_account,
+        listing_type: "product"
+      )
+      listing.assign_attributes(listing_attributes)
+      listing.title = @product.name if listing.title.blank?
+      listing.account ||= @product.merchant_account
+      listing.listing_type = "product"
+      listing.save!
     end
   end
 end

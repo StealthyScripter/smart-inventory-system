@@ -37,8 +37,10 @@ module Admin
       case [moderatable.class.name, action_name]
       when ["Product", "hide"]
         moderatable.update!(marketplace_status: "archived")
+        moderatable.marketplace_listing&.update!(status: "hidden")
       when ["Product", "approve"]
         moderatable.update!(marketplace_status: "public")
+        moderatable.marketplace_listing&.update!(status: "active", visibility: "public")
       when ["Product", "soft_delete"], ["ServiceListing", "soft_delete"], ["Supplier", "soft_delete"], ["Review", "soft_delete"]
         moderatable.soft_delete!
       when ["Product", "restore"], ["ServiceListing", "restore"], ["Supplier", "restore"], ["Review", "restore"]
@@ -49,8 +51,10 @@ module Admin
         moderatable.update!(status: "public")
       when ["Supplier", "suspend"]
         moderatable.update!(shop_status: "paused")
+        moderatable.merchant_account&.update!(status: "suspended")
       when ["Supplier", "approve"]
         moderatable.update!(shop_status: "public")
+        moderatable.merchant_account&.update!(status: "active")
       when ["Review", "hide"]
         moderatable.update!(status: "hidden")
       when ["Review", "approve"]

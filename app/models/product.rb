@@ -37,7 +37,7 @@ class Product < ApplicationRecord
 
   scope :marketplace_available, -> { where(listing_scope: ["marketplace", "both"]) }
   scope :local_only, -> { where(listing_scope: "local") }
-  scope :publicly_listed, -> { joins(:marketplace_listing).merge(MarketplaceListing.visible.products).marketplace_available }
+  scope :publicly_listed, -> { where(marketplace_status: "public").joins(:marketplace_listing).merge(MarketplaceListing.visible.products).marketplace_available }
   scope :active_marketplace, -> { where.not(marketplace_status: "archived") }
   scope :owned_by_suppliers, ->(supplier_ids) { where(supplier_id: supplier_ids) }
   scope :owned_by_account, ->(account) { where(account: account) }
@@ -85,7 +85,7 @@ class Product < ApplicationRecord
   end
 
   def publicly_listed?
-    marketplace_status == "public"
+    marketplace_listing&.visible? && marketplace_status == "public"
   end
 
   def average_rating
@@ -117,7 +117,8 @@ class Product < ApplicationRecord
       public_price: selling_price,
       status: "active",
       visibility: "public",
-      listing_type: "product"
+      listing_type: "product",
+      search_tags: search_tags
     )
   end
 

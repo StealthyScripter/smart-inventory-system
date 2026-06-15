@@ -75,4 +75,38 @@ RSpec.describe AccountBackfill do
       described_class.call
     end.to change { customer.reload.customer_accounts.count }.by(1)
   end
+
+  it "adds memberships for new supplier users when the merchant account already exists" do
+    owner = user("backfill.existing.owner@example.com", "supplier")
+    employee = user("backfill.existing.employee@example.com", "supplier")
+    supplier = Supplier.create!(name: "Existing Account Supplier", default_lead_time_days: 7)
+    SupplierUser.create!(supplier: supplier, user: owner)
+    account = Account.create!(name: "Existing Account Supplier", account_type: "enterprise_merchant", creator: owner)
+    account.account_memberships.create!(user: owner, role: "owner")
+    MerchantProfile.create!(account: account, supplier: supplier, display_name: supplier.name)
+    SupplierUser.create!(supplier: supplier, user: employee)
+
+    described_class.call
+
+    expect(account.account_memberships.find_by!(user: employee).role).to eq("employee")
+  end
+
+  it "promotes existing individual merchant accounts when legacy supplier users become multi-user" do
+    owner = user("backfill.promote.owner@example.com", "supplier")
+    employee = user("backfill.promote.employee@example.com", "supplier")
+    supplier = Supplier.create!(name: "Promoted Legacy Supplier", default_lead_time_days: 7)
+    SupplierUser.create!(supplier: supplier, user: owner)
+    account = Account.create_with_owner!(
+      creator: owner,
+      name: supplier.name,
+      account_type: "individual_merchant"
+    )
+    MerchantProfile.create!(account: account, supplier: supplier, display_name: supplier.name)
+    SupplierUser.create!(supplier: supplier, user: employee)
+
+    described_class.call
+
+    expect(account.reload).to be_enterprise_merchant
+    expect(account.account_memberships.find_by!(user: employee).role).to eq("employee")
+  end
 end

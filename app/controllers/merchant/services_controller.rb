@@ -78,6 +78,7 @@ module Merchant
         :starting_price,
         :image_url,
         :status,
+        :visibility,
         gallery_images: [],
         before_images: [],
         after_images: []

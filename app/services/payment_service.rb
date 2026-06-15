@@ -4,13 +4,7 @@ class PaymentService
   end
 
   def create_payment!(provider: "manual")
-    order.payments.create!(
-      provider: provider,
-      provider_reference: "manual_#{SecureRandom.hex(8)}",
-      amount: order.total_amount,
-      currency: "USD",
-      status: "pending"
-    )
+    PaymentProviders::Registry.fetch(provider).new.create_payment!(order)
   end
 
   def mark_paid!(payment)

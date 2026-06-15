@@ -35,6 +35,7 @@ RSpec.describe "Admin marketplace moderation", type: :request do
 
   it "tracks product moderation actions and hides listings" do
     login_as(admin)
+    expect(product.marketplace_listing).to be_visible
 
     expect do
       post admin_moderation_actions_path, params: {
@@ -48,10 +49,14 @@ RSpec.describe "Admin marketplace moderation", type: :request do
     end.to change(ModerationAction, :count).by(1)
 
     expect(product.reload.marketplace_status).to eq("archived")
+    expect(product.marketplace_listing.reload.status).to eq("hidden")
+    expect(Product.publicly_listed).not_to include(product)
     expect(ModerationAction.last.actor).to eq(admin)
   end
 
   it "suspends merchants through audited moderation actions" do
+    account = Account.create!(name: "Moderation Account", account_type: "enterprise_merchant")
+    MerchantProfile.create!(account: account, supplier: supplier, display_name: supplier.name)
     login_as(admin)
 
     post admin_moderation_actions_path, params: {
@@ -63,6 +68,7 @@ RSpec.describe "Admin marketplace moderation", type: :request do
     }
 
     expect(supplier.reload.shop_status).to eq("paused")
+    expect(account.reload.status).to eq("suspended")
     expect(ModerationAction.last.moderatable).to eq(supplier)
   end
 

@@ -49,13 +49,6 @@
 
         <div>
           <div class="form-group">
-            <%= form.label :marketplace_status, "Marketplace Status", class: "form-label" %>
-            <%= form.select :marketplace_status,
-                            options_for_select(Product::MARKETPLACE_STATUSES.map { |status| [status.titleize, status] }, product.marketplace_status),
-                            {}, { class: "form-select" } %>
-          </div>
-
-          <div class="form-group">
             <%= form.label :listing_scope, "Listing Scope", class: "form-label" %>
             <%= form.select :listing_scope,
                             options_for_select(Product::LISTING_SCOPES.map { |scope| [scope.titleize, scope] }, product.listing_scope),
@@ -90,6 +83,78 @@
           <div class="form-group">
             <%= form.label :images, "Product Images", class: "form-label" %>
             <%= form.file_field :images, multiple: true, accept: "image/*", class: "form-input" %>
+          </div>
+        </div>
+      </div>
+
+      <% listing = product.marketplace_listing || product.build_marketplace_listing(title: product.name, public_description: product.description, public_price: product.selling_price, status: "draft", visibility: "private", listing_type: "product", availability: "available") %>
+      <div class="table-container" style="margin-top: 2rem;">
+        <div class="table-header">
+          <h3 class="table-title">Marketplace Listing</h3>
+        </div>
+        <div style="padding: 1.5rem;">
+          <div class="grid-2" style="gap: 2rem;">
+            <div>
+              <div class="form-group">
+                <%= label_tag "marketplace_listing_title", "Public Title", class: "form-label" %>
+                <%= text_field_tag "marketplace_listing[title]", listing.title, class: "form-input" %>
+              </div>
+
+              <div class="form-group">
+                <%= label_tag "marketplace_listing_public_description", "Public Description", class: "form-label" %>
+                <%= text_area_tag "marketplace_listing[public_description]", listing.public_description, rows: 3, class: "form-input" %>
+              </div>
+
+              <div class="form-group">
+                <%= label_tag "marketplace_listing_search_tags", "Public Search Tags", class: "form-label" %>
+                <%= text_area_tag "marketplace_listing[search_tags]", listing.search_tags, rows: 2, class: "form-input" %>
+              </div>
+            </div>
+
+            <div>
+              <div class="form-group">
+                <%= label_tag "marketplace_listing_public_price", "Public Price ($)", class: "form-label" %>
+                <%= number_field_tag "marketplace_listing[public_price]", listing.public_price, step: 0.01, min: 0, class: "form-input" %>
+              </div>
+
+              <div class="form-group">
+                <%= label_tag "marketplace_listing_sale_price", "Sale Price ($)", class: "form-label" %>
+                <%= number_field_tag "marketplace_listing[sale_price]", listing.sale_price, step: 0.01, min: 0, class: "form-input" %>
+              </div>
+
+              <div class="form-group">
+                <%= label_tag "marketplace_listing_availability", "Availability", class: "form-label" %>
+                <%= select_tag "marketplace_listing[availability]",
+                               options_for_select(MarketplaceListing::AVAILABILITIES.map { |value| [value.titleize, value] }, listing.availability),
+                               class: "form-select" %>
+              </div>
+
+              <div class="form-group">
+                <%= label_tag "marketplace_listing_status", "Listing Status", class: "form-label" %>
+                <%= select_tag "marketplace_listing[status]",
+                               options_for_select(MarketplaceListing::STATUSES.map { |status| [status.titleize, status] }, listing.status),
+                               class: "form-select" %>
+              </div>
+
+              <div class="form-group">
+                <%= label_tag "marketplace_listing_visibility", "Visibility", class: "form-label" %>
+                <%= select_tag "marketplace_listing[visibility]",
+                               options_for_select(MarketplaceListing::VISIBILITIES.map { |visibility| [visibility.titleize, visibility] }, listing.visibility),
+                               class: "form-select" %>
+              </div>
+
+              <div class="form-group">
+                <%= label_tag "marketplace_listing_featured_media_url", "Featured Media URL", class: "form-label" %>
+                <%= text_field_tag "marketplace_listing[featured_media_url]", listing.featured_media_url, class: "form-input" %>
+              </div>
+
+              <div class="form-group">
+                <%= label_tag "marketplace_listing_shipping_eligible", "Shipping Eligible", class: "form-label" %>
+                <%= select_tag "marketplace_listing[shipping_eligible]",
+                               options_for_select([["Yes", true], ["No", false]], listing.shipping_eligible),
+                               class: "form-select" %>
+              </div>
+            </div>
           </div>
         </div>
       </div>

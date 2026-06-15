@@ -83,6 +83,7 @@ Rails.application.routes.draw do
   post "conversations/:id", to: "conversations#create"
   namespace :webhooks do
     post "payments/manual", to: "payments#create"
+    post "payments/:provider", to: "payments#create", as: :provider_payment
   end
 
   get "dashboard", to: "dashboard#index"

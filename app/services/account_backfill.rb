@@ -29,13 +29,23 @@ class AccountBackfill
 
   def backfill_merchant_accounts
     Supplier.includes(:supplier_users).find_each do |supplier|
-      next if supplier.merchant_account.present?
-
       supplier_users = supplier.supplier_users.includes(:user).to_a
       creator = supplier_users.first&.user
-      account_type = supplier_users.many? ? "enterprise_merchant" : "individual_merchant"
-      account = Account.create!(name: supplier.name, account_type: account_type, creator: creator)
+      account = supplier.merchant_account || create_merchant_account_for(supplier, creator, supplier_users)
+      account.update!(account_type: "enterprise_merchant") if supplier_users.many? && account.individual_merchant?
 
+      supplier_users.each_with_index do |supplier_user, index|
+        role = account.enterprise_merchant? && index.positive? ? "employee" : "owner"
+        account.account_memberships.find_or_create_by!(user: supplier_user.user) do |membership|
+          membership.role = role
+        end
+      end
+    end
+  end
+
+  def create_merchant_account_for(supplier, creator, supplier_users)
+    account_type = supplier_users.many? ? "enterprise_merchant" : "individual_merchant"
+    Account.create!(name: supplier.name, account_type: account_type, creator: creator).tap do |account|
       MerchantProfile.create!(
         account: account,
         supplier: supplier,
@@ -44,13 +54,6 @@ class AccountBackfill
         slug: supplier.shop_slug,
         status: supplier.shop_status
       )
-
-      supplier_users.each_with_index do |supplier_user, index|
-        role = account.enterprise_merchant? && index.positive? ? "employee" : "owner"
-        account.account_memberships.find_or_create_by!(user: supplier_user.user) do |membership|
-          membership.role = role
-        end
-      end
     end
   end
 

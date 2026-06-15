@@ -2,44 +2,73 @@
 
 ## Runtime
 
-Smart Inventory is a Rails 8.1 server-rendered application using SQLite, Solid Queue, Solid Cache, Solid Cable, Active Storage, Hotwire, RSpec, RuboCop, and Brakeman.
+Smart Inventory is a Rails 8.1 server-rendered application using Hotwire,
+importmap, Active Storage, Solid Queue, Solid Cache, RSpec, RuboCop, and
+Brakeman.
 
 ## Required Environment Variables
 
-- `RAILS_MASTER_KEY`: required if encrypted credentials are used in production.
-- `SECRET_KEY_BASE`: required for Rails sessions and signed data.
-- `RAILS_ENV=production`: production runtime mode.
-- `DEMO_SEED_CREDENTIAL`: optional credential used only by demo seeds.
-- `MANUAL_PAYMENT_WEBHOOK_SECRET`: required if manual/test payment webhook handling is enabled.
+- `RAILS_ENV=production`
+- `SECRET_KEY_BASE`
+- `RAILS_MASTER_KEY` when encrypted credentials are used
+- `DATABASE_URL` for production PostgreSQL deployments
+- `ACTIVE_STORAGE_SERVICE` for production object storage, for example `amazon_env`
+- `ACTIVE_STORAGE_BUCKET`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and
+  `AWS_REGION` when using the `amazon_env` storage service
+- `MANUAL_PAYMENT_WEBHOOK_SECRET` when manual/test webhooks are enabled
+- `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` when Stripe is enabled
+- `DEMO_SEED_CREDENTIAL` only for intentional staging/demo seed runs
 
 Do not hardcode payment, mail, storage, or webhook secrets.
 
-## Database Notes
+## Database
 
-The current production configuration uses SQLite database files in `storage/`. This is acceptable for a controlled milestone demo but should move to PostgreSQL before marketplace scale or multi-node deployment.
+Development and test continue to use SQLite. Production marketplace deployments
+should use PostgreSQL through `DATABASE_URL`. The SQLite production entries in
+`config/database.yml` remain only as a backwards-compatible fallback for local
+containers, demos, and single-node smoke tests.
 
 Before deployment:
 
 ```sh
 bin/rails db:migrate
-bin/rails db:seed # only when intentional
+bin/rails db:seed # staging/demo only, when intentional
 ```
 
-## Active Storage Notes
+Run `bin/rails db:migrate:status` after deploy and before routing production
+traffic.
 
-Production currently uses local disk storage. Ensure the `storage/` directory is persisted and backed up. Move to S3, GCS, Azure Storage, or another durable object store before high-volume production use.
+## Active Storage
+
+Local development and tests use disk storage. Production should use durable
+object storage by setting `ACTIVE_STORAGE_SERVICE=amazon_env` and the matching
+AWS/S3-compatible environment variables. Local production storage is acceptable
+only for controlled demos where the `storage/` volume is persistent and backed
+up.
 
 ## Background Jobs
 
-Production uses Solid Queue. Ensure the queue database is persisted and a worker process is running. The app can run Solid Queue in Puma with `SOLID_QUEUE_IN_PUMA`, but a separate worker is preferred for production operations.
+Production uses Solid Queue. Run a dedicated worker process for production
+traffic. `SOLID_QUEUE_IN_PUMA` is acceptable for small staging/demo deploys but
+should not be the default for real marketplace load.
+
+## Deployment Steps
+
+1. Build the release image from the tagged commit.
+2. Set production environment variables in the hosting platform.
+3. Run migrations.
+4. Start web and worker processes.
+5. Verify `/up`, `/catalog`, merchant login, customer login, checkout, and admin
+   moderation smoke tests.
+6. Confirm logs, queue processing, backups, and object storage writes.
 
 ## Production Checklist
 
-- Set `RAILS_MASTER_KEY` and `SECRET_KEY_BASE`.
-- Confirm mail delivery settings.
-- Persist SQLite and Active Storage files.
-- Run migrations.
-- Run smoke tests after deployment.
-- Confirm SSL termination and secure cookies.
-- Confirm backup jobs.
-- Confirm monitoring and error reporting.
+- PostgreSQL is configured through `DATABASE_URL`.
+- Active Storage uses durable object storage or a documented persistent volume.
+- SSL termination is configured; Rails `force_ssl` is enabled.
+- Solid Queue workers are running.
+- Mail delivery is configured.
+- Backup and restore jobs are scheduled.
+- Monitoring and error reporting are active.
+- Brakeman has no active warnings.

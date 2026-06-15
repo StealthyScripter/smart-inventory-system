@@ -1,6 +1,6 @@
 class Payment < ApplicationRecord
   STATUSES = %w[pending authorized paid failed refunded].freeze
-  PROVIDERS = %w[manual].freeze
+  PROVIDERS = %w[manual stripe].freeze
 
   belongs_to :order
 

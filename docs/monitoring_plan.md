@@ -2,27 +2,43 @@
 
 ## Health Checks
 
-Monitor application boot, HTTP 5xx rates, response latency, database availability, queue availability, and disk space for SQLite and Active Storage.
+Monitor `/up` from the load balancer or uptime monitor. Treat failed health
+checks, elevated HTTP 5xx rates, and sustained latency increases as deploy
+blockers.
 
-## Application Errors
+## Application Signals
 
-Track exceptions from controllers, jobs, mailers, and service objects. Sentry or Honeybadger are good future options.
+Track:
 
-## Background Jobs
+- request rate, latency, and error rate
+- database availability and slow queries
+- Solid Queue backlog, failures, retries, and job runtime
+- payment webhook failures and replay rejections
+- Active Storage read/write failures
+- mail delivery failures
+- disk usage for any local demo storage
 
-Monitor Solid Queue backlog, failed jobs, retry volume, and job runtime. Alert when mailer or notification queues stop draining.
+## Logging
 
-## Mail Delivery
+Rails logs to STDOUT with request IDs. Production log aggregation should retain
+request IDs and payment/order identifiers while avoiding sensitive payloads,
+passwords, tokens, webhook secrets, and full payment provider responses.
 
-Track delivery failures, bounces, and provider authentication errors. Mailer failures should not change order, payment, or booking state.
+## Alerts
 
-## Storage Failures
+Alert on:
 
-Monitor Active Storage write/read failures and disk capacity. Local production storage must be persistent and backed up.
+- `/up` failing
+- elevated 5xx rate
+- queue backlog growth
+- failed payment webhooks
+- failed order or booking notifications
+- object storage write failures
+- database backup failure
 
 ## Future Tooling Options
 
-- Sentry or Honeybadger for exceptions.
-- Lograge for structured Rails logs.
-- UptimeRobot, Pingdom, or managed load balancer health checks for uptime.
-- Managed database/storage metrics after PostgreSQL or object storage migration.
+Sentry or Honeybadger can provide exception tracking. Lograge can be introduced
+later for denser structured request logs. Managed PostgreSQL and object storage
+metrics should become the primary production dashboards after the hosting
+provider is selected.

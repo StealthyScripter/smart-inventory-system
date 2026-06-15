@@ -14,6 +14,7 @@ RSpec.describe Review, type: :model do
     )
   end
   let(:product) { Product.create!(name: "Review Model Product", sku: "REVIEW-MODEL", category: category, supplier: supplier, marketplace_status: "public") }
+  let(:service_listing) { ServiceListing.create!(supplier: supplier, name: "Review Model Service", service_category: "Cleaning", status: "public") }
   let(:order) { Order.create!(user: customer, status: "delivered", total_amount: 5) }
   let(:order_item) do
     order.order_items.create!(product: product, supplier: supplier, quantity: 1, unit_price: 5, total_amount: 5, fulfillment_status: "delivered")
@@ -32,5 +33,27 @@ RSpec.describe Review, type: :model do
 
     expect(review).not_to be_valid
     expect(review.errors[:order_item]).to be_present
+  end
+
+  it "requires a completed service booking for service reviews" do
+    booking = ServiceBooking.create!(user: customer, supplier: supplier, status: "scheduled")
+    booking.service_booking_items.create!(service_listing: service_listing)
+    review = Review.new(user: customer, supplier: supplier, service_listing: service_listing, rating: 5)
+
+    expect(review).not_to be_valid
+    expect(review.errors[:service_listing]).to include("must be a completed booking by this customer")
+
+    booking.update!(status: "completed")
+    expect(review).to be_valid
+  end
+
+  it "prevents duplicate service reviews" do
+    booking = ServiceBooking.create!(user: customer, supplier: supplier, status: "completed")
+    booking.service_booking_items.create!(service_listing: service_listing)
+    Review.create!(user: customer, supplier: supplier, service_listing: service_listing, rating: 5)
+    duplicate = Review.new(user: customer, supplier: supplier, service_listing: service_listing, rating: 4)
+
+    expect(duplicate).not_to be_valid
+    expect(duplicate.errors[:service_listing_id]).to be_present
   end
 end

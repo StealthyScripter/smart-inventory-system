@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_15_006000) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_15_007000) do
   create_table "account_memberships", force: :cascade do |t|
     t.integer "account_id", null: false
     t.boolean "active", default: true, null: false
@@ -176,12 +176,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_15_006000) do
 
   create_table "marketplace_listings", force: :cascade do |t|
     t.integer "account_id"
+    t.string "availability", default: "available", null: false
     t.datetime "created_at", null: false
+    t.string "featured_media_url"
     t.string "listing_type", default: "product", null: false
     t.integer "product_id"
     t.text "public_description"
     t.decimal "public_price", precision: 10, scale: 2
     t.decimal "sale_price", precision: 10, scale: 2
+    t.text "search_tags"
     t.text "seo_keywords"
     t.integer "service_listing_id"
     t.boolean "shipping_eligible", default: true, null: false
@@ -468,6 +471,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_15_006000) do
     t.string "status", default: "draft", null: false
     t.integer "supplier_id", null: false
     t.datetime "updated_at", null: false
+    t.string "visibility", default: "public", null: false
     t.index ["account_id"], name: "index_service_listings_on_account_id"
     t.index ["discarded_at"], name: "index_service_listings_on_discarded_at"
     t.index ["service_category"], name: "index_service_listings_on_service_category"
