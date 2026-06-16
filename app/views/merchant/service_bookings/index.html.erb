@@ -2,80 +2,87 @@
 
 <div class="table-container">
   <div class="table-header"><h3 class="table-title">Booking Queue</h3></div>
-  <table>
-    <tbody>
+  <div class="card-grid">
       <% @booking_queue.each do |booking| %>
-        <tr>
-          <td><%= booking.booking_number %></td>
-          <td><%= booking.user.full_name %></td>
-          <td><%= booking.status.titleize %></td>
-        </tr>
+        <article class="ui-card">
+          <h3 class="card-title"><%= booking.booking_number %></h3>
+          <div class="card-meta">
+            <span><%= booking.user.full_name %></span>
+            <span class="badge <%= status_badge_class(booking.status) %>"><%= booking.status.titleize %></span>
+          </div>
+        </article>
       <% end %>
       <% if @booking_queue.empty? %>
-        <tr><td style="color: #718096; font-style: italic;">No bookings waiting for action.</td></tr>
+        <div class="empty-state"><span class="empty-icon">✓</span><span>No bookings waiting for action.</span></div>
       <% end %>
-    </tbody>
-  </table>
+  </div>
 </div>
 
 <div class="table-container">
   <div class="table-header"><h3 class="table-title">Upcoming Jobs</h3></div>
-  <table>
-    <tbody>
+  <div class="card-grid">
       <% @upcoming_jobs.each do |booking| %>
-        <tr>
-          <td><%= booking.scheduled_date %></td>
-          <td><%= booking.scheduled_time&.strftime("%H:%M") %></td>
-          <td><%= booking.service_listings.map(&:name).to_sentence %></td>
-        </tr>
+        <article class="ui-card">
+          <h3 class="card-title"><%= booking.service_listings.map(&:name).to_sentence %></h3>
+          <div class="card-meta">
+            <span>📅 <%= booking.scheduled_date %></span>
+            <span><%= booking.scheduled_time&.strftime("%H:%M") %></span>
+          </div>
+        </article>
       <% end %>
-    </tbody>
-  </table>
+      <% if @upcoming_jobs.empty? %>
+        <div class="empty-state"><span class="empty-icon">📅</span><span>No upcoming jobs scheduled.</span></div>
+      <% end %>
+  </div>
 </div>
 
 <div class="table-container">
   <div class="table-header"><h3 class="table-title">Calendar</h3></div>
-  <table>
-    <tbody>
+  <div class="card-grid">
       <% @calendar_bookings.each do |date, bookings| %>
-        <tr>
-          <td><strong><%= date %></strong></td>
-          <td><%= bookings.map(&:booking_number).to_sentence %></td>
-        </tr>
+        <article class="ui-card">
+          <h3 class="card-title"><%= date %></h3>
+          <div class="card-meta">📅 <%= bookings.map(&:booking_number).to_sentence %></div>
+        </article>
       <% end %>
-    </tbody>
-  </table>
+      <% if @calendar_bookings.empty? %>
+        <div class="empty-state"><span class="empty-icon">📅</span><span>No bookings on the calendar.</span></div>
+      <% end %>
+  </div>
 </div>
 
 <div class="table-container">
   <div class="table-header"><h3 class="table-title">Service Bookings</h3></div>
-  <table>
-    <thead>
-      <tr><th>Booking</th><th>Customer</th><th>Service</th><th>Status</th><th>Schedule</th><th>Actions</th></tr>
-    </thead>
-    <tbody>
+  <% if @bookings.any? %>
+    <div class="card-grid">
       <% @bookings.each do |booking| %>
-        <tr>
-          <td><%= booking.booking_number %></td>
-          <td><%= booking.user.full_name %></td>
-          <td><%= booking.service_listings.map(&:name).to_sentence %></td>
-          <td><%= booking.status.titleize %></td>
-          <td><%= [booking.scheduled_date, booking.scheduled_time&.strftime("%H:%M")].compact.join(" ") %></td>
-          <td>
+        <article class="ui-card">
+          <div class="card-meta">
+            <span class="badge <%= status_badge_class(booking.status) %>"><%= booking.status.titleize %></span>
+            <span>📅 <%= [booking.scheduled_date, booking.scheduled_time&.strftime("%H:%M")].compact.join(" ") %></span>
+          </div>
+          <h3 class="card-title"><%= booking.booking_number %></h3>
+          <div class="card-meta">
+            <span><%= booking.user.full_name %></span>
+            <span>🛠 <%= booking.service_listings.map(&:name).to_sentence %></span>
+          </div>
+          <div class="card-actions">
             <%= link_to "Estimate PDF", estimate_merchant_service_booking_path(booking), class: "btn btn-secondary", style: "margin-bottom: 0.5rem;" %>
+          </div>
             <% next_statuses = ServiceBooking::TRANSITIONS.fetch(booking.status) %>
             <% if next_statuses.any? %>
-              <%= form_with url: merchant_service_booking_path(booking), method: :patch, local: true do |form| %>
+              <%= form_with url: merchant_service_booking_path(booking), method: :patch, local: true, class: "stack" do |form| %>
                 <%= form.select :status, options_for_select(next_statuses.map { |status| [status.titleize, status] }), {}, { class: "form-select" } %>
-                <%= form.date_field :scheduled_date, value: booking.scheduled_date, class: "form-input", style: "margin-top: 0.5rem;" %>
-                <%= form.time_field :scheduled_time, value: booking.scheduled_time&.strftime("%H:%M"), class: "form-input", style: "margin-top: 0.5rem;" %>
-                <%= form.number_field :duration_minutes, value: booking.duration_minutes, min: 30, step: 30, class: "form-input", style: "margin-top: 0.5rem;" %>
-                <%= form.submit "Update", class: "btn btn-secondary", style: "margin-top: 0.5rem;" %>
+                <%= form.date_field :scheduled_date, value: booking.scheduled_date, class: "form-input" %>
+                <%= form.time_field :scheduled_time, value: booking.scheduled_time&.strftime("%H:%M"), class: "form-input" %>
+                <%= form.number_field :duration_minutes, value: booking.duration_minutes, min: 30, step: 30, class: "form-input" %>
+                <%= form.submit "Update", class: "btn btn-secondary" %>
               <% end %>
             <% end %>
-          </td>
-        </tr>
+        </article>
       <% end %>
-    </tbody>
-  </table>
+    </div>
+  <% else %>
+    <div class="empty-state"><span class="empty-icon">📅</span><span>No service bookings yet.</span></div>
+  <% end %>
 </div>

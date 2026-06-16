@@ -1,4 +1,43 @@
 module ApplicationHelper
+  def safe_media_url?(url)
+    return false if url.blank?
+    return true if url.start_with?("/")
+
+    uri = URI.parse(url)
+    uri.host.in?(%w[127.0.0.1 localhost])
+  rescue URI::InvalidURIError
+    false
+  end
+
+  def account_theme_class
+    return "theme-enterprise" if current_merchant_account&.enterprise_merchant?
+    return "theme-merchant" if current_merchant_account&.individual_merchant? || current_user&.supplier_user?
+    return "theme-customer" if current_customer_account.present? || current_user&.customer?
+
+    "theme-enterprise"
+  end
+
+  def status_badge_class(status)
+    normalized = status.to_s.downcase
+
+    case normalized
+    when /active|paid|delivered|completed|accepted|published|public|available|read/
+      "badge-success"
+    when /pending|draft|requested|processing|scheduled|low|review/
+      "badge-warning"
+    when /cancelled|canceled|failed|suspended|hidden|private|out|rejected/
+      "badge-danger"
+    when /shipped|in_transit|unread|open/
+      "badge-info"
+    else
+      "badge-secondary"
+    end
+  end
+
+  def ui_initial(text)
+    text.to_s.strip.first&.upcase || "S"
+  end
+
   def role_badge(user)
     badge_class = case user.normalized_role
     when "admin"

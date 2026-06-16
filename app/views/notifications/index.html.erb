@@ -4,33 +4,25 @@
   <div class="table-header">
     <h3 class="table-title">Notifications</h3>
   </div>
-  <table>
-    <thead>
-      <tr>
-        <th>Status</th>
-        <th>Title</th>
-        <th>Message</th>
-        <th>Received</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
+  <% if @notifications.any? %>
+    <div class="card-grid">
       <% @notifications.each do |notification| %>
-        <tr>
-          <td><%= notification.read_at? ? "Read" : "Unread" %></td>
-          <td><%= notification.title %></td>
-          <td><%= notification.body %></td>
-          <td><%= notification.created_at.strftime("%b %d, %Y %H:%M") %></td>
-          <td>
+        <article class="ui-card">
+          <div class="card-meta">
+            <span class="badge <%= notification.read_at? ? "badge-success" : "badge-info" %>"><%= notification.read_at? ? "Read" : "Unread" %></span>
+            <span>📅 <%= notification.created_at.strftime("%b %d, %Y %H:%M") %></span>
+          </div>
+          <h3 class="card-title"><%= notification.title %></h3>
+          <p class="clamp-2" style="color: var(--muted-text);"><%= notification.body %></p>
+          <div class="card-actions">
             <% unless notification.read_at? %>
               <%= button_to "Mark Read", notification_path(notification), method: :patch, class: "btn btn-secondary" %>
             <% end %>
-          </td>
-        </tr>
+          </div>
+        </article>
       <% end %>
-      <% if @notifications.empty? %>
-        <tr><td colspan="5" style="text-align: center; color: #718096; font-style: italic;">No notifications.</td></tr>
-      <% end %>
-    </tbody>
-  </table>
+    </div>
+  <% else %>
+    <div class="empty-state"><span class="empty-icon">🔔</span><span>No notifications.</span></div>
+  <% end %>
 </div>

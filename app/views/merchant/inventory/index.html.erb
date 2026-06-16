@@ -4,40 +4,28 @@
   <div class="table-header">
     <h3 class="table-title">Inventory</h3>
   </div>
-  <table>
-    <thead>
-      <tr>
-        <th>Product</th>
-        <th>Supplier</th>
-        <th>Location</th>
-        <th>Current</th>
-        <th>Reserved</th>
-        <th>Available</th>
-        <th>Adjust</th>
-      </tr>
-    </thead>
-    <tbody>
+  <% if @stock_levels.any? %>
+    <div class="card-grid">
       <% @stock_levels.each do |stock_level| %>
-        <tr>
-          <td><%= stock_level.product.name %></td>
-          <td><%= stock_level.product.supplier&.name %></td>
-          <td><%= stock_level.location.name %></td>
-          <td><%= number_with_delimiter(stock_level.current_quantity) %></td>
-          <td><%= number_with_delimiter(stock_level.reserved_quantity) %></td>
-          <td><strong><%= number_with_delimiter(stock_level.available_quantity) %></strong></td>
-          <td>
-            <%= form_with model: stock_level, url: merchant_inventory_item_path(stock_level), method: :patch, local: true, style: "display: flex; gap: 0.5rem;" do |form| %>
+        <article class="ui-card">
+          <h3 class="card-title"><%= stock_level.product.name %></h3>
+          <div class="card-meta">
+            <span>🏬 <%= stock_level.product.supplier&.name || "Marketplace" %></span>
+            <span>📍 <%= stock_level.location.name %></span>
+          </div>
+          <div class="card-meta">
+            <span>Current <strong><%= number_with_delimiter(stock_level.current_quantity) %></strong></span>
+            <span>Reserved <%= number_with_delimiter(stock_level.reserved_quantity) %></span>
+            <span>Available <strong><%= number_with_delimiter(stock_level.available_quantity) %></strong></span>
+          </div>
+          <%= form_with model: stock_level, url: merchant_inventory_item_path(stock_level), method: :patch, local: true, class: "inline-form" do |form| %>
               <%= form.number_field :current_quantity, min: 0, class: "form-input", style: "max-width: 7rem;" %>
               <%= form.submit "Save", class: "btn btn-secondary" %>
-            <% end %>
-          </td>
-        </tr>
+          <% end %>
+        </article>
       <% end %>
-      <% if @stock_levels.empty? %>
-        <tr>
-          <td colspan="7" style="text-align: center; color: #718096; font-style: italic;">No inventory found.</td>
-        </tr>
-      <% end %>
-    </tbody>
-  </table>
+    </div>
+  <% else %>
+    <div class="empty-state"><span class="empty-icon">📦</span><span>No inventory found.</span></div>
+  <% end %>
 </div>

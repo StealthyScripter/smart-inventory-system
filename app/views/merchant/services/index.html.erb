@@ -5,29 +5,21 @@
     <h3 class="table-title">Services</h3>
     <%= link_to "Add Service", new_merchant_service_path, class: "btn btn-primary" %>
   </div>
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Category</th>
-        <th>Status</th>
-        <th>Starting Price</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
+  <% if @services.any? %>
+    <div class="card-grid">
       <% @services.each do |service| %>
-        <tr>
-          <td><%= service.name %></td>
-          <td><%= service.service_category %></td>
-          <td><%= service.status.titleize %></td>
-          <td><%= currency(service.starting_price.to_f) %></td>
-          <td><%= link_to "Edit", edit_merchant_service_path(service), class: "btn btn-secondary" %></td>
-        </tr>
+        <article class="ui-card">
+          <div class="card-meta">
+            <span class="badge <%= status_badge_class(service.status) %>"><%= service.status.titleize %></span>
+            <span>🛠 <%= service.service_category %></span>
+          </div>
+          <h3 class="card-title"><%= service.name %></h3>
+          <div class="price"><%= currency(service.starting_price.to_f) %></div>
+          <div class="card-actions"><%= link_to "Edit", edit_merchant_service_path(service), class: "btn btn-secondary" %></div>
+        </article>
       <% end %>
-      <% if @services.empty? %>
-        <tr><td colspan="5" style="text-align: center; color: #718096; font-style: italic;">No services found.</td></tr>
-      <% end %>
-    </tbody>
-  </table>
+    </div>
+  <% else %>
+    <div class="empty-state"><span class="empty-icon">🛠</span><span>No services found.</span></div>
+  <% end %>
 </div>

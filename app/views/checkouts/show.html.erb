@@ -5,34 +5,22 @@
     <h3 class="table-title">Checkout Review</h3>
     <%= link_to "Back to Cart", cart_path, class: "btn btn-secondary" %>
   </div>
-  <table>
-    <thead>
-      <tr>
-        <th>Product</th>
-        <th>Quantity</th>
-        <th>Total</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% @cart.cart_items.includes(:product).each do |item| %>
-        <tr>
-          <td><%= item.product.name %></td>
-          <td><%= item.quantity %></td>
-          <td><%= currency(item.total_amount) %></td>
-        </tr>
-      <% end %>
-    </tbody>
-    <tfoot>
-      <tr>
-        <td colspan="2"><strong>Total</strong></td>
-        <td><strong><%= currency(@cart.total_amount) %></strong></td>
-      </tr>
-    </tfoot>
-  </table>
-  <div style="padding: 1.5rem; text-align: right;">
+  <div class="card-grid">
+    <% @cart.cart_items.includes(:product).each do |item| %>
+      <article class="ui-card">
+        <h3 class="card-title"><%= item.product.name %></h3>
+        <div class="card-meta">
+          <span>Qty <%= item.quantity %></span>
+          <span><strong><%= currency(item.total_amount) %></strong></span>
+        </div>
+      </article>
+    <% end %>
+  </div>
+  <div class="summary-panel action-row" style="margin: 0 1.25rem 1.25rem; justify-content: space-between;">
+    <div class="price">Total <%= currency(@cart.total_amount) %></div>
     <%= button_to "Create Draft Order", checkout_path, method: :post, class: "btn btn-primary" %>
     <% if params[:order_id].present? %>
-      <%= button_to "Start Manual Payment", payments_path(order_id: params[:order_id]), method: :post, class: "btn btn-secondary", style: "margin-top: 0.75rem;" %>
+      <%= button_to "Start Manual Payment", payments_path(order_id: params[:order_id]), method: :post, class: "btn btn-secondary" %>
     <% end %>
   </div>
 </div>

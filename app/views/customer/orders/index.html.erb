@@ -4,27 +4,20 @@
   <div class="table-header">
     <h3 class="table-title">Orders</h3>
   </div>
-  <table>
-    <thead>
-      <tr>
-        <th>Order</th>
-        <th>Status</th>
-        <th>Total</th>
-        <th>Submitted</th>
-      </tr>
-    </thead>
-    <tbody>
+  <% if @orders.any? %>
+    <div class="card-grid">
       <% @orders.each do |order| %>
-        <tr>
-          <td><%= link_to order.order_number, customer_order_path(order) %></td>
-          <td><span class="badge badge-secondary"><%= order.status.titleize %></span></td>
-          <td><%= currency(order.total_amount.to_f) %></td>
-          <td><%= order.submitted_at&.strftime("%b %d, %Y") || order.created_at.strftime("%b %d, %Y") %></td>
-        </tr>
+        <article class="ui-card">
+          <div class="card-meta">
+            <span class="badge <%= status_badge_class(order.status) %>"><%= order.status.titleize %></span>
+            <span>📅 <%= order.submitted_at&.strftime("%b %d, %Y") || order.created_at.strftime("%b %d, %Y") %></span>
+          </div>
+          <h3 class="card-title"><%= link_to order.order_number, customer_order_path(order) %></h3>
+          <div class="price"><%= currency(order.total_amount.to_f) %></div>
+        </article>
       <% end %>
-      <% if @orders.empty? %>
-        <tr><td colspan="4" style="text-align: center; color: #718096; font-style: italic;">No orders found.</td></tr>
-      <% end %>
-    </tbody>
-  </table>
+    </div>
+  <% else %>
+    <div class="empty-state"><span class="empty-icon">📦</span><span>No orders found.</span></div>
+  <% end %>
 </div>

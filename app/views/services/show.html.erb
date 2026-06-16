@@ -5,44 +5,53 @@
     <h3 class="table-title"><%= @service.name %></h3>
     <%= link_to "Back to Services", services_path, class: "btn btn-secondary" %>
   </div>
-  <div style="padding: 1.5rem;">
-    <% if @service.image_url.present? %>
-      <img src="<%= @service.image_url %>" alt="<%= @service.name %>" style="max-width: 100%; max-height: 220px; object-fit: cover; margin-bottom: 1rem;">
-    <% end %>
-    <% if @service.gallery_images.attached? || @service.before_images.attached? || @service.after_images.attached? %>
-      <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;">
-        <% (@service.gallery_images.to_a + @service.before_images.to_a + @service.after_images.to_a).each do |image| %>
-          <%= image_tag image, alt: @service.name, style: "max-width: 180px; max-height: 150px; object-fit: cover;" %>
-        <% end %>
+  <div class="product-hero">
+    <div class="stack">
+      <% if safe_media_url?(@service.image_url) %>
+        <div class="hero-media"><img src="<%= @service.image_url %>" alt="<%= @service.name %>"></div>
+      <% else %>
+        <div class="hero-placeholder"><%= ui_initial(@service.name) %></div>
+      <% end %>
+      <% if @service.gallery_images.attached? || @service.before_images.attached? || @service.after_images.attached? %>
+        <div class="market-grid" style="padding: 0; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));">
+          <% (@service.gallery_images.to_a + @service.before_images.to_a + @service.after_images.to_a).each do |image| %>
+            <div class="card-media" style="border-radius: var(--radius-md);"><%= image_tag image, alt: @service.name %></div>
+          <% end %>
+        </div>
+      <% end %>
+      <p style="color: var(--muted-text);"><%= @service.description %></p>
+    </div>
+
+    <aside class="summary-panel stack">
+      <div class="price">From <%= currency(@service.starting_price.to_f) %></div>
+      <div class="card-meta">
+        <span>🛠 <%= @service.service_category %></span>
+        <span>★ <%= number_with_precision(@service.average_rating, precision: 1) %></span>
       </div>
-    <% end %>
-    <p><strong>Category:</strong> <%= @service.service_category %></p>
-    <p><strong>Provider:</strong> <%= link_to @service.supplier.name, merchant_storefront_path(@service.supplier) %></p>
-    <p><strong>Starting Price:</strong> <%= currency(@service.starting_price.to_f) %></p>
-    <p><strong>Rating:</strong> <%= number_with_precision(@service.average_rating, precision: 2) %> / 5</p>
-    <p><%= @service.description %></p>
-    <%= form_with url: service_bookings_path, method: :post, local: true, style: "margin-top: 1rem;" do |form| %>
-      <%= form.hidden_field :service_listing_id, value: @service.id %>
-      <div class="grid-2">
-        <div class="form-group">
-          <%= form.label :scheduled_date, "Preferred Date", class: "form-label" %>
-          <%= form.date_field :scheduled_date, class: "form-input" %>
+      <div class="card-meta">🏬 <%= link_to @service.supplier.name, merchant_storefront_path(@service.supplier) %></div>
+      <%= form_with url: service_bookings_path, method: :post, local: true, class: "stack" do |form| %>
+        <%= form.hidden_field :service_listing_id, value: @service.id %>
+        <div class="grid-2">
+          <div class="form-group">
+            <%= form.label :scheduled_date, "Date", class: "form-label" %>
+            <%= form.date_field :scheduled_date, class: "form-input" %>
+          </div>
+          <div class="form-group">
+            <%= form.label :scheduled_time, "Time", class: "form-label" %>
+            <%= form.time_field :scheduled_time, class: "form-input" %>
+          </div>
         </div>
         <div class="form-group">
-          <%= form.label :scheduled_time, "Preferred Time", class: "form-label" %>
-          <%= form.time_field :scheduled_time, class: "form-input" %>
+          <%= form.label :duration_minutes, "Duration", class: "form-label" %>
+          <%= form.number_field :duration_minutes, min: 30, step: 30, class: "form-input" %>
         </div>
-      </div>
-      <div class="form-group">
-        <%= form.label :duration_minutes, "Duration (minutes)", class: "form-label" %>
-        <%= form.number_field :duration_minutes, min: 30, step: 30, class: "form-input" %>
-      </div>
-      <div class="form-group">
-        <%= form.label :notes, class: "form-label" %>
-        <%= form.text_area :notes, rows: 3, class: "form-input" %>
-      </div>
-      <%= form.submit "Request Service", class: "btn btn-primary" %>
-    <% end %>
+        <div class="form-group">
+          <%= form.label :notes, class: "form-label" %>
+          <%= form.text_area :notes, rows: 3, class: "form-input" %>
+        </div>
+        <%= form.submit "Request Service", class: "btn btn-primary" %>
+      <% end %>
+    </aside>
   </div>
 </div>
 
@@ -50,12 +59,15 @@
   <div class="table-header">
     <h3 class="table-title">Recommended Services</h3>
   </div>
-  <div style="padding: 1.5rem;">
+  <div class="card-grid">
     <% @recommended_services.each do |service| %>
-      <p><%= link_to service.name, service_path(service) %> — <%= service.supplier.name %></p>
+      <article class="ui-card">
+        <h3 class="card-title"><%= link_to service.name, service_path(service) %></h3>
+        <div class="card-meta">🏬 <%= service.supplier.name %></div>
+      </article>
     <% end %>
     <% if @recommended_services.empty? %>
-      <p style="color: #718096; font-style: italic;">No recommendations yet.</p>
+      <div class="empty-state"><span class="empty-icon">🛠</span><span>No recommendations yet.</span></div>
     <% end %>
   </div>
 </div>

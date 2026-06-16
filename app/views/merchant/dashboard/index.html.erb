@@ -3,7 +3,7 @@
   Merchant / Dashboard
 <% end %>
 
-<div style="margin-bottom: 1rem;">
+<div class="action-row" style="margin-bottom: 1rem;">
   <span class="badge badge-info"><%= merchant_suppliers.map(&:name).to_sentence %></span>
 </div>
 
@@ -47,36 +47,28 @@
         <%= link_to "Local Inventory", merchant_inventory_path, class: "btn btn-secondary" %>
       <% end %>
     </div>
-    <table>
-      <thead>
-        <tr>
-          <th>Product</th>
-          <th>Stock</th>
-          <th>Reorder Point</th>
-        </tr>
-      </thead>
-      <tbody>
+    <% if @low_stock_products.any? %>
+      <div class="card-grid">
         <% @low_stock_products.each do |product| %>
-          <tr>
-            <td><%= product.name %></td>
-            <td class="stock-low"><%= number_with_delimiter(product.total_stock) %></td>
-            <td><%= product.reorder_point %></td>
-          </tr>
+          <article class="ui-card">
+            <h3 class="card-title"><%= product.name %></h3>
+            <div class="card-meta">
+              <span class="stock-low">📦 <%= number_with_delimiter(product.total_stock) %></span>
+              <span>Reorder <%= product.reorder_point %></span>
+            </div>
+          </article>
         <% end %>
-        <% if @low_stock_products.empty? %>
-          <tr>
-            <td colspan="3" style="text-align: center; color: #718096; font-style: italic;">No low stock items.</td>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
+      </div>
+    <% else %>
+      <div class="empty-state"><span class="empty-icon">✓</span><span>No low stock items.</span></div>
+    <% end %>
   </div>
 
   <div class="table-container">
     <div class="table-header">
       <h3 class="table-title">Merchant Tools</h3>
     </div>
-    <div style="padding: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+    <div class="card-grid">
       <% if can_manage_merchant?(:manage_catalog) %>
         <%= link_to "Marketplace Listings", merchant_products_path, class: "btn btn-primary" %>
       <% end %>
@@ -112,27 +104,25 @@
   <div class="table-header">
     <h3 class="table-title">Recent Activity</h3>
   </div>
-  <table>
-    <tbody>
+  <div class="card-grid">
       <% @booking_queue.each do |booking| %>
-        <tr>
-          <td>Booking requested</td>
-          <td><%= booking.booking_number %></td>
-          <td><%= booking.created_at.to_fs(:short) %></td>
-        </tr>
+        <article class="ui-card">
+          <span class="badge badge-info">Booking</span>
+          <h3 class="card-title"><%= booking.booking_number %></h3>
+          <div class="card-meta"><%= booking.created_at.to_fs(:short) %></div>
+        </article>
       <% end %>
       <% @low_stock_products.each do |product| %>
-        <tr>
-          <td>Low stock</td>
-          <td><%= product.name %></td>
-          <td><%= number_with_delimiter(product.total_stock) %> on hand</td>
-        </tr>
+        <article class="ui-card">
+          <span class="badge badge-warning">Low Stock</span>
+          <h3 class="card-title"><%= product.name %></h3>
+          <div class="card-meta">📦 <%= number_with_delimiter(product.total_stock) %> on hand</div>
+        </article>
       <% end %>
       <% if @booking_queue.empty? && @low_stock_products.empty? %>
-        <tr><td class="empty-state">No recent activity requiring attention.</td></tr>
+        <div class="empty-state"><span class="empty-icon">✓</span><span>No recent activity requiring attention.</span></div>
       <% end %>
-    </tbody>
-  </table>
+  </div>
 </div>
 
 <div class="grid-2">
@@ -141,39 +131,39 @@
       <h3 class="table-title">Booking Queue</h3>
       <%= link_to "Bookings", merchant_service_bookings_path, class: "btn btn-secondary" %>
     </div>
-    <table>
-      <tbody>
+    <div class="card-grid">
         <% @booking_queue.each do |booking| %>
-          <tr>
-            <td><%= booking.booking_number %></td>
-            <td><%= booking.user.full_name %></td>
-            <td><%= booking.status.titleize %></td>
-          </tr>
+          <article class="ui-card">
+            <h3 class="card-title"><%= booking.booking_number %></h3>
+            <div class="card-meta">
+              <span><%= booking.user.full_name %></span>
+              <span class="badge <%= status_badge_class(booking.status) %>"><%= booking.status.titleize %></span>
+            </div>
+          </article>
         <% end %>
         <% if @booking_queue.empty? %>
-          <tr><td style="color: #718096; font-style: italic;">No bookings waiting for action.</td></tr>
+          <div class="empty-state"><span class="empty-icon">✓</span><span>No bookings waiting for action.</span></div>
         <% end %>
-      </tbody>
-    </table>
+    </div>
   </div>
 
   <div class="table-container">
     <div class="table-header">
       <h3 class="table-title">Upcoming Jobs</h3>
     </div>
-    <table>
-      <tbody>
+    <div class="card-grid">
         <% @upcoming_jobs.each do |booking| %>
-          <tr>
-            <td><%= booking.scheduled_date %></td>
-            <td><%= booking.service_listings.map(&:name).to_sentence %></td>
-            <td><%= booking.status.titleize %></td>
-          </tr>
+          <article class="ui-card">
+            <h3 class="card-title"><%= booking.service_listings.map(&:name).to_sentence %></h3>
+            <div class="card-meta">
+              <span>📅 <%= booking.scheduled_date %></span>
+              <span class="badge <%= status_badge_class(booking.status) %>"><%= booking.status.titleize %></span>
+            </div>
+          </article>
         <% end %>
         <% if @upcoming_jobs.empty? %>
-          <tr><td style="color: #718096; font-style: italic;">No upcoming jobs scheduled.</td></tr>
+          <div class="empty-state"><span class="empty-icon">📅</span><span>No upcoming jobs scheduled.</span></div>
         <% end %>
-      </tbody>
-    </table>
+    </div>
   </div>
 </div>

@@ -15,60 +15,40 @@
 
   <% if cart_items.empty? %>
     <div class="empty-state">
-      Your cart is empty.
-      <div style="margin-top: 1rem;">
-        <%= link_to "Browse Catalog", catalog_path, class: "btn btn-primary" %>
-      </div>
+      <span class="empty-icon">🛒</span>
+      <span>Your cart is empty.</span>
+      <%= link_to "Browse Catalog", catalog_path, class: "btn btn-primary" %>
     </div>
   <% else %>
-    <table>
-      <thead>
-        <tr>
-          <th>Listing</th>
-          <th>Unit Price</th>
-          <th>Quantity</th>
-          <th>Subtotal</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
+    <div class="card-grid">
         <% cart_items.each do |item| %>
           <% listing = item.product.marketplace_listing %>
           <% listing_title = listing&.title.presence || item.product.name %>
           <% unit_price = listing&.current_price || item.product.selling_price.to_d %>
           <% subtotal = unit_price.to_d * item.quantity %>
-          <tr>
-            <td>
-              <strong><%= link_to listing_title, catalog_product_path(item.product) %></strong>
+          <article class="ui-card">
+            <h3 class="card-title"><%= link_to listing_title, catalog_product_path(item.product) %></h3>
               <% if listing&.availability.present? %>
-                <div style="color: #718096; margin-top: 0.25rem;"><%= listing.availability.humanize %></div>
+                <span class="badge <%= status_badge_class(listing.availability) %>"><%= listing.availability.humanize %></span>
               <% end %>
-            </td>
-            <td><%= currency(unit_price) %></td>
-            <td>
-              <%= form_with url: cart_path, method: :patch, local: true, style: "display: flex; gap: 0.5rem;" do |form| %>
+            <div class="card-meta">
+              <span>Unit <%= currency(unit_price) %></span>
+              <span>Subtotal <strong><%= currency(subtotal) %></strong></span>
+            </div>
+            <div class="action-row">
+              <%= form_with url: cart_path, method: :patch, local: true, class: "inline-form" do |form| %>
                 <%= form.hidden_field :item_id, value: item.id %>
                 <%= form.number_field :quantity, value: item.quantity, min: 1, class: "form-input", style: "width: 6rem;" %>
                 <%= form.submit "Update", class: "btn btn-secondary" %>
               <% end %>
-            </td>
-            <td><%= currency(subtotal) %></td>
-            <td>
               <%= button_to "Remove", cart_path(item_id: item.id), method: :delete, class: "btn btn-danger" %>
-            </td>
-          </tr>
+            </div>
+          </article>
         <% end %>
-      </tbody>
-      <tfoot>
-        <tr>
-          <td colspan="3"><strong>Total</strong></td>
-          <td><strong><%= currency(cart_total) %></strong></td>
-          <td></td>
-        </tr>
-      </tfoot>
-    </table>
+    </div>
 
-    <div style="padding: 1.5rem; display: flex; gap: 0.75rem; justify-content: flex-end; flex-wrap: wrap;">
+    <div class="summary-panel action-row" style="margin: 0 1.25rem 1.25rem; justify-content: space-between;">
+      <div class="price">Total <%= currency(cart_total) %></div>
       <%= link_to "Continue Shopping", catalog_path, class: "btn btn-secondary" %>
       <%= link_to "Review Checkout", checkout_path, class: "btn btn-primary" %>
     </div>

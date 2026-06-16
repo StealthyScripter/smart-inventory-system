@@ -5,47 +5,49 @@
     <h3 class="table-title"><%= @listing.title %></h3>
     <%= link_to "Back to Catalog", catalog_path, class: "btn btn-secondary" %>
   </div>
-  <% if @product.featured_image.attached? || @product.images.attached? %>
-    <div style="padding: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+
+  <div class="product-hero">
+    <div class="stack">
       <% if @product.featured_image.attached? %>
-        <%= image_tag @product.featured_image, alt: @product.name, style: "max-width: 260px; max-height: 220px; object-fit: cover;" %>
+        <div class="hero-media"><%= image_tag @product.featured_image, alt: @product.name %></div>
+      <% else %>
+        <div class="hero-placeholder"><%= ui_initial(@listing.title) %></div>
       <% end %>
-      <% @product.images.each do |image| %>
-        <%= image_tag image, alt: @product.name, style: "max-width: 180px; max-height: 150px; object-fit: cover;" %>
+      <% if @product.images.attached? %>
+        <div class="market-grid" style="padding: 0; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));">
+          <% @product.images.each do |image| %>
+            <div class="card-media" style="border-radius: var(--radius-md);"><%= image_tag image, alt: @product.name %></div>
+          <% end %>
+        </div>
       <% end %>
     </div>
-  <% end %>
 
-  <div style="padding: 1.5rem;">
-    <div class="grid-2">
+    <aside class="summary-panel stack">
       <div>
-        <h4>Listing</h4>
-        <p><strong>Category:</strong> <%= @product.category.name %></p>
-        <p><strong>Merchant:</strong>
+        <div class="price"><%= currency(@listing.current_price.to_f) %></div>
+        <div class="card-meta">
+          <span>🏷 <%= @product.category.name %></span>
+          <span>★ <%= number_with_precision(@product.average_rating, precision: 1) %></span>
+          <span class="badge <%= status_badge_class(@listing.availability) %>"><%= @listing.availability.titleize %></span>
+        </div>
+      </div>
+      <div class="card-meta">🏬
           <% if @product.supplier %>
             <%= link_to @product.supplier.name, merchant_storefront_path(@product.supplier) %>
           <% else %>
             Marketplace
           <% end %>
-        </p>
-        <p><strong>Description:</strong> <%= @listing.public_description.presence || "No description available." %></p>
       </div>
-
-      <div>
-        <h4>Availability</h4>
-        <p><strong>Price:</strong> <%= currency(@listing.current_price.to_f) %></p>
-        <p><strong>Availability:</strong> <%= @listing.availability.titleize %></p>
-        <p><strong>Rating:</strong> <%= number_with_precision(@product.average_rating, precision: 2) %> / 5</p>
-        <%= form_with url: cart_path, method: :post, local: true, style: "margin-top: 1rem;" do |form| %>
-          <%= form.hidden_field :product_id, value: @product.id %>
-          <div class="form-group">
-            <%= form.label :quantity, class: "form-label" %>
-            <%= form.number_field :quantity, value: 1, min: 1, class: "form-input" %>
-          </div>
-          <%= form.submit "Add to Cart", class: "btn btn-primary" %>
-        <% end %>
-      </div>
-    </div>
+      <p style="color: var(--muted-text);"><%= @listing.public_description.presence || "No description available." %></p>
+      <%= form_with url: cart_path, method: :post, local: true, class: "stack" do |form| %>
+        <%= form.hidden_field :product_id, value: @product.id %>
+        <div class="form-group">
+          <%= form.label :quantity, class: "form-label" %>
+          <%= form.number_field :quantity, value: 1, min: 1, class: "form-input" %>
+        </div>
+        <%= form.submit "Add to Cart", class: "btn btn-primary" %>
+      <% end %>
+    </aside>
   </div>
 </div>
 
@@ -53,16 +55,17 @@
   <div class="table-header">
     <h3 class="table-title">Reviews</h3>
   </div>
-  <div style="padding: 1.5rem;">
+  <div class="card-grid">
     <% @product.reviews.published.includes(:user).each do |review| %>
-      <p>
-        <strong><%= review.rating %>/5</strong>
+      <article class="ui-card">
+        <div class="card-meta"><strong>★ <%= review.rating %>/5</strong>
         <% if review.verified_purchase? %><span class="badge badge-success">Verified Purchase</span><% end %>
+        </div>
         <%= review.body %>
-      </p>
+      </article>
     <% end %>
     <% if @product.reviews.published.empty? %>
-      <p style="color: #718096; font-style: italic;">No reviews yet.</p>
+      <div class="empty-state"><span class="empty-icon">★</span><span>No reviews yet.</span></div>
     <% end %>
   </div>
 </div>
@@ -71,12 +74,15 @@
   <div class="table-header">
     <h3 class="table-title">Recommended Products</h3>
   </div>
-  <div style="padding: 1.5rem;">
+  <div class="card-grid">
     <% @recommended_products.each do |product| %>
-      <p><%= link_to product.name, catalog_product_path(product) %> — <%= currency(product.selling_price.to_f) %></p>
+      <article class="ui-card">
+        <h3 class="card-title"><%= link_to product.name, catalog_product_path(product) %></h3>
+        <div class="price"><%= currency(product.selling_price.to_f) %></div>
+      </article>
     <% end %>
     <% if @recommended_products.empty? %>
-      <p style="color: #718096; font-style: italic;">No recommendations yet.</p>
+      <div class="empty-state"><span class="empty-icon">⌕</span><span>No recommendations yet.</span></div>
     <% end %>
   </div>
 </div>

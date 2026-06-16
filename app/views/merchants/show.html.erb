@@ -6,71 +6,76 @@
     <%= link_to "Back to Catalog", catalog_path, class: "btn btn-secondary" %>
   </div>
 
-  <div style="padding: 1.5rem; border-bottom: 1px solid #e2e8f0;">
-    <% if @merchant.shop_image_url.present? %>
-      <img src="<%= @merchant.shop_image_url %>" alt="<%= @merchant.name %>" style="max-width: 100%; max-height: 220px; object-fit: cover; margin-bottom: 1rem;">
-    <% end %>
-    <% if @merchant.banner.attached? %>
-      <%= image_tag @merchant.banner, alt: "#{@merchant.name} banner", style: "width: 100%; max-height: 240px; object-fit: cover; margin-bottom: 1rem;" %>
-    <% end %>
-    <% if @merchant.logo.attached? %>
-      <%= image_tag @merchant.logo, alt: "#{@merchant.name} logo", style: "max-width: 120px; max-height: 120px; object-fit: cover; margin-bottom: 1rem;" %>
-    <% end %>
-    <p><%= @merchant.shop_description.presence || "No shop description provided." %></p>
-    <p><strong>Email:</strong> <%= @merchant.contact_email.presence || "Not provided" %></p>
-    <p><strong>Phone:</strong> <%= @merchant.contact_phone.presence || "Not provided" %></p>
-    <p><strong>Rating:</strong> <%= number_with_precision(@merchant.average_rating, precision: 2) %> / 5</p>
+  <div class="merchant-hero">
+    <div class="hero-media">
+      <% if @merchant.banner.attached? %>
+        <%= image_tag @merchant.banner, alt: "#{@merchant.name} banner" %>
+      <% elsif safe_media_url?(@merchant.shop_image_url) %>
+        <img src="<%= @merchant.shop_image_url %>" alt="<%= @merchant.name %>">
+      <% elsif @merchant.shop_image_url.present? %>
+        <div class="hero-placeholder" data-image-url="<%= @merchant.shop_image_url %>"><%= ui_initial(@merchant.name) %></div>
+      <% else %>
+        <div class="hero-placeholder"><%= ui_initial(@merchant.name) %></div>
+      <% end %>
+    </div>
+    <aside class="summary-panel stack">
+      <% if @merchant.logo.attached? %>
+        <%= image_tag @merchant.logo, alt: "#{@merchant.name} logo", style: "width: 72px; height: 72px; border-radius: var(--radius-lg); object-fit: cover;" %>
+      <% end %>
+      <p style="color: var(--muted-text);"><%= @merchant.shop_description.presence || "No shop description provided." %></p>
+      <div class="card-meta">
+        <span>★ <%= number_with_precision(@merchant.average_rating, precision: 2) %></span>
+        <span>✉ <%= @merchant.contact_email.presence || "No email" %></span>
+        <span>☎ <%= @merchant.contact_phone.presence || "No phone" %></span>
+      </div>
+    </aside>
   </div>
 
-  <table>
-    <thead>
-      <tr>
-        <th>Product</th>
-        <th>Category</th>
-        <th>Price</th>
-        <th>Available</th>
-      </tr>
-    </thead>
-    <tbody>
+  <div class="section-header">
+    <h3 class="section-title">Products</h3>
+  </div>
+  <% if @products.any? %>
+    <div class="market-grid">
       <% @products.each do |product| %>
-        <tr>
-          <td><%= link_to product.name, catalog_product_path(product) %></td>
-          <td><%= product.category.name %></td>
-          <td><%= currency(product.selling_price.to_f) %></td>
-          <td><%= number_with_delimiter(product.available_stock) %></td>
-        </tr>
+        <article class="ui-card media-card">
+          <div class="card-media">
+            <% if product.featured_image.attached? %>
+              <%= image_tag product.featured_image, alt: product.name %>
+            <% else %>
+              <span><%= ui_initial(product.name) %></span>
+            <% end %>
+          </div>
+          <div class="card-body">
+            <h3 class="card-title clamp-2"><%= link_to product.name, catalog_product_path(product) %></h3>
+            <div class="price"><%= currency(product.selling_price.to_f) %></div>
+            <div class="card-meta">
+              <span>🏷 <%= product.category.name %></span>
+              <span>📦 <%= number_with_delimiter(product.available_stock) %></span>
+            </div>
+          </div>
+        </article>
       <% end %>
-      <% if @products.empty? %>
-        <tr>
-          <td colspan="4" style="text-align: center; color: #718096; font-style: italic;">
-            This merchant has no public products.
-          </td>
-        </tr>
-      <% end %>
-    </tbody>
-  </table>
+    </div>
+  <% else %>
+    <div class="empty-state"><span class="empty-icon">📦</span><span>This merchant has no public products.</span></div>
+  <% end %>
 </div>
 
 <div class="table-container" style="margin-top: 1.5rem;">
   <div class="table-header">
     <h3 class="table-title">Services</h3>
   </div>
-  <table>
-    <thead>
-      <tr>
-        <th>Service</th>
-        <th>Category</th>
-        <th>Starting Price</th>
-      </tr>
-    </thead>
-    <tbody>
+  <% if @services.any? %>
+    <div class="market-grid">
       <% @services.each do |service| %>
-        <tr>
-          <td><%= link_to service.name, service_path(service) %></td>
-          <td><%= service.service_category %></td>
-          <td><%= currency(service.starting_price.to_f) %></td>
-        </tr>
+        <article class="ui-card">
+          <h3 class="card-title"><%= link_to service.name, service_path(service) %></h3>
+          <div class="price">From <%= currency(service.starting_price.to_f) %></div>
+          <div class="card-meta">🛠 <%= service.service_category %></div>
+        </article>
       <% end %>
-    </tbody>
-  </table>
+    </div>
+  <% else %>
+    <div class="empty-state"><span class="empty-icon">🛠</span><span>No public services.</span></div>
+  <% end %>
 </div>

@@ -4,31 +4,24 @@
   <div class="table-header">
     <h3 class="table-title">User Reports</h3>
   </div>
-  <table>
-    <thead>
-      <tr>
-        <th>Reporter</th>
-        <th>Target</th>
-        <th>Reason</th>
-        <th>Status</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-    <tbody>
+  <% if @reports.any? %>
+    <div class="card-grid">
       <% @reports.each do |report| %>
-        <tr>
-          <td><%= report.reporter.full_name %></td>
-          <td><%= report.reportable_type %> #<%= report.reportable_id %></td>
-          <td><%= report.reason %></td>
-          <td><%= report.status.titleize %></td>
-          <td>
-            <%= form_with model: [:admin, report], method: :patch, local: true do |form| %>
+        <article class="ui-card">
+          <div class="card-meta">
+            <span class="badge <%= status_badge_class(report.status) %>"><%= report.status.titleize %></span>
+            <span><%= report.reportable_type %> #<%= report.reportable_id %></span>
+          </div>
+          <h3 class="card-title"><%= report.reason %></h3>
+          <div class="card-meta">Reporter: <%= report.reporter.full_name %></div>
+          <%= form_with model: [:admin, report], method: :patch, local: true, class: "inline-form" do |form| %>
               <%= form.select :status, options_for_select(Report::STATUSES, report.status), {}, { class: "form-select" } %>
               <%= form.submit "Update", class: "btn btn-primary" %>
-            <% end %>
-          </td>
-        </tr>
+          <% end %>
+        </article>
       <% end %>
-    </tbody>
-  </table>
+    </div>
+  <% else %>
+    <div class="empty-state"><span class="empty-icon">✓</span><span>No user reports.</span></div>
+  <% end %>
 </div>

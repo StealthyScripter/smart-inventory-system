@@ -5,11 +5,11 @@
 
 <div class="table-container">
   <div class="table-header">
-    <h3 class="table-title">Marketplace Search</h3>
+    <h3 class="table-title">Search Marketplace</h3>
   </div>
 
-  <div style="padding: 1rem 1.5rem; border-bottom: 1px solid #e2e8f0;">
-    <%= form_with url: search_path, method: :get, local: true, style: "display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 0.75rem; align-items: end;" do |form| %>
+  <div class="filter-bar">
+    <%= form_with url: search_path, method: :get, local: true, class: "filter-grid" do |form| %>
       <div class="form-group" style="margin-bottom: 0;">
         <%= form.label :q, "Search", class: "form-label" %>
         <%= form.text_field :q, value: params[:q], class: "form-input" %>
@@ -35,8 +35,8 @@
   </div>
 
   <% if @suggestions.any? %>
-    <div style="padding: 1rem 1.5rem; border-bottom: 1px solid #e2e8f0;">
-      <strong>Suggestions:</strong>
+    <div class="card-meta" style="padding: 1rem 1.5rem; border-top: 1px solid var(--border-color);">
+      <strong>Try:</strong>
       <%= @suggestions.join(", ") %>
     </div>
   <% end %>
@@ -44,77 +44,80 @@
 
 <div class="table-container">
   <div class="table-header"><h3 class="table-title">Products</h3></div>
-  <table>
-    <thead>
-      <tr>
-        <th>Product</th>
-        <th>Category</th>
-        <th>Merchant</th>
-        <th>Price</th>
-        <th>Rating</th>
-      </tr>
-    </thead>
-    <tbody>
+  <% if @products.any? %>
+    <div class="market-grid">
       <% @products.each do |product| %>
-        <tr>
-          <td><%= link_to product.name, catalog_product_path(product) %></td>
-          <td><%= product.category.name %></td>
-          <td><%= product.supplier ? link_to(product.supplier.name, merchant_storefront_path(product.supplier)) : "Marketplace" %></td>
-          <td><%= currency(product.selling_price.to_f) %></td>
-          <td><%= number_with_precision(product.average_rating, precision: 2) %></td>
-        </tr>
+        <article class="ui-card media-card">
+          <div class="card-media">
+            <% if product.featured_image.attached? %>
+              <%= image_tag product.featured_image, alt: product.name %>
+            <% else %>
+              <span><%= ui_initial(product.name) %></span>
+            <% end %>
+          </div>
+          <div class="card-body">
+            <h3 class="card-title clamp-2"><%= link_to product.name, catalog_product_path(product) %></h3>
+            <div class="price"><%= currency(product.selling_price.to_f) %></div>
+            <div class="card-meta">
+              <span>🏷 <%= product.category.name %></span>
+              <span>★ <%= number_with_precision(product.average_rating, precision: 1) %></span>
+            </div>
+            <div class="card-meta">🏬 <%= product.supplier ? link_to(product.supplier.name, merchant_storefront_path(product.supplier)) : "Marketplace" %></div>
+          </div>
+        </article>
       <% end %>
-    </tbody>
-  </table>
+    </div>
+  <% else %>
+    <div class="empty-state"><span class="empty-icon">⌕</span><span>No products found.</span></div>
+  <% end %>
   <%= pagination_controls(@products) %>
 </div>
 
 <div class="table-container">
   <div class="table-header"><h3 class="table-title">Services</h3></div>
-  <table>
-    <thead>
-      <tr>
-        <th>Service</th>
-        <th>Category</th>
-        <th>Provider</th>
-        <th>Starting Price</th>
-        <th>Rating</th>
-      </tr>
-    </thead>
-    <tbody>
+  <% if @services.any? %>
+    <div class="market-grid">
       <% @services.each do |service| %>
-        <tr>
-          <td><%= link_to service.name, service_path(service) %></td>
-          <td><%= service.service_category %></td>
-          <td><%= link_to service.supplier.name, merchant_storefront_path(service.supplier) %></td>
-          <td><%= currency(service.starting_price.to_f) %></td>
-          <td><%= number_with_precision(service.average_rating, precision: 2) %></td>
-        </tr>
+        <article class="ui-card media-card">
+          <div class="card-media">
+            <% if safe_media_url?(service.image_url) %>
+              <img src="<%= service.image_url %>" alt="<%= service.name %>">
+            <% else %>
+              <span><%= ui_initial(service.name) %></span>
+            <% end %>
+          </div>
+          <div class="card-body">
+            <h3 class="card-title clamp-2"><%= link_to service.name, service_path(service) %></h3>
+            <div class="price">From <%= currency(service.starting_price.to_f) %></div>
+            <div class="card-meta">
+              <span>🛠 <%= service.service_category %></span>
+              <span>★ <%= number_with_precision(service.average_rating, precision: 1) %></span>
+            </div>
+            <div class="card-meta">🏬 <%= link_to service.supplier.name, merchant_storefront_path(service.supplier) %></div>
+          </div>
+        </article>
       <% end %>
-    </tbody>
-  </table>
+    </div>
+  <% else %>
+    <div class="empty-state"><span class="empty-icon">🛠</span><span>No services found.</span></div>
+  <% end %>
 </div>
 
 <div class="table-container">
   <div class="table-header"><h3 class="table-title">Merchants</h3></div>
-  <table>
-    <thead>
-      <tr>
-        <th>Merchant</th>
-        <th>Description</th>
-        <th>Rating</th>
-      </tr>
-    </thead>
-    <tbody>
+  <% if @merchants.any? %>
+    <div class="card-grid">
       <% @merchants.each do |merchant| %>
-        <tr>
-          <td><%= link_to merchant.name, merchant_storefront_path(merchant) %></td>
-          <td><%= merchant.shop_description %></td>
-          <td><%= number_with_precision(merchant.average_rating, precision: 2) %></td>
-        </tr>
+        <article class="ui-card">
+          <h3 class="card-title"><%= link_to merchant.name, merchant_storefront_path(merchant) %></h3>
+          <p class="clamp-2" style="color: var(--muted-text);"><%= merchant.shop_description.presence || "Marketplace seller" %></p>
+          <div class="card-meta">★ <%= number_with_precision(merchant.average_rating, precision: 1) %></div>
+        </article>
       <% end %>
-    </tbody>
-  </table>
+    </div>
+  <% else %>
+    <div class="empty-state"><span class="empty-icon">🏬</span><span>No merchants found.</span></div>
+  <% end %>
 </div>
 
 <div class="table-container">
