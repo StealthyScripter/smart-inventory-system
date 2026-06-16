@@ -71,10 +71,13 @@ RSpec.describe "UX navigation", type: :request do
     expect(response.body).to include("theme-enterprise")
   end
 
-  it "serves root as the public catalog for guests" do
+  it "serves root as the public marketplace landing page for guests" do
     get root_path
 
     expect(response).to have_http_status(:success)
+    expect(response.body).to include("Goods")
+    expect(response.body).to include("Services")
+    expect(response.body).to include("Merchants")
     expect(response.body).not_to include("Marketplace / Catalog")
   end
 
