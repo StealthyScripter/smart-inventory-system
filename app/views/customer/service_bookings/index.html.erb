@@ -3,40 +3,30 @@
   Customer / Bookings
 <% end %>
 
-<section class="page-section">
-  <div class="section-header">
-    <div>
-      <h2 class="section-title">Service Bookings</h2>
-      <p class="section-subtitle">Track requested, scheduled, and completed services.</p>
-    </div>
-    <%= link_to "Browse Services", services_path, class: "btn btn-secondary" %>
-  </div>
-
+<div class="table-container">
+  <div class="table-header"><h3 class="table-title">Bookings</h3></div>
   <% if @bookings.any? %>
     <div class="card-grid">
       <% @bookings.each do |booking| %>
         <article class="ui-card">
-          <div class="card-body">
-            <div class="card-kicker">Booking</div>
-            <h3 class="card-title"><%= booking.booking_number %></h3>
-            <p><strong><%= booking.service_listings.map(&:name).to_sentence %></strong></p>
-            <p class="card-meta"><%= booking.supplier.name %></p>
-            <%= render "shared/status_badge", status: booking.status, label: booking.status.titleize %>
-            <p class="muted-text"><%= [booking.scheduled_date, booking.scheduled_time&.strftime("%H:%M")].compact.join(" ").presence || "Schedule pending" %></p>
+          <div class="card-meta">
+            <span class="badge <%= status_badge_class(booking.status) %>"><%= booking.status.titleize %></span>
+            <span>📅 <%= [booking.scheduled_date, booking.scheduled_time&.strftime("%H:%M")].compact.join(" ") %></span>
           </div>
-          <% if ServiceBooking::TRANSITIONS.fetch(booking.status).include?("cancelled") %>
-            <div class="card-actions">
-              <%= button_to "Cancel Booking", customer_service_booking_path(booking), method: :patch, class: "btn btn-danger" %>
-            </div>
-          <% end %>
+          <h3 class="card-title"><%= booking.booking_number %></h3>
+          <div class="card-meta">
+            <span>🛠 <%= booking.service_listings.map(&:name).to_sentence %></span>
+            <span>🏬 <%= booking.supplier.name %></span>
+          </div>
+          <div class="card-actions">
+            <% if ServiceBooking::TRANSITIONS.fetch(booking.status).include?("cancelled") %>
+              <%= button_to "Cancel", customer_service_booking_path(booking), method: :patch, class: "btn btn-danger" %>
+            <% end %>
+          </div>
         </article>
       <% end %>
     </div>
   <% else %>
-    <%= render "shared/empty_state",
-               title: "No service bookings yet.",
-               message: "Book a public service to track scheduling here.",
-               action: "Browse Services",
-               path: services_path %>
+    <div class="empty-state"><span class="empty-icon">📅</span><span>No service bookings yet.</span></div>
   <% end %>
-</section>
+</div>

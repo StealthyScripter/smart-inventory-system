@@ -162,19 +162,18 @@
                 <%= form_with url: search_path, method: :get, local: true, class: "global-search" do |form| %>
                   <%= form.search_field :q, value: params[:q], placeholder: "Search marketplace", class: "form-input" %>
                 <% end %>
-                <span>Welcome, <%= current_user.full_name %></span>
-                <%= link_to "Notifications (#{current_user.notifications.unread.count})", notifications_path, class: "btn btn-secondary" %>
+                <span class="user-name"><%= current_user.full_name %></span>
+                <%= link_to "🔔 #{current_user.notifications.unread.count}", notifications_path, class: "btn btn-secondary icon-btn", title: "Notifications" %>
                 <% if current_user.customer? %>
-                  <%= link_to "Inbox", customer_conversations_path, class: "btn btn-secondary" %>
+                  <%= link_to "💬 Inbox", customer_conversations_path, class: "btn btn-secondary" %>
                 <% elsif current_merchant_account.present? || (current_user.supplier_user? && current_user.suppliers.exists?) %>
-                  <%= link_to "Inbox", merchant_conversations_path, class: "btn btn-secondary" %>
+                  <%= link_to "💬 Inbox", merchant_conversations_path, class: "btn btn-secondary" %>
                 <% end %>
                 <%= role_badge(current_user) %>
                 <%= button_to "Logout", logout_path,
                               method: :delete,
                               form: { data: { turbo_confirm: "Are you sure you want to logout?" } },
-                              class: "btn btn-secondary",
-                              style: "padding: 0.5rem 1rem; margin-left: 1rem;" %>
+                              class: "btn btn-secondary" %>
               <% else %>
                 <%= link_to "Login", login_path, class: "btn btn-primary" %>
                 <%= link_to "Sign Up", signup_path, class: "btn btn-secondary" %>
@@ -214,7 +213,7 @@
       </div>
     <% else %>
       <!-- No current_user: render only login or public pages -->
-      <div class="content-area" style="max-width: 1200px; margin: 2rem auto;">
+      <div class="content-area public-shell">
         <% flash.each do |type, message| %>
           <div class="alert flash-<%= type %>"><%= message %></div>
         <% end %>

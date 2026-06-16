@@ -1,121 +1,116 @@
 <% content_for :page_title, "Marketplace Governance" %>
 
-<section class="page-section">
-  <div class="section-header">
-    <div>
-      <h2 class="section-title">Open Reports</h2>
-      <p class="section-subtitle">Triage customer and merchant reports before taking moderation action.</p>
-    </div>
+<div class="table-container">
+  <div class="table-header">
+    <h3 class="table-title">Open Reports</h3>
   </div>
-  <% if @reports.any? %>
-    <div class="card-grid">
+  <div class="card-grid">
       <% @reports.each do |report| %>
         <article class="ui-card">
-          <div class="card-body">
-            <div class="card-kicker"><%= report.reportable_type %> #<%= report.reportable_id %></div>
-            <h3 class="card-title"><%= report.reason %></h3>
-            <p class="card-meta">Reported by <%= report.reporter.full_name %></p>
-            <%= render "shared/status_badge", status: report.status, label: report.status.titleize %>
+          <span class="badge <%= status_badge_class(report.status) %>"><%= report.status.titleize %></span>
+          <h3 class="card-title"><%= report.reason %></h3>
+          <div class="card-meta">
+            <span><%= report.reporter.full_name %></span>
+            <span><%= report.reportable_type %> #<%= report.reportable_id %></span>
           </div>
         </article>
       <% end %>
-    </div>
-  <% else %>
-    <%= render "shared/empty_state", title: "No open reports" %>
-  <% end %>
-</section>
-
-<section class="page-section">
-  <div class="section-header"><h2 class="section-title">Products</h2></div>
-  <div class="card-grid compact">
-    <% @products.each do |product| %>
-      <article class="ui-card">
-        <div class="card-body">
-          <h3 class="card-title"><%= product.marketplace_listing&.title.presence || product.name %></h3>
-          <%= render "shared/status_badge", status: product.marketplace_status, label: product.marketplace_status.titleize %>
-        </div>
-        <div class="card-actions">
-          <%= button_to "Hide", admin_moderation_actions_path,
-                        params: { moderation_action: { moderatable_type: "Product", moderatable_id: product.id, action_name: "hide" } },
-                        class: "btn btn-secondary" %>
-        </div>
-      </article>
-    <% end %>
+      <% if @reports.empty? %>
+        <div class="empty-state"><span class="empty-icon">✓</span><span>No open reports.</span></div>
+      <% end %>
   </div>
-</section>
+</div>
 
-<section class="page-section">
-  <div class="section-header"><h2 class="section-title">Services</h2></div>
-  <div class="card-grid compact">
-    <% @services.each do |service| %>
-      <article class="ui-card">
-        <div class="card-body">
+<div class="table-container">
+  <div class="table-header"><h3 class="table-title">Products</h3></div>
+  <div class="card-grid">
+      <% @products.each do |product| %>
+        <article class="ui-card">
+          <span class="badge <%= status_badge_class(product.marketplace_status) %>"><%= product.marketplace_status.titleize %></span>
+          <h3 class="card-title"><%= product.name %></h3>
+            <%= button_to "Hide", admin_moderation_actions_path,
+                          params: { moderation_action: { moderatable_type: "Product", moderatable_id: product.id, action_name: "hide" } },
+                          class: "btn btn-secondary" %>
+        </article>
+      <% end %>
+      <% if @products.empty? %>
+        <div class="empty-state"><span class="empty-icon">📦</span><span>No products in queue.</span></div>
+      <% end %>
+  </div>
+</div>
+
+<div class="table-container">
+  <div class="table-header"><h3 class="table-title">Services</h3></div>
+  <div class="card-grid">
+      <% @services.each do |service| %>
+        <article class="ui-card">
+          <span class="badge <%= status_badge_class(service.status) %>"><%= service.status.titleize %></span>
           <h3 class="card-title"><%= service.name %></h3>
-          <%= render "shared/status_badge", status: service.status, label: service.status.titleize %>
-        </div>
-        <div class="card-actions">
-          <%= button_to "Hide", admin_moderation_actions_path,
-                        params: { moderation_action: { moderatable_type: "ServiceListing", moderatable_id: service.id, action_name: "hide" } },
-                        class: "btn btn-secondary" %>
-        </div>
-      </article>
-    <% end %>
+            <%= button_to "Hide", admin_moderation_actions_path,
+                          params: { moderation_action: { moderatable_type: "ServiceListing", moderatable_id: service.id, action_name: "hide" } },
+                          class: "btn btn-secondary" %>
+        </article>
+      <% end %>
+      <% if @services.empty? %>
+        <div class="empty-state"><span class="empty-icon">🛠</span><span>No services in queue.</span></div>
+      <% end %>
   </div>
-</section>
+</div>
 
-<section class="page-section">
-  <div class="section-header"><h2 class="section-title">Reviews</h2></div>
-  <div class="card-grid compact">
-    <% @reviews.each do |review| %>
-      <article class="ui-card">
-        <div class="card-body">
-          <div class="rating-row"><strong><%= review.rating %>/5</strong><%= render "shared/status_badge", status: review.status, label: review.status.titleize %></div>
-          <p><%= review.body %></p>
-        </div>
-        <div class="card-actions">
-          <%= button_to "Hide", admin_moderation_actions_path,
-                        params: { moderation_action: { moderatable_type: "Review", moderatable_id: review.id, action_name: "hide" } },
-                        class: "btn btn-secondary" %>
-        </div>
-      </article>
-    <% end %>
+<div class="table-container">
+  <div class="table-header"><h3 class="table-title">Reviews</h3></div>
+  <div class="card-grid">
+      <% @reviews.each do |review| %>
+        <article class="ui-card">
+          <div class="card-meta">
+            <span>★ <%= review.rating %>/5</span>
+            <span class="badge <%= status_badge_class(review.status) %>"><%= review.status.titleize %></span>
+          </div>
+          <p class="clamp-2"><%= review.body %></p>
+            <%= button_to "Hide", admin_moderation_actions_path,
+                          params: { moderation_action: { moderatable_type: "Review", moderatable_id: review.id, action_name: "hide" } },
+                          class: "btn btn-secondary" %>
+        </article>
+      <% end %>
+      <% if @reviews.empty? %>
+        <div class="empty-state"><span class="empty-icon">★</span><span>No reviews in queue.</span></div>
+      <% end %>
   </div>
-</section>
+</div>
 
-<section class="page-section">
-  <div class="section-header"><h2 class="section-title">Merchants</h2></div>
-  <div class="card-grid compact">
-    <% @suppliers.each do |supplier| %>
-      <article class="ui-card">
-        <div class="card-body">
+<div class="table-container">
+  <div class="table-header"><h3 class="table-title">Merchants</h3></div>
+  <div class="card-grid">
+      <% @suppliers.each do |supplier| %>
+        <article class="ui-card">
+          <span class="badge <%= status_badge_class(supplier.shop_status) %>"><%= supplier.shop_status.titleize %></span>
           <h3 class="card-title"><%= supplier.name %></h3>
-          <%= render "shared/status_badge", status: supplier.shop_status, label: supplier.shop_status.titleize %>
-        </div>
-        <div class="card-actions">
-          <%= button_to "Suspend", admin_moderation_actions_path,
-                        params: { moderation_action: { moderatable_type: "Supplier", moderatable_id: supplier.id, action_name: "suspend" } },
-                        class: "btn btn-secondary" %>
-        </div>
-      </article>
-    <% end %>
+            <%= button_to "Suspend", admin_moderation_actions_path,
+                          params: { moderation_action: { moderatable_type: "Supplier", moderatable_id: supplier.id, action_name: "suspend" } },
+                          class: "btn btn-secondary" %>
+        </article>
+      <% end %>
+      <% if @suppliers.empty? %>
+        <div class="empty-state"><span class="empty-icon">🏬</span><span>No merchants in queue.</span></div>
+      <% end %>
   </div>
-</section>
+</div>
 
-<section class="page-section">
-  <div class="section-header"><h2 class="section-title">Moderation Log</h2></div>
-  <% if @moderation_actions.any? %>
-    <div class="card-grid compact">
+<div class="table-container">
+  <div class="table-header"><h3 class="table-title">Moderation Log</h3></div>
+  <div class="card-grid">
       <% @moderation_actions.each do |action| %>
         <article class="ui-card">
-          <div class="card-body">
-            <div class="card-kicker"><%= action.created_at.to_fs(:short) %></div>
-            <h3 class="card-title"><%= action.action_name.titleize %></h3>
-            <p class="card-meta"><%= action.actor.full_name %> moderated <%= action.moderatable_type %> #<%= action.moderatable_id %></p>
+          <span class="badge badge-secondary"><%= action.action_name.titleize %></span>
+          <div class="card-meta">
+            <span><%= action.created_at.to_fs(:short) %></span>
+            <span><%= action.actor.full_name %></span>
+            <span><%= action.moderatable_type %> #<%= action.moderatable_id %></span>
           </div>
         </article>
       <% end %>
-    </div>
-  <% else %>
-    <%= render "shared/empty_state", title: "No moderation actions yet" %>
-  <% end %>
-</section>
+      <% if @moderation_actions.empty? %>
+        <div class="empty-state"><span class="empty-icon">✓</span><span>No moderation actions yet.</span></div>
+      <% end %>
+  </div>
+</div>

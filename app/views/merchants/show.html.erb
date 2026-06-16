@@ -1,67 +1,81 @@
 <% content_for :page_title, @merchant.name %>
 
-<section class="page-section">
-  <article class="ui-card">
-    <% if @merchant.banner.attached? %>
-      <%= image_tag @merchant.banner, class: "merchant-banner", alt: "#{@merchant.name} banner" %>
-    <% elsif @merchant.shop_image_url.present? %>
-      <img class="merchant-banner" src="<%= @merchant.shop_image_url %>" alt="<%= @merchant.name %> storefront">
-    <% else %>
-      <div class="merchant-banner placeholder-media" role="img" aria-label="<%= @merchant.name %> storefront placeholder">
-        <span><%= @merchant.name.to_s.first&.upcase || "M" %></span>
-      </div>
-    <% end %>
-
-    <div class="card-body">
-      <div class="section-header" style="margin-bottom: 0;">
-        <div>
-          <h2 class="section-title"><%= @merchant.name %></h2>
-          <p class="section-subtitle"><%= @merchant.shop_description.presence || "Marketplace merchant storefront." %></p>
-        </div>
-        <div class="rating-row">
-          <strong><%= number_with_precision(@merchant.average_rating, precision: 2) %> / 5</strong>
-          <%= link_to "Back to Catalog", catalog_path, class: "btn btn-secondary" %>
-        </div>
-      </div>
-      <div class="dashboard-card-grid">
-        <div class="summary-card">
-          <div class="card-kicker">Contact</div>
-          <p><%= @merchant.contact_email.presence || "Email not provided" %></p>
-          <p><%= @merchant.contact_phone.presence || "Phone not provided" %></p>
-        </div>
-        <div class="summary-card">
-          <div class="card-kicker">Marketplace</div>
-          <p><%= pluralize(@products.size, "public product") %></p>
-          <p><%= pluralize(@services.size, "public service") %></p>
-        </div>
-      </div>
-    </div>
-  </article>
-</section>
-
-<section class="page-section">
-  <div class="section-header">
-    <h2 class="section-title">Products</h2>
+<div class="table-container">
+  <div class="table-header">
+    <h3 class="table-title"><%= @merchant.name %></h3>
+    <%= link_to "Back to Catalog", catalog_path, class: "btn btn-secondary" %>
   </div>
-  <% product_listings = @products.filter_map(&:marketplace_listing) %>
-  <% if product_listings.any? %>
-    <div class="card-grid">
-      <%= render partial: "shared/listing_card", collection: product_listings, as: :listing %>
+
+  <div class="merchant-hero">
+    <div class="hero-media">
+      <% if @merchant.banner.attached? %>
+        <%= image_tag @merchant.banner, alt: "#{@merchant.name} banner" %>
+      <% elsif safe_media_url?(@merchant.shop_image_url) %>
+        <img src="<%= @merchant.shop_image_url %>" alt="<%= @merchant.name %>">
+      <% elsif @merchant.shop_image_url.present? %>
+        <div class="hero-placeholder" data-image-url="<%= @merchant.shop_image_url %>"><%= ui_initial(@merchant.name) %></div>
+      <% else %>
+        <div class="hero-placeholder"><%= ui_initial(@merchant.name) %></div>
+      <% end %>
+    </div>
+    <aside class="summary-panel stack">
+      <% if @merchant.logo.attached? %>
+        <%= image_tag @merchant.logo, alt: "#{@merchant.name} logo", style: "width: 72px; height: 72px; border-radius: var(--radius-lg); object-fit: cover;" %>
+      <% end %>
+      <p style="color: var(--muted-text);"><%= @merchant.shop_description.presence || "No shop description provided." %></p>
+      <div class="card-meta">
+        <span>★ <%= number_with_precision(@merchant.average_rating, precision: 2) %></span>
+        <span>✉ <%= @merchant.contact_email.presence || "No email" %></span>
+        <span>☎ <%= @merchant.contact_phone.presence || "No phone" %></span>
+      </div>
+    </aside>
+  </div>
+
+  <div class="section-header">
+    <h3 class="section-title">Products</h3>
+  </div>
+  <% if @products.any? %>
+    <div class="market-grid">
+      <% @products.each do |product| %>
+        <article class="ui-card media-card">
+          <div class="card-media">
+            <% if product.featured_image.attached? %>
+              <%= image_tag product.featured_image, alt: product.name %>
+            <% else %>
+              <span><%= ui_initial(product.name) %></span>
+            <% end %>
+          </div>
+          <div class="card-body">
+            <h3 class="card-title clamp-2"><%= link_to product.name, catalog_product_path(product) %></h3>
+            <div class="price"><%= currency(product.selling_price.to_f) %></div>
+            <div class="card-meta">
+              <span>🏷 <%= product.category.name %></span>
+              <span>📦 <%= number_with_delimiter(product.available_stock) %></span>
+            </div>
+          </div>
+        </article>
+      <% end %>
     </div>
   <% else %>
-    <%= render "shared/empty_state", title: "No public products", message: "This merchant has no public product listings." %>
+    <div class="empty-state"><span class="empty-icon">📦</span><span>This merchant has no public products.</span></div>
   <% end %>
-</section>
+</div>
 
-<section class="page-section">
-  <div class="section-header">
-    <h2 class="section-title">Services</h2>
+<div class="table-container" style="margin-top: 1.5rem;">
+  <div class="table-header">
+    <h3 class="table-title">Services</h3>
   </div>
   <% if @services.any? %>
-    <div class="card-grid">
-      <%= render partial: "shared/service_card", collection: @services, as: :service %>
+    <div class="market-grid">
+      <% @services.each do |service| %>
+        <article class="ui-card">
+          <h3 class="card-title"><%= link_to service.name, service_path(service) %></h3>
+          <div class="price">From <%= currency(service.starting_price.to_f) %></div>
+          <div class="card-meta">🛠 <%= service.service_category %></div>
+        </article>
+      <% end %>
     </div>
   <% else %>
-    <%= render "shared/empty_state", title: "No public services", message: "This merchant has no public services." %>
+    <div class="empty-state"><span class="empty-icon">🛠</span><span>No public services.</span></div>
   <% end %>
-</section>
+</div>

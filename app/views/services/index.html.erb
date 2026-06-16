@@ -3,19 +3,15 @@
   Marketplace / Services
 <% end %>
 
-<section class="page-section">
-  <div class="section-header">
-    <div>
-      <h2 class="section-title">Marketplace Services</h2>
-      <p class="section-subtitle">Find bookable services from marketplace providers.</p>
-    </div>
+<div class="table-container">
+  <div class="table-header">
+    <h3 class="table-title">Service Marketplace</h3>
   </div>
-
-  <div class="filter-card">
-    <%= form_with url: services_path, method: :get, local: true, class: "filter-grid", style: "grid-template-columns: 2fr 1fr auto;" do |form| %>
+  <div class="filter-bar">
+    <%= form_with url: services_path, method: :get, local: true, class: "filter-grid compact" do |form| %>
       <div class="form-group" style="margin-bottom: 0;">
         <%= form.label :q, "Search", class: "form-label" %>
-        <%= form.text_field :q, value: params[:q], class: "form-input", placeholder: "Search services" %>
+        <%= form.text_field :q, value: params[:q], class: "form-input" %>
       </div>
       <div class="form-group" style="margin-bottom: 0;">
         <%= form.label :category, class: "form-label" %>
@@ -24,17 +20,36 @@
       <%= form.submit "Apply", class: "btn btn-primary" %>
     <% end %>
   </div>
-
   <% if @services.any? %>
-    <div class="card-grid">
-      <%= render partial: "shared/service_card", collection: @services, as: :service %>
+    <div class="market-grid">
+      <% @services.each do |service| %>
+        <article class="ui-card media-card">
+          <div class="card-media">
+            <% if safe_media_url?(service.image_url) %>
+              <img src="<%= service.image_url %>" alt="<%= service.name %>">
+            <% else %>
+              <span><%= ui_initial(service.name) %></span>
+            <% end %>
+          </div>
+          <div class="card-body">
+            <h3 class="card-title clamp-2"><%= link_to service.name, service_path(service) %></h3>
+            <div class="price">From <%= currency(service.starting_price.to_f) %></div>
+            <div class="card-meta">
+              <span class="meta-item">🛠 <%= service.service_category %></span>
+              <span class="meta-item">★ <%= number_with_precision(service.average_rating, precision: 1) %></span>
+            </div>
+            <div class="card-meta">
+              <span class="meta-item">🏬 <%= link_to service.supplier.name, merchant_storefront_path(service.supplier) %></span>
+            </div>
+          </div>
+        </article>
+      <% end %>
     </div>
-    <%= pagination_controls(@services) %>
   <% else %>
-    <%= render "shared/empty_state",
-               title: "No services found",
-               message: "Try a different search or service category.",
-               action: "View All Services",
-               path: services_path %>
+    <div class="empty-state">
+      <span class="empty-icon">🛠</span>
+      <span>No services match your filters.</span>
+    </div>
   <% end %>
-</section>
+  <%= pagination_controls(@services) %>
+</div>

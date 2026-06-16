@@ -1,30 +1,21 @@
-<section class="page-section">
-  <div class="section-header">
-    <div>
-      <h2 class="section-title">Conversations</h2>
-      <p class="section-subtitle">Messages between customers and merchants.</p>
-    </div>
-  </div>
-
+<div class="table-container">
+  <div class="table-header"><h3 class="table-title">Conversations</h3></div>
   <% if conversations.any? %>
     <div class="card-grid">
       <% conversations.each do |conversation| %>
         <article class="ui-card">
-          <div class="card-body">
-            <div class="card-kicker"><%= conversation.supplier.name %></div>
-            <h3 class="card-title"><%= link_to conversation.subject, conversation_path(conversation) %></h3>
-            <div class="order-card-meta">
-              <%= render "shared/status_badge", status: "pending", label: "#{conversation.messages.where.not(sender: current_user).unread.count} unread" %>
-              <span class="muted-text"><%= conversation.updated_at.strftime("%b %d, %Y %H:%M") %></span>
-            </div>
+          <div class="card-meta">
+            <span>🏬 <%= conversation.supplier.name %></span>
+            <span>📅 <%= conversation.updated_at.strftime("%b %d, %Y %H:%M") %></span>
           </div>
-          <div class="card-actions">
-            <%= link_to "Open Conversation", conversation_path(conversation), class: "btn btn-secondary" %>
-          </div>
+          <h3 class="card-title"><%= link_to conversation.subject, conversation_path(conversation) %></h3>
+          <span class="badge <%= conversation.messages.where.not(sender: current_user).unread.count.positive? ? "badge-info" : "badge-secondary" %>">
+            💬 <%= conversation.messages.where.not(sender: current_user).unread.count %>
+          </span>
         </article>
       <% end %>
     </div>
   <% else %>
-    <%= render "shared/empty_state", title: "No conversations", message: "Messages with merchants will appear here." %>
+    <div class="empty-state"><span class="empty-icon">💬</span><span>No conversations yet.</span></div>
   <% end %>
-</section>
+</div>

@@ -1,97 +1,88 @@
 <% content_for :page_title, @listing.title %>
 
-<section class="detail-layout page-section">
-  <div class="ui-card">
-    <% if @listing.featured_media_url.present? %>
-      <img class="detail-media" src="<%= @listing.featured_media_url %>" alt="<%= @listing.title %>">
-    <% elsif @product.featured_image.attached? %>
-      <%= image_tag @product.featured_image, class: "detail-media", alt: @listing.title %>
-    <% else %>
-      <div class="detail-media placeholder-media" role="img" aria-label="<%= @listing.title %> image placeholder">
-        <span><%= @listing.title.to_s.first&.upcase || "P" %></span>
-      </div>
-    <% end %>
-    <% if @product.images.attached? %>
-      <div class="card-actions">
-        <% @product.images.each do |image| %>
-          <%= image_tag image, alt: @listing.title, style: "width: 96px; height: 72px; object-fit: cover; border-radius: 0.375rem;" %>
-        <% end %>
-      </div>
-    <% end %>
+<div class="table-container">
+  <div class="table-header">
+    <h3 class="table-title"><%= @listing.title %></h3>
+    <%= link_to "Back to Catalog", catalog_path, class: "btn btn-secondary" %>
   </div>
 
-  <aside class="summary-card">
-    <div class="card-kicker"><%= @product.category.name %></div>
-    <h2 class="section-title"><%= @listing.title %></h2>
-    <p class="card-meta">
-      Sold by
-      <% if @product.supplier %>
-        <%= link_to @product.supplier.name, merchant_storefront_path(@product.supplier) %>
+  <div class="product-hero">
+    <div class="stack">
+      <% if @product.featured_image.attached? %>
+        <div class="hero-media"><%= image_tag @product.featured_image, alt: @product.name %></div>
       <% else %>
-        Marketplace
+        <div class="hero-placeholder"><%= ui_initial(@listing.title) %></div>
       <% end %>
-    </p>
-    <div class="rating-row" style="margin: 0.75rem 0;">
-      <span><%= number_with_precision(@product.average_rating, precision: 1) %> / 5</span>
-      <span class="muted-text">(<%= pluralize(@product.reviews.published.count, "review") %>)</span>
-    </div>
-    <div class="price-row" style="margin-bottom: 0.75rem;">
-      <% if @listing.sale_price.present? %>
-        <span class="price"><%= currency(@listing.sale_price) %></span>
-        <span class="list-price"><%= currency(@listing.public_price) %></span>
-      <% else %>
-        <span class="price"><%= currency(@listing.current_price.to_f) %></span>
+      <% if @product.images.attached? %>
+        <div class="market-grid" style="padding: 0; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));">
+          <% @product.images.each do |image| %>
+            <div class="card-media" style="border-radius: var(--radius-md);"><%= image_tag image, alt: @product.name %></div>
+          <% end %>
+        </div>
       <% end %>
     </div>
-    <%= render "shared/status_badge", status: @listing.availability, label: @listing.availability.humanize %>
-    <p style="margin-top: 1rem;"><%= @listing.public_description.presence || "No description available." %></p>
 
-    <%= form_with url: cart_path, method: :post, local: true, style: "margin-top: 1.25rem;" do |form| %>
-      <%= form.hidden_field :product_id, value: @product.id %>
-      <div class="form-group">
-        <%= form.label :quantity, class: "form-label" %>
-        <%= form.number_field :quantity, value: 1, min: 1, class: "form-input" %>
+    <aside class="summary-panel stack">
+      <div>
+        <div class="price"><%= currency(@listing.current_price.to_f) %></div>
+        <div class="card-meta">
+          <span>🏷 <%= @product.category.name %></span>
+          <span>★ <%= number_with_precision(@product.average_rating, precision: 1) %></span>
+          <span class="badge <%= status_badge_class(@listing.availability) %>"><%= @listing.availability.titleize %></span>
+        </div>
       </div>
-      <%= form.submit "Add to Cart", class: "btn btn-primary" %>
-      <%= link_to "Back to Catalog", catalog_path, class: "btn btn-secondary" %>
-    <% end %>
-  </aside>
-</section>
-
-<section class="page-section">
-  <div class="section-header">
-    <h2 class="section-title">Reviews</h2>
-  </div>
-  <% if @product.reviews.published.any? %>
-    <div class="card-grid compact">
-      <% @product.reviews.published.includes(:user).each do |review| %>
-        <article class="ui-card">
-          <div class="card-body">
-            <div class="rating-row">
-              <strong><%= review.rating %>/5</strong>
-              <% if review.verified_purchase? %><%= render "shared/status_badge", status: "completed", label: "Verified Purchase" %><% end %>
-            </div>
-            <p><%= review.body %></p>
-            <p class="muted-text"><%= review.user.full_name %></p>
-          </div>
-        </article>
+      <div class="card-meta">🏬
+          <% if @product.supplier %>
+            <%= link_to @product.supplier.name, merchant_storefront_path(@product.supplier) %>
+          <% else %>
+            Marketplace
+          <% end %>
+      </div>
+      <p style="color: var(--muted-text);"><%= @listing.public_description.presence || "No description available." %></p>
+      <%= form_with url: cart_path, method: :post, local: true, class: "stack" do |form| %>
+        <%= form.hidden_field :product_id, value: @product.id %>
+        <div class="form-group">
+          <%= form.label :quantity, class: "form-label" %>
+          <%= form.number_field :quantity, value: 1, min: 1, class: "form-input" %>
+        </div>
+        <%= form.submit "Add to Cart", class: "btn btn-primary" %>
       <% end %>
-    </div>
-  <% else %>
-    <%= render "shared/empty_state", title: "No reviews yet", message: "Customer reviews will appear here after completed purchases." %>
-  <% end %>
-</section>
-
-<section class="page-section">
-  <div class="section-header">
-    <h2 class="section-title">Recommended Products</h2>
+    </aside>
   </div>
-  <% recommended_listings = @recommended_products.filter_map(&:marketplace_listing) %>
-  <% if recommended_listings.any? %>
-    <div class="card-grid compact">
-      <%= render partial: "shared/listing_card", collection: recommended_listings, as: :listing %>
-    </div>
-  <% else %>
-    <%= render "shared/empty_state", title: "No recommendations yet" %>
-  <% end %>
-</section>
+</div>
+
+<div class="table-container" style="margin-top: 1.5rem;">
+  <div class="table-header">
+    <h3 class="table-title">Reviews</h3>
+  </div>
+  <div class="card-grid">
+    <% @product.reviews.published.includes(:user).each do |review| %>
+      <article class="ui-card">
+        <div class="card-meta"><strong>★ <%= review.rating %>/5</strong>
+        <% if review.verified_purchase? %><span class="badge badge-success">Verified Purchase</span><% end %>
+        </div>
+        <%= review.body %>
+      </article>
+    <% end %>
+    <% if @product.reviews.published.empty? %>
+      <div class="empty-state"><span class="empty-icon">★</span><span>No reviews yet.</span></div>
+    <% end %>
+  </div>
+</div>
+
+<div class="table-container" style="margin-top: 1.5rem;">
+  <div class="table-header">
+    <h3 class="table-title">Recommended Products</h3>
+  </div>
+  <div class="card-grid">
+    <% @recommended_products.each do |product| %>
+      <article class="ui-card">
+        <h3 class="card-title"><%= link_to product.name, catalog_product_path(product) %></h3>
+        <div class="price"><%= currency(product.selling_price.to_f) %></div>
+      </article>
+    <% end %>
+    <% if @recommended_products.empty? %>
+      <div class="empty-state"><span class="empty-icon">⌕</span><span>No recommendations yet.</span></div>
+    <% end %>
+  </div>
+</div>

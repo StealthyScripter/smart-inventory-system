@@ -1,75 +1,73 @@
 <% content_for :page_title, @service.name %>
 
-<section class="detail-layout page-section">
-  <div class="ui-card">
-    <% if @service.image_url.present? %>
-      <img class="detail-media" src="<%= @service.image_url %>" alt="<%= @service.name %>">
-    <% elsif @service.gallery_images.attached? %>
-      <%= image_tag @service.gallery_images.first, class: "detail-media", alt: @service.name %>
-    <% else %>
-      <div class="detail-media placeholder-media" role="img" aria-label="<%= @service.name %> image placeholder">
-        <span><%= @service.name.to_s.first&.upcase || "S" %></span>
-      </div>
-    <% end %>
-    <% images = @service.gallery_images.to_a + @service.before_images.to_a + @service.after_images.to_a %>
-    <% if images.any? %>
-      <div class="card-actions">
-        <% images.each do |image| %>
-          <%= image_tag image, alt: @service.name, style: "width: 96px; height: 72px; object-fit: cover; border-radius: 0.375rem;" %>
-        <% end %>
-      </div>
-    <% end %>
+<div class="table-container">
+  <div class="table-header">
+    <h3 class="table-title"><%= @service.name %></h3>
+    <%= link_to "Back to Services", services_path, class: "btn btn-secondary" %>
   </div>
-
-  <aside class="summary-card">
-    <div class="card-kicker"><%= @service.service_category %></div>
-    <h2 class="section-title"><%= @service.name %></h2>
-    <p class="card-meta">Provided by <%= link_to @service.supplier.name, merchant_storefront_path(@service.supplier) %></p>
-    <div class="rating-row" style="margin: 0.75rem 0;">
-      <span><%= number_with_precision(@service.average_rating, precision: 1) %> / 5</span>
-      <span class="muted-text">(<%= pluralize(@service.reviews.published.count, "review") %>)</span>
+  <div class="product-hero">
+    <div class="stack">
+      <% if safe_media_url?(@service.image_url) %>
+        <div class="hero-media"><img src="<%= @service.image_url %>" alt="<%= @service.name %>"></div>
+      <% else %>
+        <div class="hero-placeholder"><%= ui_initial(@service.name) %></div>
+      <% end %>
+      <% if @service.gallery_images.attached? || @service.before_images.attached? || @service.after_images.attached? %>
+        <div class="market-grid" style="padding: 0; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));">
+          <% (@service.gallery_images.to_a + @service.before_images.to_a + @service.after_images.to_a).each do |image| %>
+            <div class="card-media" style="border-radius: var(--radius-md);"><%= image_tag image, alt: @service.name %></div>
+          <% end %>
+        </div>
+      <% end %>
+      <p style="color: var(--muted-text);"><%= @service.description %></p>
     </div>
-    <div class="price-row" style="margin-bottom: 0.75rem;">
-      <span class="price"><%= currency(@service.starting_price.to_f) %></span>
-    </div>
-    <%= render "shared/status_badge", status: @service.status, label: @service.status.humanize %>
-    <p style="margin-top: 1rem;"><%= @service.description %></p>
 
-    <%= form_with url: service_bookings_path, method: :post, local: true, style: "margin-top: 1.25rem;" do |form| %>
-      <%= form.hidden_field :service_listing_id, value: @service.id %>
-      <div class="grid-2">
-        <div class="form-group">
-          <%= form.label :scheduled_date, "Preferred Date", class: "form-label" %>
-          <%= form.date_field :scheduled_date, class: "form-input" %>
+    <aside class="summary-panel stack">
+      <div class="price">From <%= currency(@service.starting_price.to_f) %></div>
+      <div class="card-meta">
+        <span>🛠 <%= @service.service_category %></span>
+        <span>★ <%= number_with_precision(@service.average_rating, precision: 1) %></span>
+      </div>
+      <div class="card-meta">🏬 <%= link_to @service.supplier.name, merchant_storefront_path(@service.supplier) %></div>
+      <%= form_with url: service_bookings_path, method: :post, local: true, class: "stack" do |form| %>
+        <%= form.hidden_field :service_listing_id, value: @service.id %>
+        <div class="grid-2">
+          <div class="form-group">
+            <%= form.label :scheduled_date, "Date", class: "form-label" %>
+            <%= form.date_field :scheduled_date, class: "form-input" %>
+          </div>
+          <div class="form-group">
+            <%= form.label :scheduled_time, "Time", class: "form-label" %>
+            <%= form.time_field :scheduled_time, class: "form-input" %>
+          </div>
         </div>
         <div class="form-group">
-          <%= form.label :scheduled_time, "Preferred Time", class: "form-label" %>
-          <%= form.time_field :scheduled_time, class: "form-input" %>
+          <%= form.label :duration_minutes, "Duration", class: "form-label" %>
+          <%= form.number_field :duration_minutes, min: 30, step: 30, class: "form-input" %>
         </div>
-      </div>
-      <div class="form-group">
-        <%= form.label :duration_minutes, "Duration (minutes)", class: "form-label" %>
-        <%= form.number_field :duration_minutes, min: 30, step: 30, class: "form-input" %>
-      </div>
-      <div class="form-group">
-        <%= form.label :notes, class: "form-label" %>
-        <%= form.text_area :notes, rows: 3, class: "form-input" %>
-      </div>
-      <%= form.submit "Request Service", class: "btn btn-primary" %>
-      <%= link_to "Back to Services", services_path, class: "btn btn-secondary" %>
-    <% end %>
-  </aside>
-</section>
-
-<section class="page-section">
-  <div class="section-header">
-    <h2 class="section-title">Recommended Services</h2>
+        <div class="form-group">
+          <%= form.label :notes, class: "form-label" %>
+          <%= form.text_area :notes, rows: 3, class: "form-input" %>
+        </div>
+        <%= form.submit "Request Service", class: "btn btn-primary" %>
+      <% end %>
+    </aside>
   </div>
-  <% if @recommended_services.any? %>
-    <div class="card-grid compact">
-      <%= render partial: "shared/service_card", collection: @recommended_services, as: :service %>
-    </div>
-  <% else %>
-    <%= render "shared/empty_state", title: "No recommendations yet" %>
-  <% end %>
-</section>
+</div>
+
+<div class="table-container" style="margin-top: 1.5rem;">
+  <div class="table-header">
+    <h3 class="table-title">Recommended Services</h3>
+  </div>
+  <div class="card-grid">
+    <% @recommended_services.each do |service| %>
+      <article class="ui-card">
+        <h3 class="card-title"><%= link_to service.name, service_path(service) %></h3>
+        <div class="card-meta">🏬 <%= service.supplier.name %></div>
+      </article>
+    <% end %>
+    <% if @recommended_services.empty? %>
+      <div class="empty-state"><span class="empty-icon">🛠</span><span>No recommendations yet.</span></div>
+    <% end %>
+  </div>
+</div>

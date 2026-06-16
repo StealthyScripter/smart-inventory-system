@@ -3,17 +3,40 @@
   Merchant / Dashboard
 <% end %>
 
-<div style="margin-bottom: 1rem;">
+<div class="action-row" style="margin-bottom: 1rem;">
   <span class="badge badge-info"><%= merchant_suppliers.map(&:name).to_sentence %></span>
 </div>
 
 <div class="stats-grid">
-  <%= render "shared/metric_card", label: "Listings", value: number_with_delimiter(@product_count), hint: "Inventory products and marketplace-ready listings" %>
-  <%= render "shared/metric_card", label: "Public Listings", value: number_with_delimiter(@public_product_count), hint: "Visible to customers" %>
-  <%= render "shared/metric_card", label: "Draft / Private", value: number_with_delimiter(@non_public_product_count), hint: "Not public" %>
-  <%= render "shared/metric_card", label: "Pending Orders", value: number_with_delimiter(@pending_orders_count), hint: "Need fulfillment attention" %>
-  <%= render "shared/metric_card", label: "Services", value: number_with_delimiter(@service_count), hint: "Bookable provider offerings" %>
-  <%= render "shared/metric_card", label: "Sales", value: currency(@sales_summary[:sales_total].to_f), hint: "Current sales summary" %>
+  <div class="stat-card">
+    <div class="stat-header"><span class="stat-title">Listings</span></div>
+    <div class="stat-value"><%= number_with_delimiter(@product_count) %></div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-header"><span class="stat-title">Public Listings</span></div>
+    <div class="stat-value"><%= number_with_delimiter(@public_product_count) %></div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-header"><span class="stat-title">Draft / Private</span></div>
+    <div class="stat-value"><%= number_with_delimiter(@non_public_product_count) %></div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-header"><span class="stat-title">Pending Orders</span></div>
+    <div class="stat-value"><%= number_with_delimiter(@pending_orders_count) %></div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-header"><span class="stat-title">Services</span></div>
+    <div class="stat-value"><%= number_with_delimiter(@service_count) %></div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-header"><span class="stat-title">Sales</span></div>
+    <div class="stat-value"><%= currency(@sales_summary[:sales_total].to_f) %></div>
+  </div>
 </div>
 
 <div class="grid-2">
@@ -24,31 +47,28 @@
         <%= link_to "Local Inventory", merchant_inventory_path, class: "btn btn-secondary" %>
       <% end %>
     </div>
-    <div style="padding: 1rem;">
-      <% if @low_stock_products.any? %>
-        <div class="card-grid compact">
-          <% @low_stock_products.each do |product| %>
-            <article class="ui-card">
-              <div class="card-body">
-                <div class="card-kicker">Local Inventory</div>
-                <h3 class="card-title"><%= product.name %></h3>
-                <div class="summary-row"><span>Stock</span><strong class="stock-low"><%= number_with_delimiter(product.total_stock) %></strong></div>
-                <div class="summary-row"><span>Reorder Point</span><strong><%= product.reorder_point %></strong></div>
-              </div>
-            </article>
-          <% end %>
-        </div>
-      <% else %>
-        <%= render "shared/empty_state", title: "No low stock items" %>
-      <% end %>
-    </div>
+    <% if @low_stock_products.any? %>
+      <div class="card-grid">
+        <% @low_stock_products.each do |product| %>
+          <article class="ui-card">
+            <h3 class="card-title"><%= product.name %></h3>
+            <div class="card-meta">
+              <span class="stock-low">📦 <%= number_with_delimiter(product.total_stock) %></span>
+              <span>Reorder <%= product.reorder_point %></span>
+            </div>
+          </article>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="empty-state"><span class="empty-icon">✓</span><span>No low stock items.</span></div>
+    <% end %>
   </div>
 
   <div class="table-container">
     <div class="table-header">
       <h3 class="table-title">Merchant Tools</h3>
     </div>
-    <div style="padding: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+    <div class="card-grid">
       <% if can_manage_merchant?(:manage_catalog) %>
         <%= link_to "Marketplace Listings", merchant_products_path, class: "btn btn-primary" %>
       <% end %>
@@ -84,31 +104,24 @@
   <div class="table-header">
     <h3 class="table-title">Recent Activity</h3>
   </div>
-  <div style="padding: 1rem;">
-    <% if @booking_queue.any? || @low_stock_products.any? %>
-      <div class="card-grid compact">
-        <% @booking_queue.each do |booking| %>
-          <article class="ui-card">
-            <div class="card-body">
-              <div class="card-kicker">Booking Requested</div>
-              <h3 class="card-title"><%= booking.booking_number %></h3>
-              <p class="muted-text"><%= booking.created_at.to_fs(:short) %></p>
-            </div>
-          </article>
-        <% end %>
-        <% @low_stock_products.each do |product| %>
-          <article class="ui-card">
-            <div class="card-body">
-              <div class="card-kicker">Low Stock</div>
-              <h3 class="card-title"><%= product.name %></h3>
-              <p><strong><%= number_with_delimiter(product.total_stock) %></strong> on hand</p>
-            </div>
-          </article>
-        <% end %>
-      </div>
-    <% else %>
-      <%= render "shared/empty_state", title: "No recent activity requiring attention" %>
-    <% end %>
+  <div class="card-grid">
+      <% @booking_queue.each do |booking| %>
+        <article class="ui-card">
+          <span class="badge badge-info">Booking</span>
+          <h3 class="card-title"><%= booking.booking_number %></h3>
+          <div class="card-meta"><%= booking.created_at.to_fs(:short) %></div>
+        </article>
+      <% end %>
+      <% @low_stock_products.each do |product| %>
+        <article class="ui-card">
+          <span class="badge badge-warning">Low Stock</span>
+          <h3 class="card-title"><%= product.name %></h3>
+          <div class="card-meta">📦 <%= number_with_delimiter(product.total_stock) %> on hand</div>
+        </article>
+      <% end %>
+      <% if @booking_queue.empty? && @low_stock_products.empty? %>
+        <div class="empty-state"><span class="empty-icon">✓</span><span>No recent activity requiring attention.</span></div>
+      <% end %>
   </div>
 </div>
 
@@ -118,22 +131,19 @@
       <h3 class="table-title">Booking Queue</h3>
       <%= link_to "Bookings", merchant_service_bookings_path, class: "btn btn-secondary" %>
     </div>
-    <div style="padding: 1rem;">
-      <% if @booking_queue.any? %>
-        <div class="card-grid compact">
-          <% @booking_queue.each do |booking| %>
-            <article class="ui-card">
-              <div class="card-body">
-                <h3 class="card-title"><%= booking.booking_number %></h3>
-                <p><%= booking.user.full_name %></p>
-                <%= render "shared/status_badge", status: booking.status, label: booking.status.titleize %>
-              </div>
-            </article>
-          <% end %>
-        </div>
-      <% else %>
-        <%= render "shared/empty_state", title: "No bookings waiting for action" %>
-      <% end %>
+    <div class="card-grid">
+        <% @booking_queue.each do |booking| %>
+          <article class="ui-card">
+            <h3 class="card-title"><%= booking.booking_number %></h3>
+            <div class="card-meta">
+              <span><%= booking.user.full_name %></span>
+              <span class="badge <%= status_badge_class(booking.status) %>"><%= booking.status.titleize %></span>
+            </div>
+          </article>
+        <% end %>
+        <% if @booking_queue.empty? %>
+          <div class="empty-state"><span class="empty-icon">✓</span><span>No bookings waiting for action.</span></div>
+        <% end %>
     </div>
   </div>
 
@@ -141,22 +151,19 @@
     <div class="table-header">
       <h3 class="table-title">Upcoming Jobs</h3>
     </div>
-    <div style="padding: 1rem;">
-      <% if @upcoming_jobs.any? %>
-        <div class="card-grid compact">
-          <% @upcoming_jobs.each do |booking| %>
-            <article class="ui-card">
-              <div class="card-body">
-                <div class="card-kicker"><%= booking.scheduled_date %></div>
-                <h3 class="card-title"><%= booking.service_listings.map(&:name).to_sentence %></h3>
-                <%= render "shared/status_badge", status: booking.status, label: booking.status.titleize %>
-              </div>
-            </article>
-          <% end %>
-        </div>
-      <% else %>
-        <%= render "shared/empty_state", title: "No upcoming jobs scheduled" %>
-      <% end %>
+    <div class="card-grid">
+        <% @upcoming_jobs.each do |booking| %>
+          <article class="ui-card">
+            <h3 class="card-title"><%= booking.service_listings.map(&:name).to_sentence %></h3>
+            <div class="card-meta">
+              <span>📅 <%= booking.scheduled_date %></span>
+              <span class="badge <%= status_badge_class(booking.status) %>"><%= booking.status.titleize %></span>
+            </div>
+          </article>
+        <% end %>
+        <% if @upcoming_jobs.empty? %>
+          <div class="empty-state"><span class="empty-icon">📅</span><span>No upcoming jobs scheduled.</span></div>
+        <% end %>
     </div>
   </div>
 </div>

@@ -94,6 +94,37 @@ module ApplicationHelper
     }.fetch(icon)
   end
 
+  def safe_media_url?(url)
+    return false if url.blank?
+    return true if url.start_with?("/")
+
+    uri = URI.parse(url)
+    uri.host.in?(%w[127.0.0.1 localhost])
+  rescue URI::InvalidURIError
+    false
+  end
+
+  def status_badge_class(status)
+    normalized = status.to_s.downcase
+
+    case normalized
+    when /active|paid|delivered|completed|accepted|published|public|available|read/
+      "badge-success"
+    when /pending|draft|requested|processing|scheduled|low|review/
+      "badge-warning"
+    when /cancelled|canceled|failed|suspended|hidden|private|out|rejected/
+      "badge-danger"
+    when /shipped|in_transit|unread|open/
+      "badge-info"
+    else
+      "badge-secondary"
+    end
+  end
+
+  def ui_initial(text)
+    text.to_s.strip.first&.upcase || "S"
+  end
+
   def role_badge(user)
     badge_class = case user.normalized_role
     when "admin"

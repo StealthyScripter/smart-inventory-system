@@ -1,33 +1,27 @@
 <% content_for :page_title, "Reports" %>
 
-<section class="page-section">
-  <div class="section-header">
-    <div>
-      <h2 class="section-title">User Reports</h2>
-      <p class="section-subtitle">Review and update marketplace report status.</p>
-    </div>
+<div class="table-container">
+  <div class="table-header">
+    <h3 class="table-title">User Reports</h3>
   </div>
-
   <% if @reports.any? %>
     <div class="card-grid">
       <% @reports.each do |report| %>
         <article class="ui-card">
-          <div class="card-body">
-            <div class="card-kicker"><%= report.reportable_type %> #<%= report.reportable_id %></div>
-            <h3 class="card-title"><%= report.reason %></h3>
-            <p class="card-meta">Reported by <%= report.reporter.full_name %></p>
-            <%= render "shared/status_badge", status: report.status, label: report.status.titleize %>
+          <div class="card-meta">
+            <span class="badge <%= status_badge_class(report.status) %>"><%= report.status.titleize %></span>
+            <span><%= report.reportable_type %> #<%= report.reportable_id %></span>
           </div>
-          <div class="card-actions">
-            <%= form_with model: [:admin, report], method: :patch, local: true, style: "display: flex; gap: 0.5rem; flex-wrap: wrap;" do |form| %>
+          <h3 class="card-title"><%= report.reason %></h3>
+          <div class="card-meta">Reporter: <%= report.reporter.full_name %></div>
+          <%= form_with model: [:admin, report], method: :patch, local: true, class: "inline-form" do |form| %>
               <%= form.select :status, options_for_select(Report::STATUSES, report.status), {}, { class: "form-select" } %>
               <%= form.submit "Update", class: "btn btn-primary" %>
-            <% end %>
-          </div>
+          <% end %>
         </article>
       <% end %>
     </div>
   <% else %>
-    <%= render "shared/empty_state", title: "No user reports" %>
+    <div class="empty-state"><span class="empty-icon">✓</span><span>No user reports.</span></div>
   <% end %>
-</section>
+</div>

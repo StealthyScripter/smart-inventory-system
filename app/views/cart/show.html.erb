@@ -5,49 +5,34 @@
     <h3 class="table-title">Your Cart</h3>
     <%= link_to "Continue Shopping", catalog_path, class: "btn btn-secondary" %>
   </div>
-  <table>
-    <thead>
-      <tr>
-        <th>Product</th>
-        <th>Price</th>
-        <th>Quantity</th>
-        <th>Total</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
+  <% if @cart.cart_items.any? %>
+    <div class="card-grid">
       <% @cart.cart_items.includes(:product).each do |item| %>
-        <tr>
-          <td><%= item.product.name %></td>
-          <td><%= currency(item.product.selling_price.to_f) %></td>
-          <td>
-            <%= form_with url: cart_path, method: :patch, local: true, style: "display: flex; gap: 0.5rem;" do |form| %>
+        <article class="ui-card">
+          <h3 class="card-title"><%= item.product.name %></h3>
+          <div class="card-meta">
+            <span>Unit <%= currency(item.product.selling_price.to_f) %></span>
+            <span>Subtotal <strong><%= currency(item.total_amount) %></strong></span>
+          </div>
+          <div class="action-row">
+            <%= form_with url: cart_path, method: :patch, local: true, class: "inline-form" do |form| %>
               <%= form.hidden_field :item_id, value: item.id %>
               <%= form.number_field :quantity, value: item.quantity, min: 1, class: "form-input", style: "width: 6rem;" %>
               <%= form.submit "Update", class: "btn btn-secondary" %>
             <% end %>
-          </td>
-          <td><%= currency(item.total_amount) %></td>
-          <td>
             <%= button_to "Remove", cart_path(item_id: item.id), method: :delete, class: "btn btn-danger" %>
-          </td>
-        </tr>
+          </div>
+        </article>
       <% end %>
-      <% if @cart.cart_items.empty? %>
-        <tr>
-          <td colspan="5" style="text-align: center; color: #718096; font-style: italic;">Your cart is empty.</td>
-        </tr>
-      <% end %>
-    </tbody>
-    <tfoot>
-      <tr>
-        <td colspan="3"><strong>Total</strong></td>
-        <td><strong><%= currency(@cart.total_amount) %></strong></td>
-        <td></td>
-      </tr>
-    </tfoot>
-  </table>
-  <div style="padding: 1.5rem; text-align: right;">
-    <%= link_to "Review Checkout", checkout_path, class: "btn btn-primary" %>
-  </div>
+    </div>
+    <div class="summary-panel action-row" style="margin: 0 1.25rem 1.25rem; justify-content: space-between;">
+      <div class="price">Total <%= currency(@cart.total_amount) %></div>
+      <%= link_to "Review Checkout", checkout_path, class: "btn btn-primary" %>
+    </div>
+  <% else %>
+    <div class="empty-state">
+      <span class="empty-icon">🛒</span>
+      <span>Your cart is empty.</span>
+    </div>
+  <% end %>
 </div>

@@ -1,35 +1,28 @@
 <% content_for :page_title, "Notifications" %>
 
-<section class="page-section">
-  <div class="section-header">
-    <div>
-      <h2 class="section-title">Notifications</h2>
-      <p class="section-subtitle">Updates about orders, bookings, messages, and account activity.</p>
-    </div>
+<div class="table-container">
+  <div class="table-header">
+    <h3 class="table-title">Notifications</h3>
   </div>
-
   <% if @notifications.any? %>
     <div class="card-grid">
       <% @notifications.each do |notification| %>
-        <article class="ui-card notification-card">
-          <div class="card-body">
-            <div class="card-kicker"><%= notification.event_type.to_s.tr(".", " ").titleize %></div>
-            <h3 class="card-title"><%= notification.title %></h3>
-            <p><%= notification.body %></p>
-            <div class="order-card-meta">
-              <%= render "shared/status_badge", status: notification.read_at? ? "read" : "pending", label: notification.read_at? ? "Read" : "Unread" %>
-              <span class="muted-text"><%= notification.created_at.strftime("%b %d, %Y %H:%M") %></span>
-            </div>
+        <article class="ui-card">
+          <div class="card-meta">
+            <span class="badge <%= notification.read_at? ? "badge-success" : "badge-info" %>"><%= notification.read_at? ? "Read" : "Unread" %></span>
+            <span>📅 <%= notification.created_at.strftime("%b %d, %Y %H:%M") %></span>
           </div>
-          <% unless notification.read_at? %>
-            <div class="card-actions">
+          <h3 class="card-title"><%= notification.title %></h3>
+          <p class="clamp-2" style="color: var(--muted-text);"><%= notification.body %></p>
+          <div class="card-actions">
+            <% unless notification.read_at? %>
               <%= button_to "Mark Read", notification_path(notification), method: :patch, class: "btn btn-secondary" %>
-            </div>
-          <% end %>
+            <% end %>
+          </div>
         </article>
       <% end %>
     </div>
   <% else %>
-    <%= render "shared/empty_state", title: "No notifications", message: "New activity will appear here." %>
+    <div class="empty-state"><span class="empty-icon">🔔</span><span>No notifications.</span></div>
   <% end %>
-</section>
+</div>

@@ -1,82 +1,77 @@
 <% content_for :page_title, "Service Bookings" %>
 
-<section class="page-section">
-  <div class="section-header">
-    <div>
-      <h2 class="section-title">Booking Queue</h2>
-      <p class="section-subtitle">Requests and scheduled service jobs requiring merchant action.</p>
-    </div>
-  </div>
-
-  <% if @booking_queue.any? %>
-    <div class="card-grid compact">
+<div class="table-container">
+  <div class="table-header"><h3 class="table-title">Booking Queue</h3></div>
+  <div class="card-grid">
       <% @booking_queue.each do |booking| %>
         <article class="ui-card">
-          <div class="card-body">
-            <div class="card-kicker">Waiting For Action</div>
-            <h3 class="card-title"><%= booking.booking_number %></h3>
-            <p><%= booking.user.full_name %></p>
-            <%= render "shared/status_badge", status: booking.status, label: booking.status.titleize %>
+          <h3 class="card-title"><%= booking.booking_number %></h3>
+          <div class="card-meta">
+            <span><%= booking.user.full_name %></span>
+            <span class="badge <%= status_badge_class(booking.status) %>"><%= booking.status.titleize %></span>
           </div>
         </article>
       <% end %>
-    </div>
-  <% else %>
-    <%= render "shared/empty_state", title: "No bookings waiting for action" %>
-  <% end %>
-</section>
+      <% if @booking_queue.empty? %>
+        <div class="empty-state"><span class="empty-icon">✓</span><span>No bookings waiting for action.</span></div>
+      <% end %>
+  </div>
+</div>
 
-<section class="grid-2 page-section">
-  <div class="summary-card">
-    <h2 class="section-title">Upcoming Jobs</h2>
-    <% if @upcoming_jobs.any? %>
+<div class="table-container">
+  <div class="table-header"><h3 class="table-title">Upcoming Jobs</h3></div>
+  <div class="card-grid">
       <% @upcoming_jobs.each do |booking| %>
-        <div class="summary-row">
-          <span><%= [booking.scheduled_date, booking.scheduled_time&.strftime("%H:%M")].compact.join(" ") %></span>
-          <strong><%= booking.service_listings.map(&:name).to_sentence %></strong>
-        </div>
+        <article class="ui-card">
+          <h3 class="card-title"><%= booking.service_listings.map(&:name).to_sentence %></h3>
+          <div class="card-meta">
+            <span>📅 <%= booking.scheduled_date %></span>
+            <span><%= booking.scheduled_time&.strftime("%H:%M") %></span>
+          </div>
+        </article>
       <% end %>
-    <% else %>
-      <p class="muted-text">No upcoming jobs scheduled.</p>
-    <% end %>
+      <% if @upcoming_jobs.empty? %>
+        <div class="empty-state"><span class="empty-icon">📅</span><span>No upcoming jobs scheduled.</span></div>
+      <% end %>
   </div>
+</div>
 
-  <div class="summary-card">
-    <h2 class="section-title">Calendar</h2>
-    <% if @calendar_bookings.any? %>
+<div class="table-container">
+  <div class="table-header"><h3 class="table-title">Calendar</h3></div>
+  <div class="card-grid">
       <% @calendar_bookings.each do |date, bookings| %>
-        <div class="summary-row">
-          <span><%= date %></span>
-          <strong><%= bookings.map(&:booking_number).to_sentence %></strong>
-        </div>
+        <article class="ui-card">
+          <h3 class="card-title"><%= date %></h3>
+          <div class="card-meta">📅 <%= bookings.map(&:booking_number).to_sentence %></div>
+        </article>
       <% end %>
-    <% else %>
-      <p class="muted-text">No calendar entries.</p>
-    <% end %>
+      <% if @calendar_bookings.empty? %>
+        <div class="empty-state"><span class="empty-icon">📅</span><span>No bookings on the calendar.</span></div>
+      <% end %>
   </div>
-</section>
+</div>
 
-<section class="page-section">
-  <div class="section-header">
-    <h2 class="section-title">All Service Bookings</h2>
-  </div>
-
+<div class="table-container">
+  <div class="table-header"><h3 class="table-title">Service Bookings</h3></div>
   <% if @bookings.any? %>
     <div class="card-grid">
       <% @bookings.each do |booking| %>
         <article class="ui-card">
-          <div class="card-body">
-            <div class="card-kicker"><%= booking.user.full_name %></div>
-            <h3 class="card-title"><%= booking.booking_number %></h3>
-            <p><%= booking.service_listings.map(&:name).to_sentence %></p>
-            <%= render "shared/status_badge", status: booking.status, label: booking.status.titleize %>
-            <p class="muted-text"><%= [booking.scheduled_date, booking.scheduled_time&.strftime("%H:%M")].compact.join(" ").presence || "Schedule pending" %></p>
+          <div class="card-meta">
+            <span class="badge <%= status_badge_class(booking.status) %>"><%= booking.status.titleize %></span>
+            <span>📅 <%= [booking.scheduled_date, booking.scheduled_time&.strftime("%H:%M")].compact.join(" ") %></span>
+          </div>
+          <h3 class="card-title"><%= booking.booking_number %></h3>
+          <div class="card-meta">
+            <span><%= booking.user.full_name %></span>
+            <span>🛠 <%= booking.service_listings.map(&:name).to_sentence %></span>
           </div>
           <div class="card-actions">
-            <%= link_to "Estimate PDF", estimate_merchant_service_booking_path(booking), class: "btn btn-secondary" %>
+            <%= link_to "Estimate PDF", estimate_merchant_service_booking_path(booking), class: "btn btn-secondary", style: "margin-bottom: 0.5rem;" %>
+          </div>
             <% next_statuses = ServiceBooking::TRANSITIONS.fetch(booking.status) %>
             <% if next_statuses.any? %>
-              <%= form_with url: merchant_service_booking_path(booking), method: :patch, local: true, style: "display: grid; gap: 0.5rem; width: 100%;" do |form| %>
+              <%= form_with url: merchant_service_booking_path(booking), method: :patch, local: true, class: "stack" do |form| %>
                 <%= form.select :status, options_for_select(next_statuses.map { |status| [status.titleize, status] }), {}, { class: "form-select" } %>
                 <%= form.date_field :scheduled_date, value: booking.scheduled_date, class: "form-input" %>
                 <%= form.time_field :scheduled_time, value: booking.scheduled_time&.strftime("%H:%M"), class: "form-input" %>
@@ -84,11 +79,10 @@
                 <%= form.submit "Update", class: "btn btn-secondary" %>
               <% end %>
             <% end %>
-          </div>
         </article>
       <% end %>
     </div>
   <% else %>
-    <%= render "shared/empty_state", title: "No service bookings" %>
+    <div class="empty-state"><span class="empty-icon">📅</span><span>No service bookings yet.</span></div>
   <% end %>
-</section>
+</div>

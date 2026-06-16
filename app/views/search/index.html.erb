@@ -3,19 +3,16 @@
   Marketplace / Search
 <% end %>
 
-<section class="page-section">
-  <div class="section-header">
-    <div>
-      <h2 class="section-title">Marketplace Search</h2>
-      <p class="section-subtitle">Search products, services, merchants, and categories.</p>
-    </div>
+<div class="table-container">
+  <div class="table-header">
+    <h3 class="table-title">Search Marketplace</h3>
   </div>
 
-  <div class="filter-card">
+  <div class="filter-bar">
     <%= form_with url: search_path, method: :get, local: true, class: "filter-grid" do |form| %>
       <div class="form-group" style="margin-bottom: 0;">
         <%= form.label :q, "Search", class: "form-label" %>
-        <%= form.text_field :q, value: params[:q], class: "form-input", placeholder: "What are you looking for?" %>
+        <%= form.text_field :q, value: params[:q], class: "form-input" %>
       </div>
       <div class="form-group" style="margin-bottom: 0;">
         <%= form.label :service_category, "Service", class: "form-label" %>
@@ -35,61 +32,103 @@
       </div>
       <%= form.submit "Search", class: "btn btn-primary" %>
     <% end %>
-    <% if @suggestions.any? %>
-      <p class="muted-text" style="margin-top: 1rem;"><strong>Suggestions:</strong> <%= @suggestions.join(", ") %></p>
-    <% end %>
   </div>
-</section>
 
-<section class="page-section">
-  <div class="section-header"><h2 class="section-title">Products</h2></div>
-  <% product_listings = @products.filter_map(&:marketplace_listing) %>
-  <% if product_listings.any? %>
-    <div class="card-grid">
-      <%= render partial: "shared/listing_card", collection: product_listings, as: :listing %>
+  <% if @suggestions.any? %>
+    <div class="card-meta" style="padding: 1rem 1.5rem; border-top: 1px solid var(--border-color);">
+      <strong>Try:</strong>
+      <%= @suggestions.join(", ") %>
     </div>
-    <%= pagination_controls(@products) %>
-  <% else %>
-    <%= render "shared/empty_state", title: "No matching products" %>
   <% end %>
-</section>
+</div>
 
-<section class="page-section">
-  <div class="section-header"><h2 class="section-title">Services</h2></div>
-  <% if @services.any? %>
-    <div class="card-grid">
-      <%= render partial: "shared/service_card", collection: @services, as: :service %>
-    </div>
-  <% else %>
-    <%= render "shared/empty_state", title: "No matching services" %>
-  <% end %>
-</section>
-
-<section class="page-section">
-  <div class="section-header"><h2 class="section-title">Merchants</h2></div>
-  <% if @merchants.any? %>
-    <div class="card-grid compact">
-      <%= render partial: "shared/merchant_card", collection: @merchants, as: :merchant %>
-    </div>
-  <% else %>
-    <%= render "shared/empty_state", title: "No matching merchants" %>
-  <% end %>
-</section>
-
-<section class="page-section">
-  <div class="section-header"><h2 class="section-title">Categories</h2></div>
-  <% if @categories.any? %>
-    <div class="card-grid compact">
-      <% @categories.each do |category| %>
-        <article class="ui-card">
+<div class="table-container">
+  <div class="table-header"><h3 class="table-title">Products</h3></div>
+  <% if @products.any? %>
+    <div class="market-grid">
+      <% @products.each do |product| %>
+        <article class="ui-card media-card">
+          <div class="card-media">
+            <% if product.featured_image.attached? %>
+              <%= image_tag product.featured_image, alt: product.name %>
+            <% else %>
+              <span><%= ui_initial(product.name) %></span>
+            <% end %>
+          </div>
           <div class="card-body">
-            <h3 class="card-title"><%= link_to category.name, catalog_path(category_id: category.id, q: params[:q]) %></h3>
-            <p class="card-meta"><%= category.description.presence || "Marketplace category" %></p>
+            <h3 class="card-title clamp-2"><%= link_to product.name, catalog_product_path(product) %></h3>
+            <div class="price"><%= currency(product.selling_price.to_f) %></div>
+            <div class="card-meta">
+              <span>🏷 <%= product.category.name %></span>
+              <span>★ <%= number_with_precision(product.average_rating, precision: 1) %></span>
+            </div>
+            <div class="card-meta">🏬 <%= product.supplier ? link_to(product.supplier.name, merchant_storefront_path(product.supplier)) : "Marketplace" %></div>
           </div>
         </article>
       <% end %>
     </div>
   <% else %>
-    <%= render "shared/empty_state", title: "No matching categories" %>
+    <div class="empty-state"><span class="empty-icon">⌕</span><span>No products found.</span></div>
   <% end %>
-</section>
+  <%= pagination_controls(@products) %>
+</div>
+
+<div class="table-container">
+  <div class="table-header"><h3 class="table-title">Services</h3></div>
+  <% if @services.any? %>
+    <div class="market-grid">
+      <% @services.each do |service| %>
+        <article class="ui-card media-card">
+          <div class="card-media">
+            <% if safe_media_url?(service.image_url) %>
+              <img src="<%= service.image_url %>" alt="<%= service.name %>">
+            <% else %>
+              <span><%= ui_initial(service.name) %></span>
+            <% end %>
+          </div>
+          <div class="card-body">
+            <h3 class="card-title clamp-2"><%= link_to service.name, service_path(service) %></h3>
+            <div class="price">From <%= currency(service.starting_price.to_f) %></div>
+            <div class="card-meta">
+              <span>🛠 <%= service.service_category %></span>
+              <span>★ <%= number_with_precision(service.average_rating, precision: 1) %></span>
+            </div>
+            <div class="card-meta">🏬 <%= link_to service.supplier.name, merchant_storefront_path(service.supplier) %></div>
+          </div>
+        </article>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="empty-state"><span class="empty-icon">🛠</span><span>No services found.</span></div>
+  <% end %>
+</div>
+
+<div class="table-container">
+  <div class="table-header"><h3 class="table-title">Merchants</h3></div>
+  <% if @merchants.any? %>
+    <div class="card-grid">
+      <% @merchants.each do |merchant| %>
+        <article class="ui-card">
+          <h3 class="card-title"><%= link_to merchant.name, merchant_storefront_path(merchant) %></h3>
+          <p class="clamp-2" style="color: var(--muted-text);"><%= merchant.shop_description.presence || "Marketplace seller" %></p>
+          <div class="card-meta">★ <%= number_with_precision(merchant.average_rating, precision: 1) %></div>
+        </article>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="empty-state"><span class="empty-icon">🏬</span><span>No merchants found.</span></div>
+  <% end %>
+</div>
+
+<div class="table-container">
+  <div class="table-header"><h3 class="table-title">Categories</h3></div>
+  <table>
+    <tbody>
+      <% @categories.each do |category| %>
+        <tr>
+          <td><%= link_to category.name, catalog_path(category_id: category.id, q: params[:q]) %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

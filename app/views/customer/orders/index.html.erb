@@ -1,24 +1,23 @@
 <% content_for :page_title, "My Orders" %>
 
-<section class="page-section">
-  <div class="section-header">
-    <div>
-      <h2 class="section-title">Orders</h2>
-      <p class="section-subtitle">Track purchases and review delivered items.</p>
-    </div>
+<div class="table-container">
+  <div class="table-header">
+    <h3 class="table-title">Orders</h3>
   </div>
-
   <% if @orders.any? %>
     <div class="card-grid">
       <% @orders.each do |order| %>
-        <%= render "shared/order_card", order: order, path: customer_order_path(order) %>
+        <article class="ui-card">
+          <div class="card-meta">
+            <span class="badge <%= status_badge_class(order.status) %>"><%= order.status.titleize %></span>
+            <span>📅 <%= order.submitted_at&.strftime("%b %d, %Y") || order.created_at.strftime("%b %d, %Y") %></span>
+          </div>
+          <h3 class="card-title"><%= link_to order.order_number, customer_order_path(order) %></h3>
+          <div class="price"><%= currency(order.total_amount.to_f) %></div>
+        </article>
       <% end %>
     </div>
   <% else %>
-    <%= render "shared/empty_state",
-               title: "No orders found",
-               message: "Your purchases will appear here after checkout.",
-               action: "Browse Catalog",
-               path: catalog_path %>
+    <div class="empty-state"><span class="empty-icon">📦</span><span>No orders found.</span></div>
   <% end %>
-</section>
+</div>
