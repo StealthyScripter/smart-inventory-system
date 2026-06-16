@@ -8,7 +8,7 @@ module Authorization
     :can_manage_suppliers?, :can_adjust_inventory?, :can_delete?,
     :can_access_back_office?, :can_access_product_catalog?, :can_manage_product?,
     :can_access_location?, :accessible_locations, :viewable_locations, :manageable_suppliers,
-    :can_manage_merchant?
+    :can_manage_merchant?, :legacy_supplier_merchant?
   end
 
   def admin?

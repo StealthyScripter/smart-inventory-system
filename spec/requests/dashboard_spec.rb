@@ -28,7 +28,7 @@ RSpec.describe "Dashboard", type: :request do
 
     it "renders catalog content" do
       get root_path
-      expect(response.body).to include("Marketplace / Catalog")
+      expect(response.body).not_to include("Marketplace / Catalog")
     end
   end
 

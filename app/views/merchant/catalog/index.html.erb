@@ -1,0 +1,64 @@
+<% content_for :page_title, "Catalog" %>
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-header"><span class="stat-title">Products</span></div>
+    <div class="stat-value"><%= number_with_delimiter(@product_count) %></div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-header"><span class="stat-title">Services</span></div>
+    <div class="stat-value"><%= number_with_delimiter(@service_count) %></div>
+  </div>
+</div>
+
+<div class="grid-2">
+  <div class="table-container">
+    <div class="table-header">
+      <h3 class="table-title">Products</h3>
+      <%= link_to "Open Products", merchant_products_path, class: "btn btn-secondary" %>
+    </div>
+    <% if @products.any? %>
+      <div class="card-grid">
+        <% @products.each do |product| %>
+          <article class="ui-card">
+            <div class="card-meta">
+              <span class="badge <%= status_badge_class(product.marketplace_status) %>"><%= product.marketplace_status.titleize %></span>
+              <span><%= product.category.name %></span>
+            </div>
+            <h3 class="card-title"><%= product.name %></h3>
+            <div class="card-meta">
+              <span>📦 <%= number_with_delimiter(product.total_stock) %></span>
+              <span><%= currency(product.selling_price.to_f) %></span>
+            </div>
+          </article>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="empty-state"><span class="empty-icon">📦</span><span>No products yet.</span></div>
+    <% end %>
+  </div>
+
+  <div class="table-container">
+    <div class="table-header">
+      <h3 class="table-title">Services</h3>
+      <%= link_to "Open Services", merchant_services_path, class: "btn btn-secondary" %>
+    </div>
+    <% if @services.any? %>
+      <div class="card-grid">
+        <% @services.each do |service| %>
+          <article class="ui-card">
+            <div class="card-meta">
+              <span class="badge <%= status_badge_class(service.status) %>"><%= service.status.titleize %></span>
+              <span><%= service.service_category %></span>
+            </div>
+            <h3 class="card-title"><%= service.name %></h3>
+            <div class="price"><%= currency(service.starting_price.to_f) %></div>
+          </article>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="empty-state"><span class="empty-icon">🛠</span><span>No services yet.</span></div>
+    <% end %>
+  </div>
+</div>

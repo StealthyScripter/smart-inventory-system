@@ -1,0 +1,147 @@
+<% content_for :page_title, "Profile" %>
+
+<section class="ui-card profile-hero profile-hero--merchant">
+  <div class="profile-hero-copy">
+    <span class="badge <%= enterprise_merchant_navigation? ? 'badge-info' : 'badge-secondary' %>"><%= enterprise_merchant_navigation? ? 'Enterprise Merchant' : 'Merchant' %></span>
+    <h1 class="profile-name"><%= @merchant_profile&.display_name.presence || @merchant_account&.name || merchant_suppliers.map(&:name).to_sentence %></h1>
+    <p class="profile-subtitle"><%= @merchant_account&.status&.titleize || "Active merchant account" %></p>
+    <div class="profile-meta">
+      <span class="profile-meta-item">Orders <strong><%= @orders.size %></strong></span>
+      <span class="profile-meta-item">Bookings <strong><%= @bookings.size %></strong></span>
+      <span class="profile-meta-item">Catalog <strong><%= merchant_products.count %></strong></span>
+      <span class="profile-meta-item">Notifications <strong><%= @notifications_count %></strong></span>
+    </div>
+  </div>
+
+  <div class="profile-hero-actions">
+    <% if @can_manage_settings %>
+      <%= link_to "Edit profile", edit_merchant_account_settings_path, class: "btn btn-secondary" %>
+    <% elsif merchant_suppliers.first.present? %>
+      <%= link_to "Edit profile", edit_merchant_shop_path(merchant_suppliers.first), class: "btn btn-secondary" %>
+    <% else %>
+      <%= link_to "Edit profile", merchant_root_path, class: "btn btn-secondary" %>
+    <% end %>
+    <%= link_to "Catalog / listings", merchant_catalog_path, class: "btn btn-secondary" %>
+    <%= button_to "Sign out", logout_path, method: :delete, form: { data: { turbo_confirm: "Are you sure you want to sign out?" } }, class: "btn btn-danger" %>
+  </div>
+</section>
+
+<div class="profile-grid profile-grid--primary">
+  <%= link_to merchant_orders_path, class: "ui-card profile-feature-card profile-feature-card--accent" do %>
+    <span class="profile-card-kicker">Primary</span>
+    <div class="profile-card-head">
+      <%= nav_icon(:orders) %>
+      <h2 class="card-title">Orders</h2>
+    </div>
+    <p class="profile-card-copy">Incoming purchases and fulfillment queues.</p>
+    <div class="profile-card-footer">
+      <span class="badge badge-info"><%= pluralize(@orders.size, "order") %></span>
+      <span class="profile-card-action">Open</span>
+    </div>
+  <% end %>
+
+  <%= link_to merchant_service_bookings_path, class: "ui-card profile-feature-card profile-feature-card--accent" do %>
+    <span class="profile-card-kicker">Primary</span>
+    <div class="profile-card-head">
+      <%= nav_icon(:bookings) %>
+      <h2 class="card-title">Bookings</h2>
+    </div>
+    <p class="profile-card-copy">Service jobs, schedules, and status updates.</p>
+    <div class="profile-card-footer">
+      <span class="badge badge-info"><%= pluralize(@bookings.size, "booking") %></span>
+      <span class="profile-card-action">Open</span>
+    </div>
+  <% end %>
+</div>
+
+<div class="profile-grid">
+  <div class="ui-card profile-link-card profile-link-card--static">
+    <div class="profile-card-head">
+      <%= nav_icon(:store) %>
+      <h3 class="card-title">Company information</h3>
+    </div>
+    <p class="profile-card-copy"><%= @merchant_profile&.description.presence || "Shop profile and merchant account details." %></p>
+    <div class="profile-meta">
+      <span class="profile-meta-item"><%= @merchant_account&.name || merchant_suppliers.map(&:name).to_sentence %></span>
+      <span class="profile-meta-item"><%= @merchant_profile&.status&.titleize || "Active" %></span>
+    </div>
+  </div>
+
+  <%= link_to merchant_catalog_path, class: "ui-card profile-link-card" do %>
+    <div class="profile-card-head">
+      <%= nav_icon(:catalog) %>
+      <h3 class="card-title">Catalog / listings</h3>
+    </div>
+    <p class="profile-card-copy">View the seller-facing listing surface.</p>
+  <% end %>
+
+  <%= link_to merchant_products_path, class: "ui-card profile-link-card" do %>
+    <div class="profile-card-head">
+      <%= nav_icon(:products) %>
+      <h3 class="card-title">Products</h3>
+    </div>
+    <p class="profile-card-copy">Manage product records and marketplace visibility.</p>
+  <% end %>
+
+  <%= link_to merchant_inventory_path, class: "ui-card profile-link-card" do %>
+    <div class="profile-card-head">
+      <%= nav_icon(:inventory) %>
+      <h3 class="card-title">Inventory</h3>
+    </div>
+    <p class="profile-card-copy">Track stock by location and product.</p>
+  <% end %>
+
+  <%= link_to merchant_conversations_path, class: "ui-card profile-link-card" do %>
+    <div class="profile-card-head">
+      <%= nav_icon(:inbox) %>
+      <h3 class="card-title">Inbox / messages</h3>
+    </div>
+    <p class="profile-card-copy">Merchant conversations and support threads.</p>
+  <% end %>
+
+  <%= link_to notifications_path, class: "ui-card profile-link-card" do %>
+    <div class="profile-card-head">
+      <%= nav_icon(:notifications) %>
+      <h3 class="card-title">Notifications</h3>
+    </div>
+    <p class="profile-card-copy">Unread alerts and account updates.</p>
+  <% end %>
+
+  <%= link_to merchant_analytics_path, class: "ui-card profile-link-card" do %>
+    <div class="profile-card-head">
+      <%= nav_icon(:analytics) %>
+      <h3 class="card-title">Analytics</h3>
+    </div>
+    <p class="profile-card-copy">Performance and sales overview.</p>
+  <% end %>
+
+  <% if @can_manage_team %>
+    <%= link_to merchant_members_path, class: "ui-card profile-link-card" do %>
+      <div class="profile-card-head">
+        <%= nav_icon(:team) %>
+        <h3 class="card-title">Team / members</h3>
+      </div>
+      <p class="profile-card-copy">Invite and manage account members.</p>
+    <% end %>
+  <% end %>
+
+  <% if @can_manage_locations %>
+    <%= link_to locations_path, class: "ui-card profile-link-card" do %>
+      <div class="profile-card-head">
+        <%= nav_icon(:locations) %>
+        <h3 class="card-title">Locations</h3>
+      </div>
+      <p class="profile-card-copy">Account-wide location management.</p>
+    <% end %>
+  <% end %>
+
+  <% if @can_manage_settings %>
+    <%= link_to edit_merchant_account_settings_path, class: "ui-card profile-link-card" do %>
+      <div class="profile-card-head">
+        <%= nav_icon(:settings) %>
+        <h3 class="card-title">Access control</h3>
+      </div>
+      <p class="profile-card-copy">Company settings and role management.</p>
+    <% end %>
+  <% end %>
+</div>

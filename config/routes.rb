@@ -26,6 +26,8 @@ Rails.application.routes.draw do
 
   namespace :merchant do
     root "dashboard#index"
+    get "catalog", to: "catalog#index"
+    resource :profile, only: [:show]
     resources :products, only: [:index, :new, :create, :edit, :update]
     post "products/bulk_update", to: "product_operations#bulk_update", as: :product_bulk_update
     post "products/:product_id/duplicate", to: "product_operations#duplicate", as: :product_duplicate
@@ -52,6 +54,7 @@ Rails.application.routes.draw do
   end
 
   namespace :customer do
+    resource :profile, only: [:show]
     resources :orders, only: [:index, :show]
     resources :service_bookings, only: [:index, :update]
     resources :conversations, only: [:index]

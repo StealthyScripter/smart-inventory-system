@@ -13,283 +13,81 @@
     <link rel="apple-touch-icon" href="/icon.png">
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
-    <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-      body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        background: #f8fafc;
-        color: #1a202c;
-      }
-      .app-container {
-        display: flex;
-        min-height: 100vh;
-      }
-      .sidebar {
-        width: 280px;
-        background: #2d3748;
-        color: white;
-        padding: 1rem 0;
-        overflow-y: auto;
-      }
-      .logo {
-        padding: 0 1.5rem 2rem;
-        border-bottom: 1px solid #4a5568;
-        margin-bottom: 1rem;
-      }
-      .logo h1 {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: #63b3ed;
-      }
-      .nav-menu {
-        list-style: none;
-      }
-      .nav-item {
-        margin: 0.25rem 0;
-      }
-      .nav-link {
-        display: flex;
-        align-items: center;
-        padding: 0.75rem 1.5rem;
-        color: #e2e8f0;
-        text-decoration: none;
-        transition: all 0.2s;
-        cursor: pointer;
-      }
-      .nav-link:hover,
-      .nav-link.active {
-        background: #4a5568;
-        color: #63b3ed;
-      }
-      .nav-icon {
-        width: 20px;
-        height: 20px;
-        margin-right: 0.75rem;
-        fill: currentColor;
-      }
-      .main-content {
-        flex: 1;
-        overflow-y: auto;
-      }
-      .header {
-        background: white;
-        padding: 1rem 2rem;
-        border-bottom: 1px solid #e2e8f0;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 1rem;
-        flex-wrap: wrap;
-      }
-      .header-title {
-        font-size: 1.875rem;
-        font-weight: 700;
-        color: #2d3748;
-      }
-      .user-info {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        flex-wrap: wrap;
-      }
-      .content-area {
-        padding: 2rem;
-      }
-      .alert {
-        padding: 1rem 1.5rem;
-        border-radius: 0.5rem;
-        margin-bottom: 1rem;
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-      }
-      .flash-success {
-        background: #f0fff4;
-        border: 1px solid #9ae6b4;
-        color: #22543d;
-      }
-      .flash-error {
-        background: #fff5f5;
-        border: 1px solid #feb2b2;
-        color: #742a2a;
-      }
-      .flash-notice {
-        background: #ebf8ff;
-        border: 1px solid #90cdf4;
-        color: #2a4365;
-      }
-      .flash-alert {
-        background: #fffbeb;
-        border: 1px solid #f6e05e;
-        color: #744210;
-      }
-    </style>
     <%= render partial: "layouts/styles" %>
   </head>
 
   <body class="<%= account_theme_class %>">
-    
-
-    <% if current_user %>
-      <div class="app-container">
-        <!-- Sidebar -->
-        <nav class="sidebar">
-          <div class="logo">
-            <h1>📦 Smart Inventory</h1>
-          </div>
-          <ul class="nav-menu">
-            <li class="nav-item">
-              <%= link_to search_path, class: "nav-link #{'active' if current_page?(search_path)}" do %>
-                <svg class="nav-icon" viewBox="0 0 24 24"><path d="M9.5 3a6.5 6.5 0 015.18 10.43l4.45 4.44-1.41 1.41-4.44-4.45A6.5 6.5 0 119.5 3zm0 2a4.5 4.5 0 100 9 4.5 4.5 0 000-9z"/></svg>
-                Search
+    <% if logged_in? %>
+      <% if account_navigation? %>
+        <div class="app-shell app-shell--account">
+          <header class="topbar topbar--account">
+            <div class="topbar-brand">
+              <%= link_to root_path, class: "brand-link" do %>
+                <span class="brand-mark">◼</span>
+                <span class="brand-name">Smart Inventory</span>
               <% end %>
-            </li>
+              <span class="topbar-title"><%= yield(:page_title).presence || "Dashboard" %></span>
+            </div>
 
-            <li class="nav-item">
-              <%= link_to catalog_path, class: "nav-link #{'active' if current_page?(catalog_path)}" do %>
-                <svg class="nav-icon" viewBox="0 0 24 24"><path d="M7 4h10l1 4h3v2h-1l-1 10H5L4 10H3V8h3l1-4zm2 2l-.5 2h7L15 6H9z"/></svg>
-                Catalog
-              <% end %>
-            </li>
-
-            <li class="nav-item">
-              <%= link_to services_path, class: "nav-link #{'active' if current_page?(services_path)}" do %>
-                <svg class="nav-icon" viewBox="0 0 24 24"><path d="M22 19.59L20.59 21l-6.3-6.3a7 7 0 01-8.99-8.99l4.24 4.24 2.12-2.12-4.24-4.24a7 7 0 018.99 8.99L22 19.59z"/></svg>
-                Services
-              <% end %>
-            </li>
-
-            <% if current_merchant_account.present? || (current_user.supplier_user? && current_user.suppliers.exists?) %>
-              <li class="nav-item">
-                <%= link_to merchant_root_path, class: "nav-link #{'active' if request.path.start_with?('/merchant')}" do %>
-                  <svg class="nav-icon" viewBox="0 0 24 24"><path d="M4 4h16l1 5v11H3V9l1-5zm2 7v7h12v-7H6zm.5-5l-.4 2h11.8l-.4-2H6.5z"/></svg>
-                  Merchant
-                <% end %>
-              </li>
+            <%= form_with url: search_path, method: :get, local: true, class: "top-search" do |form| %>
+              <%= form.search_field :q, value: params[:q], placeholder: "Search marketplace", class: "form-input top-search__input", aria: { label: "Search marketplace" } %>
             <% end %>
 
-            <% if current_user.customer? %>
-              <li class="nav-item">
-                <%= link_to cart_path, class: "nav-link #{'active' if current_page?(cart_path)}" do %>
-                  <svg class="nav-icon" viewBox="0 0 24 24"><path d="M7 18c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zM7.2 14h7.45c.75 0 1.41-.41 1.75-1.03L20 6H5.21L4.27 4H1v2h2l3.6 7.59L5.25 16C4.52 17.33 5.48 19 7 19h12v-2H7l1.1-2z"/></svg>
-                  Cart
+            <div class="topbar-actions">
+              <% if customer_navigation? %>
+                <%= link_to cart_path, class: "topbar-action topbar-action--cart", aria: { label: "Cart" } do %>
+                  <%= nav_icon(:cart) %>
+                  <span>Cart</span>
                 <% end %>
-              </li>
-
-              <li class="nav-item">
-                <%= link_to customer_orders_path, class: "nav-link #{'active' if current_page?(customer_orders_path)}" do %>
-                  <svg class="nav-icon" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14l4-4h12c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>
-                  Orders
-                <% end %>
-              </li>
-
-              <li class="nav-item">
-                <%= link_to customer_service_bookings_path, class: "nav-link #{'active' if current_page?(customer_service_bookings_path)}" do %>
-                  <svg class="nav-icon" viewBox="0 0 24 24"><path d="M7 2v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-2V2h-2v2H9V2H7zm12 8H5V8h14v2z"/></svg>
-                  Bookings
-                <% end %>
-              </li>
-            <% end %>
-
-            <% if can_access_back_office? %>
-              <li class="nav-item">
-                <%= link_to dashboard_path, class: "nav-link #{'active' if current_page?(dashboard_path)}" do %>
-                  <svg class="nav-icon" viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
-                  Dashboard
-                <% end %>
-              </li>
-
-              <li class="nav-item">
-                <%= link_to products_path, class: "nav-link #{'active' if current_page?(products_path)}" do %>
-                  <svg class="nav-icon" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                  Products
-                <% end %>
-              </li>
-
-              <li class="nav-item">
-                <%= link_to inventory_path, class: "nav-link #{'active' if current_page?(inventory_path)}" do %>
-                  <svg class="nav-icon" viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z"/></svg>
-                  Inventory
-                <% end %>
-              </li>
-
-              <li class="nav-item">
-                <%= link_to locations_path, class: "nav-link #{'active' if current_page?(locations_path)}" do %>
-                  <svg class="nav-icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                  Locations
-                <% end %>
-              </li>
-
-              <li class="nav-item">
-                <%= link_to suppliers_path, class: "nav-link #{'active' if current_page?(suppliers_path)}" do %>
-                  <svg class="nav-icon" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-                  Suppliers
-                <% end %>
-              </li>
-            <% end %>
-
-            <% if can_manage_users? %>
-              <li class="nav-item">
-                <%= link_to admin_users_path, class: "nav-link #{'active' if current_page?(admin_users_path)}" do %>
-                  <svg class="nav-icon" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
-                  Users
-                <% end %>
-              </li>
-            <% end %>
-          </ul>
-        </nav>
-
-        <!-- Main Content -->
-        <main class="main-content">
-          <header class="header">
-            <h1 class="header-title"><%= yield(:page_title) || "Dashboard" %></h1>
-            <div class="user-info">
-              <% if logged_in? %>
-                <%= form_with url: search_path, method: :get, local: true, class: "global-search" do |form| %>
-                  <%= form.search_field :q, value: params[:q], placeholder: "Search marketplace", class: "form-input" %>
-                <% end %>
-                <span class="user-name"><%= current_user.full_name %></span>
-                <%= link_to "🔔 #{current_user.notifications.unread.count}", notifications_path, class: "btn btn-secondary icon-btn", title: "Notifications" %>
-                <% if current_user.customer? %>
-                  <%= link_to "💬 Inbox", customer_conversations_path, class: "btn btn-secondary" %>
-                <% elsif current_merchant_account.present? || (current_user.supplier_user? && current_user.suppliers.exists?) %>
-                  <%= link_to "💬 Inbox", merchant_conversations_path, class: "btn btn-secondary" %>
-                <% end %>
-                <%= role_badge(current_user) %>
-                <%= button_to "Logout", logout_path,
-                              method: :delete,
-                              form: { data: { turbo_confirm: "Are you sure you want to logout?" } },
-                              class: "btn btn-secondary" %>
-              <% else %>
-                <%= link_to "Login", login_path, class: "btn btn-primary" %>
-                <%= link_to "Sign Up", signup_path, class: "btn btn-secondary" %>
               <% end %>
             </div>
           </header>
 
-          <div class="content-area">
-            <% if content_for?(:breadcrumbs) %>
-              <nav class="breadcrumbs"><%= yield :breadcrumbs %></nav>
-            <% end %>
-            <% flash.each do |type, message| %>
-              <div class="alert flash-<%= type %>"><%= message %></div>
-            <% end %>
-            <%= yield %>
+          <main class="app-main app-main--account">
+            <div class="content-area account-content">
+              <% flash.each do |type, message| %>
+                <div class="alert flash-<%= type %>"><%= message %></div>
+              <% end %>
+              <%= yield %>
+            </div>
+          </main>
+        </div>
+
+        <%= render "layouts/account_bottom_nav" %>
+      <% else %>
+        <div class="app-shell app-shell--admin">
+          <%= render "layouts/admin_sidebar" %>
+
+          <div class="app-shell__body">
+            <header class="topbar topbar--admin">
+              <div class="topbar-brand">
+                <%= link_to root_path, class: "brand-link" do %>
+                  <span class="brand-mark">◼</span>
+                  <span class="brand-name">Smart Inventory</span>
+                <% end %>
+                <span class="topbar-title"><%= yield(:page_title).presence || "Dashboard" %></span>
+              </div>
+
+              <%= form_with url: search_path, method: :get, local: true, class: "top-search" do |form| %>
+                <%= form.search_field :q, value: params[:q], placeholder: "Search marketplace", class: "form-input top-search__input", aria: { label: "Search marketplace" } %>
+              <% end %>
+            </header>
+
+            <main class="app-main">
+              <div class="content-area account-content">
+                <% flash.each do |type, message| %>
+                  <div class="alert flash-<%= type %>"><%= message %></div>
+                <% end %>
+                <%= yield %>
+              </div>
+            </main>
           </div>
-        </main>
-      </div>
+        </div>
+      <% end %>
     <% else %>
-      <!-- No current_user: render only login or public pages -->
       <div class="content-area public-shell">
         <% flash.each do |type, message| %>
           <div class="alert flash-<%= type %>"><%= message %></div>
-        <% end %>
-        <% if content_for?(:breadcrumbs) %>
-          <nav class="breadcrumbs"><%= yield :breadcrumbs %></nav>
         <% end %>
         <%= yield %>
       </div>
