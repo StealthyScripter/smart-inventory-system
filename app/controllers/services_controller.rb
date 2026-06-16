@@ -4,7 +4,7 @@ class ServicesController < ApplicationController
   def index
     @categories = ServiceListing::CATEGORIES
     search_params = params.permit(:q, :sort, :page).merge(service_category: params[:category])
-    @services = SearchService.new(search_params).services(limit: 25)
+    @services = ::SearchService.new(search_params).services(limit: 25)
   end
 
   def show

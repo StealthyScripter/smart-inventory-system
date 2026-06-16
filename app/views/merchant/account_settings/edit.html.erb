@@ -24,6 +24,39 @@
 
       <div class="grid-2" style="gap: 1rem;">
         <div class="form-group">
+          <%= label_tag "merchant_profile_location", "Location", class: "form-label" %>
+          <%= text_field_tag "merchant_profile[location]", @merchant_profile.location, class: "form-input" %>
+        </div>
+        <div class="form-group">
+          <%= label_tag "merchant_profile_company_size", "Company size", class: "form-label" %>
+          <%= text_field_tag "merchant_profile[company_size]", @merchant_profile.company_size, class: "form-input" %>
+        </div>
+      </div>
+
+      <div class="grid-2" style="gap: 1rem;">
+        <div class="form-group">
+          <%= label_tag "merchant_profile_contact_information", "Contact information", class: "form-label" %>
+          <%= text_area_tag "merchant_profile[contact_information]", @merchant_profile.contact_information, class: "form-input" %>
+        </div>
+        <div class="form-group">
+          <%= label_tag "merchant_profile_business_category", "Business category", class: "form-label" %>
+          <%= text_field_tag "merchant_profile[business_category]", @merchant_profile.business_category, class: "form-input" %>
+        </div>
+      </div>
+
+      <div class="grid-2" style="gap: 1rem;">
+        <div class="form-group">
+          <%= label_tag "merchant_profile_permits_and_licenses", "Permits/licenses held", class: "form-label" %>
+          <%= text_area_tag "merchant_profile[permits_and_licenses]", @merchant_profile.permits_and_licenses, class: "form-input" %>
+        </div>
+        <div class="form-group">
+          <%= label_tag "merchant_profile_controlled_goods_notes", "Controlled goods indicators", class: "form-label" %>
+          <%= text_area_tag "merchant_profile[controlled_goods_notes]", @merchant_profile.controlled_goods_notes, class: "form-input", placeholder: "Food, medicine, alcohol, regulated supplies" %>
+        </div>
+      </div>
+
+      <div class="grid-2" style="gap: 1rem;">
+        <div class="form-group">
           <%= label_tag "merchant_profile_default_listing_status", "Default listing status", class: "form-label" %>
           <%= select_tag "merchant_profile[default_listing_status]",
                          options_for_select(Product::MARKETPLACE_STATUSES, @merchant_profile.default_listing_status),

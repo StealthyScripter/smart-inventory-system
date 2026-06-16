@@ -1,0 +1,59 @@
+<% content_for :page_title, "Merchant Catalog" %>
+<% content_for :breadcrumbs do %>
+  Merchant / Catalog
+<% end %>
+
+<section class="page-section">
+  <div class="section-header">
+    <div>
+      <h2 class="section-title">Marketplace Preview</h2>
+      <p class="section-subtitle">How your product listings appear in the customer marketplace.</p>
+    </div>
+    <%= link_to "Add Product", new_merchant_product_path, class: "btn btn-primary" %>
+  </div>
+
+  <% if @product_listings.any? %>
+    <div class="card-grid">
+      <% @product_listings.each do |listing| %>
+        <div class="merchant-preview-card">
+          <%= render "shared/listing_card", listing: listing %>
+          <div class="merchant-preview-status">
+            <%= render "shared/status_badge", status: listing.status, label: "Listing #{listing.status.titleize}" %>
+            <%= render "shared/status_badge", status: listing.visibility, label: listing.visibility.titleize %>
+            <%= render "shared/status_badge", status: listing.product.marketplace_status, label: "Product #{listing.product.marketplace_status.titleize}" %>
+            <%= render "shared/status_badge", status: listing.product.listing_scope, label: listing.product.listing_scope.titleize %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <%= render "shared/empty_state", title: "No marketplace listings yet", message: "Create or publish a listing from Products or Inventory." %>
+  <% end %>
+</section>
+
+<% if @unlisted_products.any? %>
+  <section class="page-section">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">Products Without Marketplace Listings</h2>
+        <p class="section-subtitle">These product records remain local until listed.</p>
+      </div>
+    </div>
+    <div class="card-grid compact">
+      <% @unlisted_products.each do |product| %>
+        <article class="ui-card">
+          <div class="card-body">
+            <div class="card-kicker"><%= product.category.name %></div>
+            <h3 class="card-title"><%= product.name %></h3>
+            <div class="summary-row"><span>SKU</span><strong><%= product.sku %></strong></div>
+            <div class="summary-row"><span>Status</span><%= render "shared/status_badge", status: product.marketplace_status, label: product.marketplace_status.titleize %></div>
+            <div class="summary-row"><span>Scope</span><%= render "shared/status_badge", status: product.listing_scope, label: product.listing_scope.titleize %></div>
+          </div>
+          <div class="card-actions">
+            <%= link_to "Create listing", edit_merchant_product_path(product), class: "btn btn-secondary" %>
+          </div>
+        </article>
+      <% end %>
+    </div>
+  </section>
+<% end %>

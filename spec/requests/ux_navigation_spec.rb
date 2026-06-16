@@ -16,10 +16,13 @@ RSpec.describe "UX navigation", type: :request do
     get merchant_root_path
 
     expect(response).to have_http_status(:success)
-    expect(response.body).to include("Search")
+    expect(response.body).to include("Dashboard")
     expect(response.body).to include("Catalog")
+    expect(response.body).to include("Products")
+    expect(response.body).to include("Inventory")
+    expect(response.body).to include("Profile")
     expect(response.body).to include("Services")
-    expect(response.body).to include("Merchant")
+    expect(response.body).not_to include("<span>Search</span>")
     expect(response.body).to include("Search marketplace")
     expect(response.body).to include("Recent Activity")
     expect(response.body).to include("Analytics")
@@ -41,12 +44,31 @@ RSpec.describe "UX navigation", type: :request do
     get catalog_path
 
     expect(response).to have_http_status(:success)
-    expect(response.body).to include("Catalog")
+    expect(response.body).to include(">Home<")
+    expect(response.body).to include(">Shop<")
+    expect(response.body).to include(">Profile<")
     expect(response.body).to include("Cart")
-    expect(response.body).to include("Orders")
-    expect(response.body).to include("Bookings")
+    expect(response.body).not_to include("<span>Search</span>")
     expect(response.body).not_to include(">Inventory<")
     expect(response.body).not_to include(">Suppliers<")
+  end
+
+  it "renders customer profile as the orders and bookings hub" do
+    login_as(customer)
+
+    get customer_profile_path
+
+    expect(response).to have_http_status(:success)
+    expect(response.body).to include("theme-customer")
+    expect(response.body).to include("Orders")
+    expect(response.body).to include("Bookings")
+    expect(response.body).to include("Edit profile")
+    expect(response.body).to include("Manage lists")
+    expect(response.body).to include("Previous orders")
+    expect(response.body).to include("Inbox")
+    expect(response.body).to include("Notifications")
+    expect(response.body).to include("Sign out")
+    expect(response.body).not_to include("Merchant Tools")
   end
 
   it "serves root as the public catalog for guests" do

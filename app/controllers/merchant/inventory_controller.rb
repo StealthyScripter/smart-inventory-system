@@ -5,6 +5,9 @@ module Merchant
 
     def index
       @stock_levels = merchant_stock_levels
+      @inventory_products = merchant_products
+                            .includes(:marketplace_listing, stock_levels: :location)
+                            .order(:name)
     end
 
     def update
@@ -29,6 +32,36 @@ module Merchant
       redirect_to merchant_inventory_path, notice: "Inventory was updated."
     rescue ActiveRecord::RecordInvalid
       redirect_to merchant_inventory_path, alert: "Inventory could not be updated."
+    end
+
+    def update_marketplace
+      product = merchant_products.find(params[:product_id])
+
+      if params[:visibility_choice] == "marketplace"
+        product.update!(listing_scope: "both", marketplace_status: "public")
+        listing = product.marketplace_listing || product.build_marketplace_listing(
+          account: product.merchant_account,
+          title: product.name,
+          listing_type: "product"
+        )
+        listing.assign_attributes(
+          account: product.merchant_account,
+          title: listing.title.presence || product.name,
+          public_description: listing.public_description.presence || product.description,
+          public_price: listing.public_price || product.selling_price,
+          status: "active",
+          visibility: "public",
+          listing_type: "product"
+        )
+        listing.save!
+        redirect_to merchant_inventory_path, notice: "#{product.name} is ready for marketplace listing."
+      else
+        product.update!(listing_scope: "local", marketplace_status: "private")
+        product.marketplace_listing&.update!(status: "hidden", visibility: "private")
+        redirect_to merchant_inventory_path, notice: "#{product.name} will stay private/local."
+      end
+    rescue ActiveRecord::RecordInvalid
+      redirect_to merchant_inventory_path, alert: "Marketplace visibility could not be updated."
     end
 
     private

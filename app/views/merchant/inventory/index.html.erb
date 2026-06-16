@@ -8,23 +8,45 @@
     </div>
   </div>
 
-  <% if @stock_levels.any? %>
+  <% if @inventory_products.any? %>
     <div class="card-grid">
-      <% @stock_levels.each do |stock_level| %>
+      <% @inventory_products.each do |product| %>
         <article class="ui-card">
           <div class="card-body">
-            <div class="card-kicker"><%= stock_level.location.name %></div>
-            <h3 class="card-title"><%= stock_level.product.name %></h3>
-            <p class="card-meta"><%= stock_level.product.supplier&.name %></p>
-            <div class="summary-row"><span>Current</span><strong><%= number_with_delimiter(stock_level.current_quantity) %></strong></div>
-            <div class="summary-row"><span>Reserved</span><strong><%= number_with_delimiter(stock_level.reserved_quantity) %></strong></div>
-            <div class="summary-row"><span>Available</span><strong><%= number_with_delimiter(stock_level.available_quantity) %></strong></div>
+            <div class="card-kicker">Inventory record</div>
+            <h3 class="card-title"><%= product.name %></h3>
+            <p class="card-meta"><%= product.supplier&.name %></p>
+            <div class="summary-row"><span>Total current</span><strong><%= number_with_delimiter(product.total_stock) %></strong></div>
+            <div class="summary-row"><span>Total available</span><strong><%= number_with_delimiter(product.available_stock) %></strong></div>
+            <div class="summary-row"><span>Marketplace</span><%= render "shared/status_badge", status: product.listing_scope, label: product.listing_scope.titleize %></div>
+            <div class="summary-row"><span>Status</span><%= render "shared/status_badge", status: product.marketplace_status, label: product.marketplace_status.titleize %></div>
+
+            <div class="inventory-breakdown">
+              <h4>Location breakdown</h4>
+              <% product.stock_levels.sort_by { |stock_level| stock_level.location.name }.each do |stock_level| %>
+                <div class="inventory-location-row">
+                  <div>
+                    <strong><%= stock_level.location.name %></strong>
+                    <span class="muted-text">Reserved <%= number_with_delimiter(stock_level.reserved_quantity) %></span>
+                  </div>
+                  <div>
+                    <span><%= number_with_delimiter(stock_level.current_quantity) %> current</span>
+                    <span><%= number_with_delimiter(stock_level.available_quantity) %> available</span>
+                  </div>
+                </div>
+              <% end %>
+            </div>
           </div>
           <div class="card-actions">
-            <%= form_with model: stock_level, url: merchant_inventory_item_path(stock_level), method: :patch, local: true, style: "display: flex; gap: 0.5rem; flex-wrap: wrap;" do |form| %>
-              <%= form.number_field :current_quantity, min: 0, class: "form-input", style: "max-width: 7rem;", aria: { label: "Current quantity for #{stock_level.product.name}" } %>
-              <%= form.submit "Save", class: "btn btn-secondary" %>
+            <% product.stock_levels.each do |stock_level| %>
+              <%= form_with model: stock_level, url: merchant_inventory_item_path(stock_level), method: :patch, local: true, class: "inline-inventory-form" do |form| %>
+                <%= form.label :current_quantity, stock_level.location.name, class: "form-label" %>
+                <%= form.number_field :current_quantity, min: 0, class: "form-input", aria: { label: "Current quantity for #{product.name} at #{stock_level.location.name}" } %>
+                <%= form.submit "Save", class: "btn btn-secondary" %>
+              <% end %>
             <% end %>
+            <%= button_to "List on marketplace", merchant_inventory_product_marketplace_path(product), method: :patch, params: { visibility_choice: "marketplace" }, class: "btn btn-primary" %>
+            <%= button_to "Keep private/local", merchant_inventory_product_marketplace_path(product), method: :patch, params: { visibility_choice: "local" }, class: "btn btn-secondary" %>
           </div>
         </article>
       <% end %>

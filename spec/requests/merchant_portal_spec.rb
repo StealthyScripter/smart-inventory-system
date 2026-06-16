@@ -107,6 +107,23 @@ RSpec.describe "Merchant portal", type: :request do
     end
   end
 
+  describe "GET /merchant/catalog" do
+    it "previews only the merchant's marketplace listings with visibility labels" do
+      merchant_product.marketplace_listing.update!(status: "hidden", visibility: "private")
+      other_product.marketplace_listing.update!(status: "active", visibility: "public")
+      login_as(merchant_user)
+
+      get merchant_catalog_path
+
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include("Marketplace Preview")
+      expect(response.body).to include(merchant_product.name)
+      expect(response.body).to include("Listing Hidden")
+      expect(response.body).to include("Private")
+      expect(response.body).not_to include(other_product.name)
+    end
+  end
+
   describe "POST /merchant/products" do
     it "assigns merchant-created products to the selected linked supplier" do
       login_as(merchant_user)
@@ -202,7 +219,116 @@ RSpec.describe "Merchant portal", type: :request do
 
       expect(response).to have_http_status(:success)
       expect(response.body).to include(merchant_product.name)
+      expect(response.body).to include("Location breakdown")
+      expect(response.body).to include("List on marketplace")
+      expect(response.body).to include("Keep private/local")
       expect(response.body).not_to include(other_product.name)
+    end
+  end
+
+  describe "PATCH /merchant/inventory/products/:product_id/marketplace" do
+    it "uses existing listing fields to list or keep products private" do
+      login_as(merchant_user)
+
+      patch merchant_inventory_product_marketplace_path(merchant_product), params: { visibility_choice: "local" }
+
+      expect(response).to redirect_to(merchant_inventory_path)
+      expect(merchant_product.reload.listing_scope).to eq("local")
+      expect(merchant_product.marketplace_status).to eq("private")
+
+      patch merchant_inventory_product_marketplace_path(merchant_product), params: { visibility_choice: "marketplace" }
+
+      expect(response).to redirect_to(merchant_inventory_path)
+      expect(merchant_product.reload.listing_scope).to eq("both")
+      expect(merchant_product.marketplace_status).to eq("public")
+      expect(merchant_product.marketplace_listing).to be_present
+    end
+  end
+
+  describe "GET /merchant/services" do
+    it "previews only the merchant's services with status labels" do
+      ServiceListing.create!(
+        name: "Alpha Install",
+        supplier: merchant_supplier,
+        service_category: "Electrical",
+        status: "draft",
+        visibility: "private"
+      )
+      ServiceListing.create!(
+        name: "Beta Install",
+        supplier: other_supplier,
+        service_category: "Electrical",
+        status: "public",
+        visibility: "public"
+      )
+      login_as(merchant_user)
+
+      get merchant_services_path
+
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include("Services Marketplace Preview")
+      expect(response.body).to include("Alpha Install")
+      expect(response.body).to include("Draft")
+      expect(response.body).to include("Private")
+      expect(response.body).not_to include("Beta Install")
+    end
+  end
+
+  describe "GET /merchant/profile" do
+    it "shows company information and hides enterprise tools for individual merchants" do
+      account_user = create_authenticated_user(role: "customer", email: "individual.profile@example.com")
+      account = Account.create_with_owner!(
+        creator: account_user,
+        name: "Solo Merchant",
+        account_type: "individual_merchant"
+      )
+      MerchantProfile.create!(
+        account: account,
+        supplier: merchant_supplier,
+        display_name: "Solo Shop",
+        location: "Brooklyn",
+        company_size: "1",
+        contact_information: "solo@example.com",
+        business_category: "Food",
+        permits_and_licenses: "Food handler",
+        controlled_goods_notes: "food"
+      )
+      login_as(account_user)
+
+      get merchant_profile_path
+
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include("theme-individual-merchant")
+      expect(response.body).to include("Company Information")
+      expect(response.body).to include("Solo Shop")
+      expect(response.body).to include("Controlled goods indicators")
+      expect(response.body).not_to include("Team management")
+      expect(response.body).not_to include("Multiple-user settings")
+      expect(response.body).not_to include(">Locations<")
+    end
+
+    it "shows enterprise tools to enterprise admins with existing permissions" do
+      account_user = create_authenticated_user(role: "customer", email: "enterprise.profile@example.com")
+      account = Account.create_with_owner!(
+        creator: account_user,
+        name: "Enterprise Merchant",
+        account_type: "enterprise_merchant"
+      )
+      MerchantProfile.create!(
+        account: account,
+        supplier: merchant_supplier,
+        display_name: "Enterprise Shop",
+        business_category: "Regulated supplies"
+      )
+      login_as(account_user)
+
+      get merchant_profile_path
+
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include("theme-enterprise-merchant")
+      expect(response.body).to include("Team management")
+      expect(response.body).to include("Multiple-user settings")
+      expect(response.body).to include("Multiple-location settings")
     end
   end
 
