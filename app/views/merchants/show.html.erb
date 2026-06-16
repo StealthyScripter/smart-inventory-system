@@ -37,23 +37,7 @@
   <% if @products.any? %>
     <div class="market-grid">
       <% @products.each do |product| %>
-        <article class="ui-card media-card">
-          <div class="card-media">
-            <% if product.featured_image.attached? %>
-              <%= image_tag product.featured_image, alt: product.name %>
-            <% else %>
-              <span><%= ui_initial(product.name) %></span>
-            <% end %>
-          </div>
-          <div class="card-body">
-            <h3 class="card-title clamp-2"><%= link_to product.name, catalog_product_path(product) %></h3>
-            <div class="price"><%= currency(product.selling_price.to_f) %></div>
-            <div class="card-meta">
-              <span>🏷 <%= product.category.name %></span>
-              <span>📦 <%= number_with_delimiter(product.available_stock) %></span>
-            </div>
-          </div>
-        </article>
+        <%= render "home/product_card", product: product, variant: :standard %>
       <% end %>
     </div>
   <% else %>
@@ -68,11 +52,7 @@
   <% if @services.any? %>
     <div class="market-grid">
       <% @services.each do |service| %>
-        <article class="ui-card">
-          <h3 class="card-title"><%= link_to service.name, service_path(service) %></h3>
-          <div class="price">From <%= currency(service.starting_price.to_f) %></div>
-          <div class="card-meta">🛠 <%= service.service_category %></div>
-        </article>
+        <%= render "home/service_card", service: service, variant: :standard %>
       <% end %>
     </div>
   <% else %>

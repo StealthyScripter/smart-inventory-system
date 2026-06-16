@@ -17,6 +17,47 @@ module ApplicationHelper
     "theme-enterprise"
   end
 
+  def marketplace_home_theme_class
+    return "theme-enterprise" if current_merchant_account&.enterprise_merchant?
+    return "theme-merchant" if current_merchant_account.present? || current_user&.supplier_user?
+
+    "theme-customer"
+  end
+
+  def marketplace_home_account
+    if logged_in?
+      if current_customer_account.present? || current_user&.customer?
+        {
+          label: current_customer_account&.name.presence || current_user.full_name,
+          subtitle: "Customer account",
+          path: customer_profile_path,
+          aria_label: "Customer account"
+        }
+      elsif current_merchant_account.present? || current_user&.supplier_user?
+        {
+          label: current_merchant_account&.name.presence || current_user.full_name,
+          subtitle: "Merchant account",
+          path: merchant_profile_path,
+          aria_label: "Merchant account"
+        }
+      else
+        {
+          label: "Account",
+          subtitle: "Profile",
+          path: login_path,
+          aria_label: "Account"
+        }
+      end
+    else
+      {
+        label: "Sign in / Account",
+        subtitle: "Guest",
+        path: login_path,
+        aria_label: "Sign in / Account"
+      }
+    end
+  end
+
   def status_badge_class(status)
     normalized = status.to_s.downcase
 
@@ -90,6 +131,7 @@ module ApplicationHelper
   def nav_icon(name)
     path_data = {
       home: "M4 11.5L12 4l8 7.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1v-8.5z",
+      search: "M10.5 4a6.5 6.5 0 1 0 4.1 11.6L20 21l1-1-1.4-1.4-5.4-5.4A6.5 6.5 0 0 0 10.5 4zm0 2a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9z",
       catalog: "M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v11A2.5 2.5 0 0 1 17.5 20h-11A2.5 2.5 0 0 1 4 17.5v-11zm2.5-.5a.5.5 0 0 0-.5.5V10h5V6H6.5zm6.5 0V10h5V6.5a.5.5 0 0 0-.5-.5H13zM6 12v5.5a.5.5 0 0 0 .5.5H11v-6H6zm7 0v6h4.5a.5.5 0 0 0 .5-.5V12h-5z",
       services: "M6.2 4h11.6L20 8.7l-3.2 3.2v7.1H7.2v-7.1L4 8.7 6.2 4zm1.1 2l-1.1 2.3 2.4 2.4V17h7V10.7l2.4-2.4L16.8 6H7.3z",
       cart: "M6.5 18a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm9 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM4 4h2l1.5 8.5A2 2 0 0 0 9.5 14H18a1 1 0 0 0 .95-.69L21 7H8.2l-.3-1.5A1 1 0 0 0 7 5H4V4z",

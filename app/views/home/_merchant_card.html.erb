@@ -1,0 +1,41 @@
+<% variant = local_assigns.fetch(:variant, :standard) %>
+
+<article class="ui-card media-card marketplace-card marketplace-card--merchant marketplace-card--<%= variant %>">
+  <div class="marketplace-merchant-card__media">
+    <% if merchant.banner.attached? %>
+      <%= image_tag merchant.banner, alt: "#{merchant.name} banner" %>
+    <% elsif merchant.logo.attached? %>
+      <%= image_tag merchant.logo, alt: "#{merchant.name} logo" %>
+    <% elsif safe_media_url?(merchant.shop_image_url) %>
+      <img src="<%= merchant.shop_image_url %>" alt="<%= merchant.name %>">
+    <% else %>
+      <div class="marketplace-card__fallback marketplace-card__fallback--merchant">
+        <%= nav_icon(:store) %>
+        <span>Storefront</span>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="card-body">
+    <div class="card-meta">
+      <span class="badge badge-secondary">Merchant</span>
+      <span>★ <%= number_with_precision(merchant.average_rating, precision: 1) %></span>
+    </div>
+
+    <h3 class="card-title clamp-2"><%= link_to merchant.name, merchant_storefront_path(merchant) %></h3>
+
+    <p class="marketplace-merchant-card__copy clamp-2"><%= merchant.shop_description.presence || "Public merchant storefront" %></p>
+
+    <% if merchant.address.present? %>
+      <div class="card-meta">
+        <span class="meta-item">📍 <%= merchant.address %></span>
+      </div>
+    <% end %>
+
+    <% unless variant == :compact %>
+      <div class="card-actions">
+        <%= link_to "View shop", merchant_storefront_path(merchant), class: "btn btn-primary" %>
+      </div>
+    <% end %>
+  </div>
+</article>

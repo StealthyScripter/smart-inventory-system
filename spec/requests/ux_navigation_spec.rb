@@ -75,10 +75,13 @@ RSpec.describe "UX navigation", type: :request do
     get root_path
 
     expect(response).to have_http_status(:success)
-    expect(response.body).to include("Goods")
-    expect(response.body).to include("Services")
-    expect(response.body).to include("Merchants")
+    expect(response.body).to include("marketplace-home-header")
+    expect(response.body).to include("marketplace-home-account")
+    expect(response.body).to include("marketplace-home-hero")
+    expect(response.body).to include("marketplace-menu__link")
+    expect(response.body).to include("Build smarter. Shop faster.")
     expect(response.body).not_to include("Marketplace / Catalog")
+    expect(response.body).not_to include("topbar topbar--account")
   end
 
   it "renders catalog pagination controls when enough rows exist" do

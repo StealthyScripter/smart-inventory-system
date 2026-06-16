@@ -1,0 +1,33 @@
+<header class="ui-card marketplace-home-header">
+  <div class="marketplace-home-brand">
+    <%= link_to root_path, class: "brand-link marketplace-home-brand__link" do %>
+      <span class="brand-mark">◼</span>
+      <span class="brand-name">Smart Inventory</span>
+    <% end %>
+    <span class="marketplace-home-brand__tag">Marketplace</span>
+  </div>
+
+  <%= form_with url: search_path, method: :get, local: true, class: "marketplace-home-search" do |form| %>
+    <%= form.search_field :q,
+      value: params[:q],
+      placeholder: "Search products, services, merchants",
+      class: "form-input marketplace-home-search__input",
+      aria: { label: "Search marketplace" } %>
+    <%= form.button type: "submit", class: "btn btn-primary icon-btn marketplace-home-search__submit", aria: { label: "Search marketplace" } do %>
+      <%= nav_icon(:search) %>
+    <% end %>
+  <% end %>
+
+  <% account = marketplace_home_account %>
+  <div class="marketplace-home-actions">
+    <%= link_to account[:path], class: "marketplace-home-account", aria: { label: account[:aria_label] } do %>
+      <span class="marketplace-home-account__eyebrow"><%= account[:subtitle] %></span>
+      <span class="marketplace-home-account__label"><%= account[:label] %></span>
+    <% end %>
+
+    <%= link_to cart_path, class: "marketplace-home-cart btn btn-secondary icon-btn", aria: { label: "Cart" } do %>
+      <%= nav_icon(:cart) %>
+      <span class="marketplace-home-cart__label">Cart</span>
+    <% end %>
+  </div>
+</header>

@@ -16,26 +16,7 @@
   <% if @services.any? %>
     <div class="market-grid">
       <% @services.each do |service| %>
-        <article class="ui-card media-card">
-          <div class="card-media">
-            <% if safe_media_url?(service.image_url) %>
-              <img src="<%= service.image_url %>" alt="<%= service.name %>">
-            <% else %>
-              <span><%= ui_initial(service.name) %></span>
-            <% end %>
-          </div>
-          <div class="card-body">
-            <h3 class="card-title clamp-2"><%= link_to service.name, service_path(service) %></h3>
-            <div class="price">From <%= currency(service.starting_price.to_f) %></div>
-            <div class="card-meta">
-              <span class="meta-item">🛠 <%= service.service_category %></span>
-              <span class="meta-item">★ <%= number_with_precision(service.average_rating, precision: 1) %></span>
-            </div>
-            <div class="card-meta">
-              <span class="meta-item">🏬 <%= link_to service.supplier.name, merchant_storefront_path(service.supplier) %></span>
-            </div>
-          </div>
-        </article>
+        <%= render "home/service_card", service: service, variant: :standard %>
       <% end %>
     </div>
   <% else %>

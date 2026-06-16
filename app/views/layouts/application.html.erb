@@ -20,30 +20,32 @@
     <% if logged_in? %>
       <% if account_navigation? %>
         <div class="app-shell app-shell--account">
-          <header class="topbar topbar--account">
-            <div class="topbar-brand">
-              <%= link_to root_path, class: "brand-link" do %>
-                <span class="brand-mark">◼</span>
-                <span class="brand-name">Smart Inventory</span>
-              <% end %>
-              <span class="topbar-title"><%= yield(:page_title).presence || "Dashboard" %></span>
-            </div>
+          <% unless content_for?(:hide_account_topbar) %>
+            <header class="topbar topbar--account">
+              <div class="topbar-brand">
+                <%= link_to root_path, class: "brand-link" do %>
+                  <span class="brand-mark">◼</span>
+                  <span class="brand-name">Smart Inventory</span>
+                <% end %>
+                <span class="topbar-title"><%= yield(:page_title).presence || "Dashboard" %></span>
+              </div>
 
-            <% unless customer_navigation? && current_page?(root_path) %>
-              <%= form_with url: search_path, method: :get, local: true, class: "top-search" do |form| %>
-                <%= form.search_field :q, value: params[:q], placeholder: "Search marketplace", class: "form-input top-search__input", aria: { label: "Search marketplace" } %>
-              <% end %>
-            <% end %>
-
-            <div class="topbar-actions">
-              <% if customer_navigation? %>
-                <%= link_to cart_path, class: "topbar-action topbar-action--cart", aria: { label: "Cart" } do %>
-                  <%= nav_icon(:cart) %>
-                  <span>Cart</span>
+              <% unless customer_navigation? && current_page?(root_path) %>
+                <%= form_with url: search_path, method: :get, local: true, class: "top-search" do |form| %>
+                  <%= form.search_field :q, value: params[:q], placeholder: "Search marketplace", class: "form-input top-search__input", aria: { label: "Search marketplace" } %>
                 <% end %>
               <% end %>
-            </div>
-          </header>
+
+              <div class="topbar-actions">
+                <% if customer_navigation? %>
+                  <%= link_to cart_path, class: "topbar-action topbar-action--cart", aria: { label: "Cart" } do %>
+                    <%= nav_icon(:cart) %>
+                    <span>Cart</span>
+                  <% end %>
+                <% end %>
+              </div>
+            </header>
+          <% end %>
 
           <main class="app-main app-main--account">
             <div class="content-area account-content">
