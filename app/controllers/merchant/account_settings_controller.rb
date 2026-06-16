@@ -38,6 +38,12 @@ module Merchant
       params.require(:merchant_profile).permit(
         :display_name,
         :description,
+        :location,
+        :company_size,
+        :contact_information,
+        :business_category,
+        :permits_and_licenses,
+        :controlled_goods_notes,
         :default_listing_status,
         :default_inventory_policy,
         :default_fulfillment_days

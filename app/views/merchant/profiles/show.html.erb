@@ -1,0 +1,58 @@
+<% content_for :page_title, "Merchant Profile" %>
+<% content_for :breadcrumbs do %>
+  Merchant / Profile
+<% end %>
+
+<section class="page-section">
+  <div class="section-header">
+    <div>
+      <h2 class="section-title"><%= @merchant_profile&.display_name || @account&.name || @primary_supplier&.name %></h2>
+      <p class="section-subtitle"><%= @account&.account_type&.humanize || "Legacy merchant" %></p>
+    </div>
+    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+      <% if @primary_supplier && can_manage_merchant?(:manage_account_settings) %>
+        <%= link_to "Edit profile", edit_merchant_shop_path(@primary_supplier), class: "btn btn-primary" %>
+      <% end %>
+      <% if @account&.enterprise_merchant? && can_manage_merchant?(:manage_account_settings) %>
+        <%= link_to "Account settings", edit_merchant_account_settings_path, class: "btn btn-secondary" %>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <article class="summary-card">
+      <div class="card-kicker">Company Information</div>
+      <div class="summary-row"><span>Company/shop name</span><strong><%= @merchant_profile&.display_name || @primary_supplier&.name || "Not set" %></strong></div>
+      <div class="summary-row"><span>Description</span><strong><%= @merchant_profile&.description.presence || @primary_supplier&.shop_description.presence || "Not set" %></strong></div>
+      <div class="summary-row"><span>Location</span><strong><%= @merchant_profile&.location.presence || @primary_supplier&.address.presence || "Not set" %></strong></div>
+      <div class="summary-row"><span>Company size</span><strong><%= @merchant_profile&.company_size.presence || "Not set" %></strong></div>
+      <div class="summary-row"><span>Contact information</span><strong><%= @merchant_profile&.contact_information.presence || [@primary_supplier&.contact_email, @primary_supplier&.contact_phone].compact_blank.to_sentence.presence || "Not set" %></strong></div>
+      <div class="summary-row"><span>Business category</span><strong><%= @merchant_profile&.business_category.presence || "Not set" %></strong></div>
+      <div class="summary-row"><span>Permits/licenses held</span><strong><%= @merchant_profile&.permits_and_licenses.presence || "Not set" %></strong></div>
+      <div class="summary-row"><span>Controlled goods indicators</span><strong><%= @merchant_profile&.controlled_goods_notes.presence || "Not set" %></strong></div>
+    </article>
+
+    <article class="summary-card">
+      <div class="card-kicker">Merchant Tools</div>
+      <div class="profile-action-grid compact">
+        <%= link_to "Dashboard", merchant_root_path, class: "profile-action-card" %>
+        <%= link_to "Catalog", merchant_catalog_path, class: "profile-action-card" %>
+        <%= link_to "Products", merchant_products_path, class: "profile-action-card" %>
+        <%= link_to "Inventory", merchant_inventory_path, class: "profile-action-card" %>
+        <%= link_to "Orders", merchant_orders_path, class: "profile-action-card" %>
+        <%= link_to "Services", merchant_services_path, class: "profile-action-card" %>
+        <%= link_to "Bookings", merchant_service_bookings_path, class: "profile-action-card" %>
+        <%= link_to "Messages", merchant_conversations_path, class: "profile-action-card" %>
+        <%= link_to "Analytics", merchant_analytics_path, class: "profile-action-card" %>
+        <% if @account&.enterprise_merchant? && can_manage_merchant?(:manage_members) %>
+          <%= link_to "Team management", merchant_members_path, class: "profile-action-card enterprise-only" %>
+        <% end %>
+        <% if @account&.enterprise_merchant? && can_manage_merchant?(:manage_locations) %>
+          <%= link_to "Locations", locations_path, class: "profile-action-card enterprise-only" %>
+          <span class="profile-action-card enterprise-only">Multiple-user settings</span>
+          <span class="profile-action-card enterprise-only">Multiple-location settings</span>
+        <% end %>
+      </div>
+    </article>
+  </div>
+</section>

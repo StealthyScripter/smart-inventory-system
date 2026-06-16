@@ -2,7 +2,7 @@ class SearchController < ApplicationController
   skip_before_action :require_login
 
   def index
-    @search = SearchService.new(search_params.merge(page: params[:page]))
+    @search = ::SearchService.new(search_params.merge(page: params[:page]))
     @products = @search.products
     @services = @search.services
     @merchants = @search.merchants

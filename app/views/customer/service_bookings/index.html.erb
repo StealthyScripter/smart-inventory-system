@@ -3,30 +3,40 @@
   Customer / Bookings
 <% end %>
 
-<div class="table-container">
-  <div class="table-header"><h3 class="table-title">Bookings</h3></div>
-  <table>
-    <thead>
-      <tr><th>Booking</th><th>Service</th><th>Provider</th><th>Status</th><th>Schedule</th><th>Actions</th></tr>
-    </thead>
-    <tbody>
+<section class="page-section">
+  <div class="section-header">
+    <div>
+      <h2 class="section-title">Service Bookings</h2>
+      <p class="section-subtitle">Track requested, scheduled, and completed services.</p>
+    </div>
+    <%= link_to "Browse Services", services_path, class: "btn btn-secondary" %>
+  </div>
+
+  <% if @bookings.any? %>
+    <div class="card-grid">
       <% @bookings.each do |booking| %>
-        <tr>
-          <td><%= booking.booking_number %></td>
-          <td><%= booking.service_listings.map(&:name).to_sentence %></td>
-          <td><%= booking.supplier.name %></td>
-          <td><%= booking.status.titleize %></td>
-          <td><%= [booking.scheduled_date, booking.scheduled_time&.strftime("%H:%M")].compact.join(" ") %></td>
-          <td>
-            <% if ServiceBooking::TRANSITIONS.fetch(booking.status).include?("cancelled") %>
-              <%= button_to "Cancel", customer_service_booking_path(booking), method: :patch, class: "btn btn-danger" %>
-            <% end %>
-          </td>
-        </tr>
+        <article class="ui-card">
+          <div class="card-body">
+            <div class="card-kicker">Booking</div>
+            <h3 class="card-title"><%= booking.booking_number %></h3>
+            <p><strong><%= booking.service_listings.map(&:name).to_sentence %></strong></p>
+            <p class="card-meta"><%= booking.supplier.name %></p>
+            <%= render "shared/status_badge", status: booking.status, label: booking.status.titleize %>
+            <p class="muted-text"><%= [booking.scheduled_date, booking.scheduled_time&.strftime("%H:%M")].compact.join(" ").presence || "Schedule pending" %></p>
+          </div>
+          <% if ServiceBooking::TRANSITIONS.fetch(booking.status).include?("cancelled") %>
+            <div class="card-actions">
+              <%= button_to "Cancel Booking", customer_service_booking_path(booking), method: :patch, class: "btn btn-danger" %>
+            </div>
+          <% end %>
+        </article>
       <% end %>
-      <% if @bookings.empty? %>
-        <tr><td colspan="6" class="empty-state">No service bookings yet.</td></tr>
-      <% end %>
-    </tbody>
-  </table>
-</div>
+    </div>
+  <% else %>
+    <%= render "shared/empty_state",
+               title: "No service bookings yet.",
+               message: "Book a public service to track scheduling here.",
+               action: "Browse Services",
+               path: services_path %>
+  <% end %>
+</section>

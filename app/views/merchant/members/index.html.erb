@@ -1,56 +1,54 @@
 <% content_for :page_title, "Team" %>
 
-<div class="table-container">
-  <div class="table-header">
-    <h1 class="table-title">Team</h1>
+<section class="page-section">
+  <div class="section-header">
+    <div>
+      <h2 class="section-title">Team</h2>
+      <p class="section-subtitle">Manage enterprise merchant access and roles.</p>
+    </div>
   </div>
 
-  <div style="padding: 2rem;">
+  <div class="summary-card">
     <%= form_with url: merchant_members_path, scope: :account_membership, local: true do |form| %>
       <div class="grid-2" style="gap: 1rem;">
         <div class="form-group">
           <%= form.label :email, "User email", class: "form-label" %>
           <%= form.email_field :email, class: "form-input", required: true %>
         </div>
-
         <div class="form-group" style="display: flex; align-items: end;">
           <%= form.submit "Add Member", class: "btn btn-primary" %>
         </div>
       </div>
     <% end %>
   </div>
+</section>
 
-  <table class="inventory-table">
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Email</th>
-        <th>Role</th>
-        <th>Status</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
+<section class="page-section">
+  <% if @memberships.any? %>
+    <div class="card-grid">
       <% @memberships.each do |membership| %>
-        <tr>
-          <td><%= membership.user.full_name %></td>
-          <td><%= membership.user.email %></td>
-          <td>
-            <%= form_with url: merchant_member_path(membership), method: :patch, scope: :account_membership, local: true do |form| %>
+        <article class="ui-card">
+          <div class="card-body">
+            <div class="card-kicker"><%= membership.role.titleize %></div>
+            <h3 class="card-title"><%= membership.user.full_name %></h3>
+            <p class="card-meta"><%= membership.user.email %></p>
+            <%= render "shared/status_badge", status: membership.active? ? "active" : "disabled", label: membership.active? ? "Active" : "Disabled" %>
+          </div>
+          <div class="card-actions">
+            <%= form_with url: merchant_member_path(membership), method: :patch, scope: :account_membership, local: true, style: "display: flex; gap: 0.5rem; flex-wrap: wrap;" do |form| %>
               <%= form.select :role, AccountMembership::ROLES.map { |role| [role.titleize, role] }, { selected: membership.role }, class: "form-input" %>
               <%= form.submit "Update", class: "btn btn-secondary" %>
             <% end %>
-          </td>
-          <td><%= membership.active? ? "Active" : "Disabled" %></td>
-          <td>
             <% if membership.active? %>
               <%= button_to "Disable", merchant_member_path(membership), method: :delete, class: "btn btn-danger" %>
             <% else %>
               <%= button_to "Enable", enable_merchant_member_path(membership), method: :patch, class: "btn btn-secondary" %>
             <% end %>
-          </td>
-        </tr>
+          </div>
+        </article>
       <% end %>
-    </tbody>
-  </table>
-</div>
+    </div>
+  <% else %>
+    <%= render "shared/empty_state", title: "No team members" %>
+  <% end %>
+</section>

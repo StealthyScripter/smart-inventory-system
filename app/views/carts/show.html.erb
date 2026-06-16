@@ -7,70 +7,79 @@
      unit_price.to_d * item.quantity
    end %>
 
-<div class="table-container">
-  <div class="table-header">
-    <h3 class="table-title">Your Cart</h3>
+<section class="page-section">
+  <div class="section-header">
+    <div>
+      <h2 class="section-title">Your Cart</h2>
+      <p class="section-subtitle">Review marketplace items before checkout.</p>
+    </div>
     <%= link_to "Continue Shopping", catalog_path, class: "btn btn-secondary" %>
   </div>
 
   <% if cart_items.empty? %>
-    <div class="empty-state">
-      Your cart is empty.
-      <div style="margin-top: 1rem;">
-        <%= link_to "Browse Catalog", catalog_path, class: "btn btn-primary" %>
-      </div>
-    </div>
+    <%= render "shared/empty_state",
+               title: "Your cart is empty.",
+               message: "Browse public marketplace listings and add items here.",
+               action: "Browse Catalog",
+               path: catalog_path %>
   <% else %>
-    <table>
-      <thead>
-        <tr>
-          <th>Listing</th>
-          <th>Unit Price</th>
-          <th>Quantity</th>
-          <th>Subtotal</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
+    <div class="cart-layout">
+      <div class="card-grid" style="grid-template-columns: 1fr;">
         <% cart_items.each do |item| %>
           <% listing = item.product.marketplace_listing %>
           <% listing_title = listing&.title.presence || item.product.name %>
           <% unit_price = listing&.current_price || item.product.selling_price.to_d %>
           <% subtotal = unit_price.to_d * item.quantity %>
-          <tr>
-            <td>
-              <strong><%= link_to listing_title, catalog_product_path(item.product) %></strong>
-              <% if listing&.availability.present? %>
-                <div style="color: #718096; margin-top: 0.25rem;"><%= listing.availability.humanize %></div>
-              <% end %>
-            </td>
-            <td><%= currency(unit_price) %></td>
-            <td>
-              <%= form_with url: cart_path, method: :patch, local: true, style: "display: flex; gap: 0.5rem;" do |form| %>
+          <article class="ui-card">
+            <div class="card-body">
+              <div class="section-header" style="margin-bottom: 0;">
+                <div>
+                  <div class="card-kicker">Marketplace Item</div>
+                  <h3 class="card-title"><%= link_to listing_title, catalog_product_path(item.product) %></h3>
+                  <% if listing&.availability.present? %>
+                    <%= render "shared/status_badge", status: listing.availability, label: listing.availability.humanize %>
+                  <% end %>
+                </div>
+                <div class="price-row">
+                  <span class="price"><%= currency(unit_price) %></span>
+                </div>
+              </div>
+              <div class="summary-row">
+                <span>Quantity</span>
+                <strong><%= item.quantity %></strong>
+              </div>
+              <div class="summary-row">
+                <span>Subtotal</span>
+                <strong><%= currency(subtotal) %></strong>
+              </div>
+            </div>
+            <div class="card-actions">
+              <%= form_with url: cart_path, method: :patch, local: true, style: "display: flex; gap: 0.5rem; flex-wrap: wrap;" do |form| %>
                 <%= form.hidden_field :item_id, value: item.id %>
                 <%= form.number_field :quantity, value: item.quantity, min: 1, class: "form-input", style: "width: 6rem;" %>
                 <%= form.submit "Update", class: "btn btn-secondary" %>
               <% end %>
-            </td>
-            <td><%= currency(subtotal) %></td>
-            <td>
               <%= button_to "Remove", cart_path(item_id: item.id), method: :delete, class: "btn btn-danger" %>
-            </td>
-          </tr>
+            </div>
+          </article>
         <% end %>
-      </tbody>
-      <tfoot>
-        <tr>
-          <td colspan="3"><strong>Total</strong></td>
-          <td><strong><%= currency(cart_total) %></strong></td>
-          <td></td>
-        </tr>
-      </tfoot>
-    </table>
+      </div>
 
-    <div style="padding: 1.5rem; display: flex; gap: 0.75rem; justify-content: flex-end; flex-wrap: wrap;">
-      <%= link_to "Continue Shopping", catalog_path, class: "btn btn-secondary" %>
-      <%= link_to "Review Checkout", checkout_path, class: "btn btn-primary" %>
+      <aside class="summary-card">
+        <h3 class="section-title">Order Summary</h3>
+        <div class="summary-row">
+          <span>Items</span>
+          <strong><%= cart_items.sum(&:quantity) %></strong>
+        </div>
+        <div class="summary-row">
+          <span>Total</span>
+          <strong><%= currency(cart_total) %></strong>
+        </div>
+        <div style="margin-top: 1rem; display: grid; gap: 0.75rem;">
+          <%= link_to "Review Checkout", checkout_path, class: "btn btn-primary" %>
+          <%= link_to "Continue Shopping", catalog_path, class: "btn btn-secondary" %>
+        </div>
+      </aside>
     </div>
   <% end %>
-</div>
+</section>

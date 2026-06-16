@@ -1,43 +1,57 @@
 <% content_for :page_title, "Merchant Inventory" %>
 
-<div class="table-container">
-  <div class="table-header">
-    <h3 class="table-title">Inventory</h3>
+<section class="page-section">
+  <div class="section-header">
+    <div>
+      <h2 class="section-title">Local Inventory</h2>
+      <p class="section-subtitle">Private stock levels by product and location. These records are not public marketplace listings.</p>
+    </div>
   </div>
-  <table>
-    <thead>
-      <tr>
-        <th>Product</th>
-        <th>Supplier</th>
-        <th>Location</th>
-        <th>Current</th>
-        <th>Reserved</th>
-        <th>Available</th>
-        <th>Adjust</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% @stock_levels.each do |stock_level| %>
-        <tr>
-          <td><%= stock_level.product.name %></td>
-          <td><%= stock_level.product.supplier&.name %></td>
-          <td><%= stock_level.location.name %></td>
-          <td><%= number_with_delimiter(stock_level.current_quantity) %></td>
-          <td><%= number_with_delimiter(stock_level.reserved_quantity) %></td>
-          <td><strong><%= number_with_delimiter(stock_level.available_quantity) %></strong></td>
-          <td>
-            <%= form_with model: stock_level, url: merchant_inventory_item_path(stock_level), method: :patch, local: true, style: "display: flex; gap: 0.5rem;" do |form| %>
-              <%= form.number_field :current_quantity, min: 0, class: "form-input", style: "max-width: 7rem;" %>
-              <%= form.submit "Save", class: "btn btn-secondary" %>
+
+  <% if @inventory_products.any? %>
+    <div class="card-grid">
+      <% @inventory_products.each do |product| %>
+        <article class="ui-card">
+          <div class="card-body">
+            <div class="card-kicker">Inventory record</div>
+            <h3 class="card-title"><%= product.name %></h3>
+            <p class="card-meta"><%= product.supplier&.name %></p>
+            <div class="summary-row"><span>Total current</span><strong><%= number_with_delimiter(product.total_stock) %></strong></div>
+            <div class="summary-row"><span>Total available</span><strong><%= number_with_delimiter(product.available_stock) %></strong></div>
+            <div class="summary-row"><span>Marketplace</span><%= render "shared/status_badge", status: product.listing_scope, label: product.listing_scope.titleize %></div>
+            <div class="summary-row"><span>Status</span><%= render "shared/status_badge", status: product.marketplace_status, label: product.marketplace_status.titleize %></div>
+
+            <div class="inventory-breakdown">
+              <h4>Location breakdown</h4>
+              <% product.stock_levels.sort_by { |stock_level| stock_level.location.name }.each do |stock_level| %>
+                <div class="inventory-location-row">
+                  <div>
+                    <strong><%= stock_level.location.name %></strong>
+                    <span class="muted-text">Reserved <%= number_with_delimiter(stock_level.reserved_quantity) %></span>
+                  </div>
+                  <div>
+                    <span><%= number_with_delimiter(stock_level.current_quantity) %> current</span>
+                    <span><%= number_with_delimiter(stock_level.available_quantity) %> available</span>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+          <div class="card-actions">
+            <% product.stock_levels.each do |stock_level| %>
+              <%= form_with model: stock_level, url: merchant_inventory_item_path(stock_level), method: :patch, local: true, class: "inline-inventory-form" do |form| %>
+                <%= form.label :current_quantity, stock_level.location.name, class: "form-label" %>
+                <%= form.number_field :current_quantity, min: 0, class: "form-input", aria: { label: "Current quantity for #{product.name} at #{stock_level.location.name}" } %>
+                <%= form.submit "Save", class: "btn btn-secondary" %>
+              <% end %>
             <% end %>
-          </td>
-        </tr>
+            <%= button_to "List on marketplace", merchant_inventory_product_marketplace_path(product), method: :patch, params: { visibility_choice: "marketplace" }, class: "btn btn-primary" %>
+            <%= button_to "Keep private/local", merchant_inventory_product_marketplace_path(product), method: :patch, params: { visibility_choice: "local" }, class: "btn btn-secondary" %>
+          </div>
+        </article>
       <% end %>
-      <% if @stock_levels.empty? %>
-        <tr>
-          <td colspan="7" style="text-align: center; color: #718096; font-style: italic;">No inventory found.</td>
-        </tr>
-      <% end %>
-    </tbody>
-  </table>
-</div>
+    </div>
+  <% else %>
+    <%= render "shared/empty_state", title: "No inventory found", message: "Stock levels will appear here after inventory is created." %>
+  <% end %>
+</section>

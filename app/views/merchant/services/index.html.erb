@@ -1,33 +1,45 @@
 <% content_for :page_title, "Merchant Services" %>
 
-<div class="table-container">
-  <div class="table-header">
-    <h3 class="table-title">Services</h3>
+<section class="page-section">
+  <div class="section-header">
+    <div>
+      <h2 class="section-title">Services Marketplace Preview</h2>
+      <p class="section-subtitle">How your services appear in the customer marketplace, including public and hidden status.</p>
+    </div>
     <%= link_to "Add Service", new_merchant_service_path, class: "btn btn-primary" %>
   </div>
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Category</th>
-        <th>Status</th>
-        <th>Starting Price</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
+
+  <% if @services.any? %>
+    <div class="card-grid">
       <% @services.each do |service| %>
-        <tr>
-          <td><%= service.name %></td>
-          <td><%= service.service_category %></td>
-          <td><%= service.status.titleize %></td>
-          <td><%= currency(service.starting_price.to_f) %></td>
-          <td><%= link_to "Edit", edit_merchant_service_path(service), class: "btn btn-secondary" %></td>
-        </tr>
+        <article class="ui-card">
+          <% if service.image_url.present? %>
+            <img class="card-media" src="<%= service.image_url %>" alt="<%= service.name %>">
+          <% else %>
+            <div class="card-media placeholder-media" role="img" aria-label="<%= service.name %> image placeholder">
+              <span><%= service.name.to_s.first&.upcase || "S" %></span>
+            </div>
+          <% end %>
+          <div class="card-body">
+            <div class="card-kicker"><%= service.service_category %></div>
+            <h3 class="card-title"><%= service.name %></h3>
+            <p class="card-meta"><%= service.description.presence || "No public description yet." %></p>
+            <div class="summary-row"><span>Status</span><%= render "shared/status_badge", status: service.status, label: service.status.titleize %></div>
+            <div class="summary-row"><span>Visibility</span><%= render "shared/status_badge", status: service.visibility, label: service.visibility.titleize %></div>
+            <div class="summary-row"><span>Starting Price</span><strong><%= currency(service.starting_price.to_f) %></strong></div>
+            <% if service.marketplace_listing.present? %>
+              <div class="summary-row"><span>Listing</span><%= render "shared/status_badge", status: service.marketplace_listing.status, label: service.marketplace_listing.status.titleize %></div>
+            <% else %>
+              <div class="summary-row"><span>Listing</span><%= render "shared/status_badge", status: "draft", label: "No linked listing" %></div>
+            <% end %>
+          </div>
+          <div class="card-actions">
+            <%= link_to "Edit", edit_merchant_service_path(service), class: "btn btn-secondary" %>
+          </div>
+        </article>
       <% end %>
-      <% if @services.empty? %>
-        <tr><td colspan="5" style="text-align: center; color: #718096; font-style: italic;">No services found.</td></tr>
-      <% end %>
-    </tbody>
-  </table>
-</div>
+    </div>
+  <% else %>
+    <%= render "shared/empty_state", title: "No services found", action: "Add Service", path: new_merchant_service_path %>
+  <% end %>
+</section>

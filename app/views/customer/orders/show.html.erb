@@ -3,63 +3,67 @@
   Customer / Orders / <%= @order.order_number %>
 <% end %>
 
-<div class="table-container">
-  <div class="table-header">
-    <h3 class="table-title">Order <%= @order.order_number %></h3>
+<section class="page-section">
+  <div class="section-header">
+    <div>
+      <h2 class="section-title">Order <%= @order.order_number %></h2>
+      <p class="section-subtitle">Tracking, fulfillment, and review details.</p>
+    </div>
     <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
       <%= link_to "PDF Receipt", customer_order_path(@order, format: :pdf), class: "btn btn-secondary" %>
       <%= link_to "Back to Orders", customer_orders_path, class: "btn btn-secondary" %>
     </div>
   </div>
-  <div style="padding: 1.5rem;">
-    <p><strong>Status:</strong> <%= @order.status.titleize %></p>
-    <p><strong>Total:</strong> <%= currency(@order.total_amount.to_f) %></p>
-    <p><strong>Submitted:</strong> <%= @order.submitted_at&.to_date || @order.created_at.to_date %></p>
+
+  <div class="dashboard-card-grid">
+    <%= render "shared/metric_card", label: "Status", value: @order.status.titleize %>
+    <%= render "shared/metric_card", label: "Total", value: currency(@order.total_amount.to_f) %>
+    <%= render "shared/metric_card", label: "Submitted", value: (@order.submitted_at&.to_date || @order.created_at.to_date) %>
   </div>
-  <table>
-    <thead>
-      <tr>
-        <th>Product</th>
-        <th>Merchant</th>
-        <th>Quantity</th>
-        <th>Fulfillment</th>
-        <th>Tracking</th>
-        <th>Review</th>
-      </tr>
-    </thead>
-    <tbody>
+</section>
+
+<section class="page-section">
+  <div class="section-header">
+    <h2 class="section-title">Items</h2>
+  </div>
+  <% if @order.order_items.any? %>
+    <div class="card-grid">
       <% @order.order_items.each do |item| %>
-        <tr>
-          <td><%= item.product.name %></td>
-          <td><%= item.supplier.name %></td>
-          <td><%= item.quantity %></td>
-          <td><%= item.fulfillment_status.titleize %></td>
-          <td>
-            <% if item.tracking_number.present? %>
-              <%= [item.tracking_carrier, item.tracking_number].compact.join(" ") %>
-            <% else %>
-              Not available
-            <% end %>
-          </td>
-          <td>
-            <% if item.fulfillment_status == "delivered" && item.reviews.where(user: current_user).empty? %>
-              <%= form_with url: reviews_path, method: :post, local: true do |form| %>
+        <article class="ui-card">
+          <div class="card-body">
+            <div class="card-kicker"><%= item.supplier.name %></div>
+            <h3 class="card-title"><%= item.product.marketplace_listing&.title.presence || item.product.name %></h3>
+            <div class="summary-row">
+              <span>Quantity</span>
+              <strong><%= item.quantity %></strong>
+            </div>
+            <div class="summary-row">
+              <span>Fulfillment</span>
+              <%= render "shared/status_badge", status: item.fulfillment_status, label: item.fulfillment_status.titleize %>
+            </div>
+            <div class="summary-row">
+              <span>Tracking</span>
+              <strong><%= item.tracking_number.present? ? [item.tracking_carrier, item.tracking_number].compact.join(" ") : "Not available" %></strong>
+            </div>
+          </div>
+          <% if item.fulfillment_status == "delivered" && item.reviews.where(user: current_user).empty? %>
+            <div class="card-actions">
+              <%= form_with url: reviews_path, method: :post, local: true, style: "display: grid; gap: 0.5rem; width: 100%;" do |form| %>
                 <%= hidden_field_tag :order_item_id, item.id %>
                 <%= hidden_field_tag :order_id, @order.id %>
                 <%= form.fields_for :review do |review_form| %>
-                  <%= review_form.number_field :rating, min: 1, max: 5, value: 5, class: "form-input", style: "width: 5rem;" %>
+                  <%= review_form.number_field :rating, min: 1, max: 5, value: 5, class: "form-input", aria: { label: "Rating" } %>
                   <%= review_form.text_field :body, class: "form-input", placeholder: "Review" %>
                   <%= review_form.file_field :photos, multiple: true, accept: "image/*", class: "form-input" %>
                 <% end %>
-                <%= form.submit "Review", class: "btn btn-secondary" %>
+                <%= form.submit "Submit Review", class: "btn btn-secondary" %>
               <% end %>
-            <% end %>
-          </td>
-        </tr>
+            </div>
+          <% end %>
+        </article>
       <% end %>
-    </tbody>
-  </table>
-  <% if @order.order_items.empty? %>
-    <div class="empty-state">No order items are attached to this order.</div>
+    </div>
+  <% else %>
+    <%= render "shared/empty_state", title: "No order items", message: "No order items are attached to this order." %>
   <% end %>
-</div>
+</section>

@@ -1,0 +1,9 @@
+<div class="stat-card metric-card">
+  <div class="stat-header">
+    <span class="stat-title"><%= local_assigns.fetch(:label) %></span>
+  </div>
+  <div class="stat-value"><%= local_assigns.fetch(:value) %></div>
+  <% if local_assigns[:hint].present? %>
+    <p class="muted-text"><%= local_assigns[:hint] %></p>
+  <% end %>
+</div>

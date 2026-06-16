@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_15_007000) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_16_000000) do
   create_table "account_memberships", force: :cascade do |t|
     t.integer "account_id", null: false
     t.boolean "active", default: true, null: false
@@ -202,12 +202,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_15_007000) do
 
   create_table "merchant_profiles", force: :cascade do |t|
     t.integer "account_id", null: false
+    t.string "business_category"
+    t.string "company_size"
+    t.text "contact_information"
+    t.text "controlled_goods_notes"
     t.datetime "created_at", null: false
     t.integer "default_fulfillment_days", default: 3, null: false
     t.string "default_inventory_policy", default: "track_stock", null: false
     t.string "default_listing_status", default: "draft", null: false
     t.text "description"
     t.string "display_name", null: false
+    t.string "location"
+    t.text "permits_and_licenses"
     t.string "slug"
     t.string "status", default: "draft", null: false
     t.integer "supplier_id"

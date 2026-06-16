@@ -1,38 +1,60 @@
 <% content_for :page_title, "Checkout Review" %>
 
-<div class="table-container">
-  <div class="table-header">
-    <h3 class="table-title">Checkout Review</h3>
-    <%= link_to "Back to Cart", cart_path, class: "btn btn-secondary" %>
-  </div>
-  <table>
-    <thead>
-      <tr>
-        <th>Product</th>
-        <th>Quantity</th>
-        <th>Total</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% @cart.cart_items.includes(:product).each do |item| %>
-        <tr>
-          <td><%= item.product.name %></td>
-          <td><%= item.quantity %></td>
-          <td><%= currency(item.total_amount) %></td>
-        </tr>
-      <% end %>
-    </tbody>
-    <tfoot>
-      <tr>
-        <td colspan="2"><strong>Total</strong></td>
-        <td><strong><%= currency(@cart.total_amount) %></strong></td>
-      </tr>
-    </tfoot>
-  </table>
-  <div style="padding: 1.5rem; text-align: right;">
-    <%= button_to "Create Draft Order", checkout_path, method: :post, class: "btn btn-primary" %>
-    <% if params[:order_id].present? %>
-      <%= button_to "Start Manual Payment", payments_path(order_id: params[:order_id]), method: :post, class: "btn btn-secondary", style: "margin-top: 0.75rem;" %>
+<% checkout_items = @cart.cart_items.includes(product: :marketplace_listing) %>
+<% checkout_total = checkout_items.sum do |item|
+     listing = item.product.marketplace_listing
+     unit_price = listing&.current_price || item.product.selling_price.to_d
+     unit_price.to_d * item.quantity
+   end %>
+
+<section class="cart-layout page-section">
+  <div>
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">Checkout Review</h2>
+        <p class="section-subtitle">Confirm your marketplace items before creating an order.</p>
+      </div>
+      <%= link_to "Back to Cart", cart_path, class: "btn btn-secondary" %>
+    </div>
+
+    <% if checkout_items.any? %>
+      <div class="card-grid" style="grid-template-columns: 1fr;">
+        <% checkout_items.each do |item| %>
+          <% listing = item.product.marketplace_listing %>
+          <% title = listing&.title.presence || item.product.name %>
+          <% unit_price = listing&.current_price || item.product.selling_price.to_d %>
+          <article class="ui-card order-card">
+            <div class="card-body">
+              <h3 class="card-title"><%= title %></h3>
+              <div class="order-card-meta">
+                <span><%= pluralize(item.quantity, "unit") %></span>
+                <span><%= currency(unit_price) %> each</span>
+                <strong><%= currency(unit_price.to_d * item.quantity) %></strong>
+              </div>
+            </div>
+          </article>
+        <% end %>
+      </div>
+    <% else %>
+      <%= render "shared/empty_state", title: "Your cart is empty.", action: "Browse Catalog", path: catalog_path %>
     <% end %>
   </div>
-</div>
+
+  <aside class="summary-card">
+    <h3 class="section-title">Summary</h3>
+    <div class="summary-row">
+      <span>Items</span>
+      <strong><%= checkout_items.sum(&:quantity) %></strong>
+    </div>
+    <div class="summary-row">
+      <span>Total</span>
+      <strong><%= currency(checkout_total) %></strong>
+    </div>
+    <div style="margin-top: 1rem; display: grid; gap: 0.75rem;">
+      <%= button_to "Create Draft Order", checkout_path, method: :post, class: "btn btn-primary" %>
+      <% if params[:order_id].present? %>
+        <%= button_to "Start Manual Payment", payments_path(order_id: params[:order_id]), method: :post, class: "btn btn-secondary" %>
+      <% end %>
+    </div>
+  </aside>
+</section>

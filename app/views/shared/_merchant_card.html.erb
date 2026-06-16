@@ -1,0 +1,22 @@
+<article class="ui-card merchant-card">
+  <% if merchant.banner.attached? %>
+    <%= image_tag merchant.banner, class: "merchant-banner", alt: "#{merchant.name} banner" %>
+  <% elsif merchant.shop_image_url.present? %>
+    <img class="merchant-banner" src="<%= merchant.shop_image_url %>" alt="<%= merchant.name %> storefront">
+  <% else %>
+    <div class="merchant-banner placeholder-media" role="img" aria-label="<%= merchant.name %> storefront placeholder">
+      <span><%= merchant.name.to_s.first&.upcase || "M" %></span>
+    </div>
+  <% end %>
+
+  <div class="card-body">
+    <h3 class="card-title"><%= link_to merchant.name, merchant_storefront_path(merchant) %></h3>
+    <p class="card-meta"><%= truncate(merchant.shop_description.presence || "Merchant storefront", length: 120) %></p>
+    <div class="rating-row">
+      <span><%= number_with_precision(merchant.average_rating, precision: 1) %> / 5</span>
+    </div>
+  </div>
+  <div class="card-actions">
+    <%= link_to "Visit Storefront", merchant_storefront_path(merchant), class: "btn btn-secondary" %>
+  </div>
+</article>

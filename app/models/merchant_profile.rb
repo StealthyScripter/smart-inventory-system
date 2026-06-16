@@ -12,6 +12,7 @@ class MerchantProfile < ApplicationRecord
   validates :status, inclusion: { in: STATUSES }
   validates :slug, uniqueness: true, allow_blank: true
   validates :slug, format: { with: /\A[a-z0-9-]+\z/ }, allow_blank: true
+  validates :company_size, :business_category, length: { maximum: 120 }, allow_blank: true
   validate :account_must_be_merchant
 
   before_validation :normalize_slug
