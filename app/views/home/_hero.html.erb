@@ -19,18 +19,31 @@
   </div>
 
   <div class="marketplace-home-hero__visual">
-    <% if @featured_product.present? %>
-      <%= render "home/product_card", product: @featured_product, variant: :feature %>
-    <% end %>
+    <article class="ui-card marketplace-home-promo">
+      <div class="marketplace-home-promo__media">
+        <% if @featured_product&.featured_image&.attached? %>
+          <%= image_tag @featured_product.featured_image, alt: @featured_product.name %>
+        <% elsif @featured_merchant&.banner&.attached? %>
+          <%= image_tag @featured_merchant.banner, alt: "#{@featured_merchant.name} banner" %>
+        <% elsif @featured_service.present? && safe_media_url?(@featured_service.image_url) %>
+          <img src="<%= @featured_service.image_url %>" alt="<%= @featured_service.name %>">
+        <% else %>
+          <div class="marketplace-home-promo__fallback">
+            <%= nav_icon(:catalog) %>
+          </div>
+        <% end %>
+      </div>
 
-    <div class="marketplace-home-hero__stack">
-      <% if @featured_service.present? %>
-        <%= render "home/service_card", service: @featured_service, variant: :compact %>
-      <% end %>
-
-      <% if @featured_merchant.present? %>
-        <%= render "home/merchant_card", merchant: @featured_merchant, variant: :compact %>
-      <% end %>
-    </div>
+      <div class="marketplace-home-promo__body">
+        <div class="marketplace-home-promo__eyebrow">Featured marketplace</div>
+        <h2 class="marketplace-home-promo__title">Find trusted products, services, and suppliers in one place.</h2>
+        <p class="marketplace-home-promo__copy">Browse public listings with clear pricing and cleaner navigation.</p>
+        <div class="marketplace-home-promo__stats" aria-label="Marketplace highlights">
+          <span class="marketplace-home-chip">Top goods</span>
+          <span class="marketplace-home-chip">Fast services</span>
+          <span class="marketplace-home-chip">Trusted merchants</span>
+        </div>
+      </div>
+    </article>
   </div>
 </section>

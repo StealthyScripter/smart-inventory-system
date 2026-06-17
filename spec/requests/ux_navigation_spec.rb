@@ -78,6 +78,7 @@ RSpec.describe "UX navigation", type: :request do
     expect(response.body).to include("marketplace-home-header")
     expect(response.body).to include("marketplace-home-account")
     expect(response.body).to include("marketplace-home-hero")
+    expect(response.body).to include("marketplace-home-search__submit")
     expect(response.body).to include("marketplace-menu__link")
     expect(response.body).to include("Build smarter. Shop faster.")
     expect(response.body).not_to include("Marketplace / Catalog")

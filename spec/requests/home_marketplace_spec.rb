@@ -67,18 +67,21 @@ RSpec.describe "Home marketplace", type: :request do
     expect(response).to have_http_status(:success)
     expect(response.body).to include("Build smarter. Shop faster.")
     expect(response.body).to include("Search products, services, merchants")
-    expect(response.body).to include("Sign in / Account")
+    expect(response.body).to include("Sign in")
+    expect(response.body).to include("Account")
     expect(response.body).to include("Cart")
   end
 
   it "is accessible to authenticated customers" do
-    customer = create_authenticated_user(role: "customer", email: "home.customer@example.com")
+    customer = create_authenticated_user(role: "customer", first_name: "Chris", last_name: "Customer", email: "home.customer@example.com")
     login_as(customer)
 
     get root_path
 
     expect(response).to have_http_status(:success)
-    expect(response.body).to include(customer.full_name)
+    expect(response.body).to include("Hi, Chris")
+    expect(response.body).to include("Account")
+    expect(response.body).not_to include("Customer Account")
     expect(response.body).to include(customer_profile_path)
   end
 
@@ -88,12 +91,14 @@ RSpec.describe "Home marketplace", type: :request do
     expect(response.body).to include("marketplace-home-header")
     expect(response.body).to include("marketplace-home-search")
     expect(response.body).to include("marketplace-home-hero")
+    expect(response.body).to include("marketplace-home-promo")
     expect(response.body).to include("marketplace-rail")
     expect(response.body).to include("marketplace-menu__link")
     expect(response.body).to include("Departments")
     expect(response.body).to include("Services")
     expect(response.body).to include("Deals")
     expect(response.body).to include("Merchants")
+    expect(response.body).to include("Search")
   end
 
   it "renders the marketplace sections" do

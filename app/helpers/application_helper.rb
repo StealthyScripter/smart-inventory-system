@@ -28,30 +28,30 @@ module ApplicationHelper
     if logged_in?
       if current_customer_account.present? || current_user&.customer?
         {
-          label: current_customer_account&.name.presence || current_user.full_name,
-          subtitle: "Customer account",
+          label: "Hi, #{current_user.first_name}",
+          subtitle: "Account",
           path: customer_profile_path,
           aria_label: "Customer account"
         }
       elsif current_merchant_account.present? || current_user&.supplier_user?
         {
-          label: current_merchant_account&.name.presence || current_user.full_name,
-          subtitle: "Merchant account",
+          label: "Merchant",
+          subtitle: "Account",
           path: merchant_profile_path,
           aria_label: "Merchant account"
         }
       else
         {
-          label: "Account",
-          subtitle: "Profile",
+          label: "Sign in",
+          subtitle: "Account",
           path: login_path,
           aria_label: "Account"
         }
       end
     else
       {
-        label: "Sign in / Account",
-        subtitle: "Guest",
+        label: "Sign in",
+        subtitle: "Account",
         path: login_path,
         aria_label: "Sign in / Account"
       }
