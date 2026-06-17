@@ -21,14 +21,16 @@ RSpec.describe "Dashboard", type: :request do
   end
 
   describe "GET /" do
-    it "returns http success for the public catalog root" do
+    it "returns http success for the public marketplace home" do
       get root_path
       expect(response).to have_http_status(:success)
     end
 
-    it "renders catalog content" do
+    it "renders marketplace landing content" do
       get root_path
-      expect(response.body).to include("Marketplace / Catalog")
+      expect(response.body).to include("Goods")
+      expect(response.body).to include("Services")
+      expect(response.body).to include("Merchants")
     end
   end
 
@@ -37,7 +39,7 @@ RSpec.describe "Dashboard", type: :request do
       delete logout_path
     end
 
-    it "keeps the public catalog available" do
+    it "keeps the public marketplace available" do
       get root_path
       expect(response).to have_http_status(:success)
     end

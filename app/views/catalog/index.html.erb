@@ -1,7 +1,4 @@
 <% content_for :page_title, "Catalog" %>
-<% content_for :breadcrumbs do %>
-  Marketplace / Catalog
-<% end %>
 
 <div class="table-container">
   <div class="table-header">
@@ -10,10 +7,6 @@
 
   <div class="filter-bar">
     <%= form_with url: catalog_path, method: :get, local: true, class: "filter-grid" do |form| %>
-      <div class="form-group" style="margin-bottom: 0;">
-        <%= form.label :q, "Search", class: "form-label" %>
-        <%= form.text_field :q, value: params[:q], class: "form-input" %>
-      </div>
       <div class="form-group" style="margin-bottom: 0;">
         <%= form.label :category_id, "Category", class: "form-label" %>
         <%= form.select :category_id, options_from_collection_for_select(@categories, :id, :name, params[:category_id]),
@@ -37,34 +30,7 @@
   <% if @product_listings.any? %>
     <div class="market-grid">
       <% @product_listings.each do |listing| %>
-        <% product = listing.product %>
-        <article class="ui-card media-card">
-          <div class="card-media">
-            <% if product.featured_image.attached? %>
-              <%= image_tag product.featured_image, alt: product.name %>
-            <% else %>
-              <span><%= ui_initial(listing.title) %></span>
-            <% end %>
-          </div>
-          <div class="card-body">
-            <h3 class="card-title clamp-2"><%= link_to listing.title, catalog_product_path(product) %></h3>
-            <div class="price"><%= currency(listing.current_price.to_f) %></div>
-            <div class="card-meta">
-              <span class="meta-item">🏷 <%= product.category.name %></span>
-              <span class="meta-item">★ <%= number_with_precision(product.average_rating, precision: 1) %></span>
-              <span class="badge <%= status_badge_class(listing.availability) %>"><%= listing.availability.titleize %></span>
-            </div>
-            <div class="card-meta">
-              <span class="meta-item">🏬
-                <% if product.supplier %>
-                  <%= link_to product.supplier.name, merchant_storefront_path(product.supplier) %>
-                <% else %>
-                  Marketplace
-                <% end %>
-              </span>
-            </div>
-          </div>
-        </article>
+        <%= render "home/product_card", product: listing.product, variant: :standard %>
       <% end %>
     </div>
   <% else %>

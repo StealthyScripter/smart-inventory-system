@@ -1,0 +1,9 @@
+<nav class="account-bottom-nav" aria-label="Account navigation">
+  <% account_navigation_items.each do |item| %>
+    <% active = current_page?(item[:path]) %>
+    <%= link_to item[:path], class: ["account-bottom-nav__link", ("is-active" if active)].compact.join(" "), aria: { current: (active ? "page" : nil) } do %>
+      <%= nav_icon(item[:icon]) %>
+      <span class="account-bottom-nav__label"><%= item[:label] %></span>
+    <% end %>
+  <% end %>
+</nav>

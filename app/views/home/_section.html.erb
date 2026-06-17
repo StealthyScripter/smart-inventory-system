@@ -1,0 +1,96 @@
+<% kind = section.fetch(:kind) %>
+<% variant = section.fetch(:variant, :standard) %>
+
+<section class="marketplace-section marketplace-section--<%= variant %>">
+  <div class="marketplace-section__header">
+    <div>
+      <div class="marketplace-section__eyebrow"><%= section[:eyebrow].presence || "Marketplace" %></div>
+      <h2 class="marketplace-section__title"><%= section[:title] %></h2>
+      <% if section[:subtitle].present? %>
+        <p class="marketplace-section__subtitle"><%= section[:subtitle] %></p>
+      <% end %>
+    </div>
+
+    <% if section[:cta_label].present? && section[:cta_path].present? %>
+      <%= link_to section[:cta_label], section[:cta_path], class: "btn btn-secondary" %>
+    <% end %>
+  </div>
+
+  <% case kind %>
+  <% when :trade %>
+    <div class="marketplace-trade-grid">
+      <div class="marketplace-trade-group">
+        <div class="marketplace-section__eyebrow">Products</div>
+        <% if section[:products].any? %>
+          <div class="market-grid marketplace-grid--compact">
+            <% section[:products].each do |product| %>
+              <%= render "home/product_card", product: product, variant: :compact %>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="empty-state"><span class="empty-icon">📦</span><span>No matching goods yet.</span></div>
+        <% end %>
+      </div>
+
+      <div class="marketplace-trade-group">
+        <div class="marketplace-section__eyebrow">Services</div>
+        <% if section[:services].any? %>
+          <div class="market-grid marketplace-grid--compact">
+            <% section[:services].each do |service| %>
+              <%= render "home/service_card", service: service, variant: :compact %>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="empty-state"><span class="empty-icon">🛠</span><span>No matching services yet.</span></div>
+        <% end %>
+      </div>
+    </div>
+  <% when :mixed %>
+    <% if section[:items].any? %>
+      <div class="marketplace-mixed-grid">
+        <% section[:items].each do |item| %>
+          <% case item[:kind] %>
+          <% when :product %>
+            <%= render "home/product_card", product: item[:record], variant: :compact %>
+          <% when :service %>
+            <%= render "home/service_card", service: item[:record], variant: :compact %>
+          <% when :merchant %>
+            <%= render "home/merchant_card", merchant: item[:record], variant: :compact %>
+          <% end %>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="empty-state"><span class="empty-icon">⌕</span><span>No public listings available.</span></div>
+    <% end %>
+  <% when :merchants %>
+    <% if section[:items].any? %>
+      <div class="<%= variant == :rail ? "marketplace-rail" : "market-grid marketplace-grid--merchant" %>">
+        <% section[:items].each do |merchant| %>
+          <%= render "home/merchant_card", merchant: merchant, variant: (variant == :rail ? :compact : :standard) %>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="empty-state"><span class="empty-icon">🏬</span><span>No public merchants available.</span></div>
+    <% end %>
+  <% when :services %>
+    <% if section[:items].any? %>
+      <div class="<%= variant == :rail ? "marketplace-rail" : "market-grid marketplace-grid--service" %>">
+        <% section[:items].each do |service| %>
+          <%= render "home/service_card", service: service, variant: (variant == :rail ? :compact : :standard) %>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="empty-state"><span class="empty-icon">🛠</span><span>No public services available.</span></div>
+    <% end %>
+  <% else %>
+    <% if section[:items].any? %>
+      <div class="<%= variant == :rail ? "marketplace-rail" : "market-grid marketplace-grid--product" %>">
+        <% section[:items].each do |product| %>
+          <%= render "home/product_card", product: product, variant: (variant == :rail ? :compact : variant) %>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="empty-state"><span class="empty-icon">📦</span><span>No public goods available.</span></div>
+    <% end %>
+  <% end %>
+</section>

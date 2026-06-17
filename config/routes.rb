@@ -91,7 +91,8 @@ Rails.application.routes.draw do
   end
 
   get "dashboard", to: "dashboard#index"
-  root "catalog#index"
+  get "home", to: "home#index"
+  root "home#index"
 
   get "inventory", to: "inventory#index"
   post "inventory/adjust", to: "inventory#adjust_stock"

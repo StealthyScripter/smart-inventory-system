@@ -1,0 +1,16 @@
+<nav class="ui-card marketplace-menu" aria-label="Marketplace categories">
+  <div class="marketplace-menu__track">
+    <%= link_to "Departments", catalog_path, class: "marketplace-menu__link" %>
+    <%= link_to "Services", services_path, class: "marketplace-menu__link" %>
+    <%= link_to "Deals", search_path(sort: "price_asc"), class: "marketplace-menu__link" %>
+    <%= link_to "New & Trending", search_path(sort: "newest"), class: "marketplace-menu__link" %>
+    <%= link_to "Building Materials", catalog_path(q: "Building Materials"), class: "marketplace-menu__link" %>
+    <%= link_to "Electrical", services_path(category: "Electrical"), class: "marketplace-menu__link" %>
+    <%= link_to "Plumbing", services_path(category: "Plumbing"), class: "marketplace-menu__link" %>
+    <%= link_to "Paint", catalog_path(q: "Paint"), class: "marketplace-menu__link" %>
+    <%= link_to "Interior Design", services_path(category: "Interior design"), class: "marketplace-menu__link" %>
+    <%= link_to "AC Services", services_path(category: "AC services"), class: "marketplace-menu__link" %>
+    <%= link_to "Hardware", catalog_path(q: "Hardware"), class: "marketplace-menu__link" %>
+    <%= link_to "Merchants", search_path, class: "marketplace-menu__link" %>
+  </div>
+</nav>

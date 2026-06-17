@@ -1,0 +1,42 @@
+<% variant = local_assigns.fetch(:variant, :standard) %>
+
+<article class="ui-card media-card marketplace-card marketplace-card--service marketplace-card--<%= variant %>">
+  <div class="card-media marketplace-card__media">
+    <% if safe_media_url?(service.image_url) %>
+      <img src="<%= service.image_url %>" alt="<%= service.name %>">
+    <% else %>
+      <div class="marketplace-card__fallback marketplace-card__fallback--service">
+        <%= nav_icon(:services) %>
+        <span>Service</span>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="card-body">
+    <div class="card-meta">
+      <span class="badge <%= status_badge_class(service.status) %>"><%= service.status.titleize %></span>
+      <span class="badge badge-secondary"><%= service.service_category %></span>
+      <span>★ <%= number_with_precision(service.average_rating, precision: 1) %></span>
+    </div>
+
+    <h3 class="card-title clamp-2"><%= link_to service.name, service_path(service) %></h3>
+
+    <div class="price">
+      <% if service.starting_price.present? %>
+        From <%= currency(service.starting_price.to_f) %>
+      <% else %>
+        Quote required
+      <% end %>
+    </div>
+
+    <div class="card-meta">
+      <span class="meta-item">🏬 <%= link_to service.supplier.name, merchant_storefront_path(service.supplier) %></span>
+    </div>
+
+    <% unless variant == :compact %>
+      <div class="card-actions">
+        <%= link_to "Book", service_path(service), class: "btn btn-primary" %>
+      </div>
+    <% end %>
+  </div>
+</article>

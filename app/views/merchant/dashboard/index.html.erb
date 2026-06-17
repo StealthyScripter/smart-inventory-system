@@ -1,7 +1,4 @@
 <% content_for :page_title, "Merchant Dashboard" %>
-<% content_for :breadcrumbs do %>
-  Merchant / Dashboard
-<% end %>
 
 <div class="action-row" style="margin-bottom: 1rem;">
   <span class="badge badge-info"><%= merchant_suppliers.map(&:name).to_sentence %></span>

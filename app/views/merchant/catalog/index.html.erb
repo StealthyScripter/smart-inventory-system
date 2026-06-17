@@ -1,7 +1,16 @@
 <% content_for :page_title, "Merchant Catalog" %>
-<% content_for :breadcrumbs do %>
-  Merchant / Catalog
-<% end %>
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-header"><span class="stat-title">Products</span></div>
+    <div class="stat-value"><%= number_with_delimiter(@product_count || @products.size) %></div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-header"><span class="stat-title">Services</span></div>
+    <div class="stat-value"><%= number_with_delimiter(@service_count || @services.size) %></div>
+  </div>
+</div>
 
 <section class="page-section">
   <div class="section-header">

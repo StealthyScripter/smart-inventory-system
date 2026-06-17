@@ -1,36 +1,83 @@
 <% content_for :page_title, "Profile" %>
-<% content_for :breadcrumbs do %>
-  Customer / Profile
-<% end %>
 
-<section class="page-section">
-  <div class="section-header">
-    <div>
-      <h2 class="section-title"><%= current_user.full_name %></h2>
-      <p class="section-subtitle"><%= current_user.email %></p>
+<section class="ui-card profile-hero profile-hero--customer">
+  <div class="profile-hero-copy">
+    <span class="badge badge-info">Customer</span>
+    <h1 class="profile-name"><%= current_user.full_name %></h1>
+    <p class="profile-subtitle"><%= @customer_account&.name || "Buyer account" %></p>
+    <div class="profile-meta">
+      <span class="profile-meta-item">Orders <strong><%= @orders_count %></strong></span>
+      <span class="profile-meta-item">Bookings <strong><%= @bookings_count %></strong></span>
+      <span class="profile-meta-item">Inbox <strong><%= @conversations.size %></strong></span>
+      <span class="profile-meta-item">Notifications <strong><%= @unread_notifications_count %></strong></span>
     </div>
   </div>
 
-  <div class="profile-action-grid primary">
-    <%= link_to customer_orders_path, class: "profile-action-card prominent" do %>
-      <span class="card-kicker">Orders</span>
-      <strong>Orders</strong>
-      <span><%= pluralize(@orders_count, "order") %></span>
-    <% end %>
-
-    <%= link_to customer_service_bookings_path, class: "profile-action-card prominent" do %>
-      <span class="card-kicker">Bookings</span>
-      <strong>Bookings</strong>
-      <span><%= pluralize(@bookings_count, "booking") %></span>
-    <% end %>
-  </div>
-
-  <div class="profile-action-grid">
-    <%= link_to "Edit profile", signup_path, class: "profile-action-card" %>
-    <%= link_to "Manage lists", catalog_path, class: "profile-action-card" %>
-    <%= link_to "Previous orders", customer_orders_path, class: "profile-action-card" %>
-    <%= link_to "Inbox", customer_conversations_path, class: "profile-action-card" %>
-    <%= link_to "Notifications (#{@unread_notifications_count})", notifications_path, class: "profile-action-card" %>
-    <%= button_to "Sign out", logout_path, method: :delete, class: "profile-action-card button-card" %>
+  <div class="profile-hero-actions">
+    <%= link_to "Edit profile", customer_profile_path, class: "btn btn-secondary" %>
+    <%= link_to "Manage lists", catalog_path, class: "btn btn-secondary" %>
+    <%= button_to "Sign out", logout_path, method: :delete, form: { data: { turbo_confirm: "Are you sure you want to sign out?" } }, class: "btn btn-danger" %>
   </div>
 </section>
+
+<div class="profile-grid profile-grid--primary">
+  <%= link_to customer_orders_path, class: "ui-card profile-feature-card profile-feature-card--accent" do %>
+    <span class="profile-card-kicker">Primary</span>
+    <div class="profile-card-head">
+      <%= nav_icon(:orders) %>
+      <h2 class="card-title">Orders</h2>
+    </div>
+    <p class="profile-card-copy">Track recent purchases and receipts.</p>
+    <div class="profile-card-footer">
+      <span class="badge badge-info"><%= pluralize(@orders_count, "order") %></span>
+      <span class="profile-card-action">Open</span>
+    </div>
+  <% end %>
+
+  <%= link_to customer_service_bookings_path, class: "ui-card profile-feature-card profile-feature-card--accent" do %>
+    <span class="profile-card-kicker">Primary</span>
+    <div class="profile-card-head">
+      <%= nav_icon(:bookings) %>
+      <h2 class="card-title">Bookings</h2>
+    </div>
+    <p class="profile-card-copy">Manage service visits and cancellations.</p>
+    <div class="profile-card-footer">
+      <span class="badge badge-info"><%= pluralize(@bookings_count, "booking") %></span>
+      <span class="profile-card-action">Open</span>
+    </div>
+  <% end %>
+</div>
+
+<div class="profile-grid">
+  <%= link_to customer_orders_path, class: "ui-card profile-link-card" do %>
+    <div class="profile-card-head">
+      <%= nav_icon(:orders) %>
+      <h3 class="card-title">Previous orders</h3>
+    </div>
+    <p class="profile-card-copy">Review past purchases and invoices.</p>
+  <% end %>
+
+  <%= link_to customer_conversations_path, class: "ui-card profile-link-card" do %>
+    <div class="profile-card-head">
+      <%= nav_icon(:inbox) %>
+      <h3 class="card-title">Inbox</h3>
+    </div>
+    <p class="profile-card-copy">Messages from merchants and support.</p>
+  <% end %>
+
+  <%= link_to notifications_path, class: "ui-card profile-link-card" do %>
+    <div class="profile-card-head">
+      <%= nav_icon(:notifications) %>
+      <h3 class="card-title">Notifications</h3>
+    </div>
+    <p class="profile-card-copy">Unread alerts and account updates.</p>
+  <% end %>
+
+  <div class="ui-card profile-link-card profile-link-card--static">
+    <div class="profile-card-head">
+      <%= nav_icon(:profile) %>
+      <h3 class="card-title">Edit profile</h3>
+    </div>
+    <p class="profile-card-copy">Account details are surfaced here while profile editing remains streamlined.</p>
+  </div>
+</div>

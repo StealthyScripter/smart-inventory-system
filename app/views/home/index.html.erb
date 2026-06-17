@@ -1,0 +1,14 @@
+<% content_for :title, "Marketplace" %>
+<% content_for :page_title, "Marketplace" %>
+<% content_for :body_class, "#{marketplace_home_theme_class} marketplace-home" %>
+<% content_for :hide_account_topbar, true %>
+
+<div class="marketplace-home-shell">
+  <%= render "home/header" %>
+  <%= render "home/menu_strip" %>
+  <%= render "home/hero" %>
+
+  <% @marketplace_sections.each do |section| %>
+    <%= render "home/section", section: section %>
+  <% end %>
+</div>

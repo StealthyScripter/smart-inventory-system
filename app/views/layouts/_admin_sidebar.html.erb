@@ -1,0 +1,16 @@
+<aside class="sidebar sidebar--admin">
+  <div class="logo">
+    <h1>Smart Inventory</h1>
+    <p class="sidebar-subtitle">Operations</p>
+  </div>
+
+  <nav class="sidebar-nav" aria-label="Administration navigation">
+    <% admin_navigation_items.each do |item| %>
+      <% active = current_page?(item[:path]) %>
+      <%= link_to item[:path], class: ["sidebar-link", ("is-active" if active)].compact.join(" "), aria: { current: (active ? "page" : nil) } do %>
+        <%= nav_icon(item[:icon]) %>
+        <span><%= item[:label] %></span>
+      <% end %>
+    <% end %>
+  </nav>
+</aside>
