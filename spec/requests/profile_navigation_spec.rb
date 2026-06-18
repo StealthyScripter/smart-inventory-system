@@ -29,8 +29,13 @@ RSpec.describe "Profile navigation", type: :request do
     expect(response).to redirect_to(login_path)
   end
 
-  it "shows customer profile actions and hides old header clutter" do
-    customer = create_authenticated_user(role: "customer", email: "customer.profile@example.com")
+  it "renders the customer profile commerce layout in the required order" do
+    customer = create_authenticated_user(
+      role: "customer",
+      first_name: "Casey",
+      last_name: "Customer",
+      email: "customer.profile@example.com"
+    )
     Notification.create!(user: customer, event_type: "test", title: "Unread")
     login_as(customer)
 
@@ -38,12 +43,23 @@ RSpec.describe "Profile navigation", type: :request do
 
     expect(response).to have_http_status(:success)
     expect(response.body).to include("theme-customer")
-    expect(response.body).to include("Orders")
-    expect(response.body).to include("Bookings")
-    expect(response.body).to include("Edit profile")
-    expect(response.body).to include("Manage lists")
-    expect(response.body).to include("Sign out")
+    profile = doc.at_css(".customer-profile")
+    expect(profile.at_css(".customer-profile__name").text.strip).to eq(customer.full_name)
+    expect(profile.css(".badge")).to be_empty
+    expect(profile.text).not_to include("#{customer.full_name} Account")
+    expect(profile.at_css(".customer-profile__avatar").text.strip).to eq("CC")
     expect(response.body).to include("placeholder=\"Search marketplace\"")
+
+    primary_actions = profile.css(".customer-profile__primary-action")
+    expect(primary_actions.map { |action| action.at_css("span").text.strip }).to eq(["Orders", "Bookings"])
+    expect(primary_actions.map { |action| action["href"] }).to eq(
+      [customer_orders_path, customer_service_bookings_path]
+    )
+
+    list_labels = profile.css(".customer-profile__list .customer-profile__row-label").map { |label| label.text.strip }
+    expect(list_labels).to eq(
+      ["Edit profile", "My lists", "Inbox", "Notifications", "Settings", "Help", "Contact us", "Sign out"]
+    )
 
     topbar_text = doc.at_css(".topbar").text
     expect(topbar_text).not_to include(customer.full_name)
@@ -52,14 +68,20 @@ RSpec.describe "Profile navigation", type: :request do
     expect(topbar_text).not_to include("Logout")
     expect(topbar_text).to include("Cart")
 
-    primary_cards = doc.css(".profile-grid--primary .profile-feature-card")
-    expect(primary_cards.size).to eq(2)
-    expect(primary_cards.map(&:text).join(" ")).to include("Orders", "Bookings")
-
     bottom_nav = doc.at_css(".account-bottom-nav")
     expect(bottom_nav.text).to include("Home", "Shop", "Services", "Cart", "Profile")
     expect(bottom_nav.text).not_to include("Search")
     expect(bottom_nav.css(".account-bottom-nav__label").any?).to be(true)
+  end
+
+  it "blocks merchants from the customer profile" do
+    merchant = create_authenticated_user(role: "supplier", email: "merchant.customer.profile@example.com")
+    SupplierUser.create!(supplier: supplier, user: merchant)
+    login_as(merchant)
+
+    get customer_profile_path
+
+    expect(response).to have_http_status(:forbidden)
   end
 
   it "allows individual merchants into the merchant profile and hides enterprise-only controls" do

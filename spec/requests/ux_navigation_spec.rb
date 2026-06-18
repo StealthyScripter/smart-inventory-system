@@ -57,9 +57,12 @@ RSpec.describe "UX navigation", type: :request do
     expect(response.body).to include("Orders")
     expect(response.body).to include("Bookings")
     expect(response.body).to include("Edit profile")
-    expect(response.body).to include("Manage lists")
+    expect(response.body).to include("My lists")
     expect(response.body).to include("Inbox")
     expect(response.body).to include("Notifications")
+    expect(response.body).to include("Settings")
+    expect(response.body).to include("Help")
+    expect(response.body).to include("Contact us")
     expect(response.body).to include("Sign out")
     expect(body_doc.at_css(".account-bottom-nav").text).to include("Profile")
   end

@@ -1,75 +1,78 @@
 <% content_for :page_title, "Profile" %>
 
-<section class="ui-card profile-hero profile-hero--customer">
-  <div class="profile-hero-copy">
-    <span class="badge badge-info">Customer</span>
-    <h1 class="profile-name"><%= current_user.full_name %></h1>
-    <p class="profile-subtitle"><%= @customer_account&.name || "Buyer account" %></p>
-    <div class="profile-meta">
-      <span class="profile-meta-item">Orders <strong><%= @orders_count %></strong></span>
-      <span class="profile-meta-item">Bookings <strong><%= @bookings_count %></strong></span>
-      <span class="profile-meta-item">Inbox <strong><%= @conversations.size %></strong></span>
-      <span class="profile-meta-item">Notifications <strong><%= @unread_notifications_count %></strong></span>
+<section class="customer-profile" aria-labelledby="customer-profile-name">
+  <header class="customer-profile__header">
+    <div class="customer-profile__avatar" role="img" aria-label="<%= current_user.full_name %> avatar">
+      <span><%= current_user.first_name.to_s.first %><%= current_user.last_name.to_s.first %></span>
     </div>
-  </div>
+    <h1 id="customer-profile-name" class="customer-profile__name"><%= current_user.full_name %></h1>
+  </header>
 
-  <div class="profile-hero-actions">
-    <%= link_to "Edit profile", customer_profile_path, class: "btn btn-secondary" %>
-    <%= link_to "Lists", catalog_path, class: "btn btn-secondary", aria: { label: "Manage lists" } %>
-    <%= button_to "Sign out", logout_path, method: :delete, form: { data: { turbo_confirm: "Are you sure you want to sign out?" } }, class: "btn btn-danger" %>
+  <nav class="customer-profile__primary-actions" aria-label="Orders and bookings">
+    <%= link_to customer_orders_path, class: "customer-profile__primary-action" do %>
+      <%= nav_icon(:orders) %>
+      <span>Orders</span>
+      <strong><%= @orders_count %></strong>
+    <% end %>
+
+    <%= link_to customer_service_bookings_path, class: "customer-profile__primary-action" do %>
+      <%= nav_icon(:bookings) %>
+      <span>Bookings</span>
+      <strong><%= @bookings_count %></strong>
+    <% end %>
+  </nav>
+
+  <div class="customer-profile__list" role="list" aria-label="Profile options">
+    <%= link_to customer_profile_path, class: "customer-profile__row", role: "listitem" do %>
+      <span class="customer-profile__row-icon"><%= nav_icon(:profile) %></span>
+      <span class="customer-profile__row-label">Edit profile</span>
+      <span class="customer-profile__chevron" aria-hidden="true">›</span>
+    <% end %>
+
+    <%= link_to catalog_path, class: "customer-profile__row", role: "listitem" do %>
+      <span class="customer-profile__row-icon"><%= nav_icon(:catalog) %></span>
+      <span class="customer-profile__row-label">My lists</span>
+      <span class="customer-profile__chevron" aria-hidden="true">›</span>
+    <% end %>
+
+    <%= link_to customer_conversations_path, class: "customer-profile__row", role: "listitem" do %>
+      <span class="customer-profile__row-icon"><%= nav_icon(:inbox) %></span>
+      <span class="customer-profile__row-label">Inbox</span>
+      <span class="customer-profile__row-meta"><%= @conversations.size %></span>
+      <span class="customer-profile__chevron" aria-hidden="true">›</span>
+    <% end %>
+
+    <%= link_to notifications_path, class: "customer-profile__row", role: "listitem" do %>
+      <span class="customer-profile__row-icon"><%= nav_icon(:notifications) %></span>
+      <span class="customer-profile__row-label">Notifications</span>
+      <span class="customer-profile__row-meta"><%= @unread_notifications_count %></span>
+      <span class="customer-profile__chevron" aria-hidden="true">›</span>
+    <% end %>
+
+    <%= link_to customer_profile_path, class: "customer-profile__row", role: "listitem" do %>
+      <span class="customer-profile__row-icon"><%= nav_icon(:settings) %></span>
+      <span class="customer-profile__row-label">Settings</span>
+      <span class="customer-profile__chevron" aria-hidden="true">›</span>
+    <% end %>
+
+    <div class="customer-profile__row is-disabled" role="listitem" aria-disabled="true">
+      <span class="customer-profile__row-icon"><%= nav_icon(:help) %></span>
+      <span class="customer-profile__row-label">Help</span>
+    </div>
+
+    <div class="customer-profile__row is-disabled" role="listitem" aria-disabled="true">
+      <span class="customer-profile__row-icon"><%= nav_icon(:contact) %></span>
+      <span class="customer-profile__row-label">Contact us</span>
+    </div>
+
+    <div class="customer-profile__signout" role="listitem">
+      <%= button_to logout_path,
+                    method: :delete,
+                    form: { data: { turbo_confirm: "Are you sure you want to sign out?" } },
+                    class: "customer-profile__row customer-profile__row--signout" do %>
+        <span class="customer-profile__row-icon"><%= nav_icon(:signout) %></span>
+        <span class="customer-profile__row-label">Sign out</span>
+      <% end %>
+    </div>
   </div>
 </section>
-
-<div class="profile-grid profile-grid--primary">
-  <%= link_to customer_orders_path, class: "ui-card profile-feature-card profile-feature-card--accent" do %>
-    <div class="profile-card-head">
-      <%= nav_icon(:orders) %>
-      <h2 class="card-title">Orders</h2>
-    </div>
-    <div class="profile-card-footer">
-      <span class="badge badge-info"><%= pluralize(@orders_count, "order") %></span>
-      <span class="profile-card-action" aria-hidden="true">→</span>
-    </div>
-  <% end %>
-
-  <%= link_to customer_service_bookings_path, class: "ui-card profile-feature-card profile-feature-card--accent" do %>
-    <div class="profile-card-head">
-      <%= nav_icon(:bookings) %>
-      <h2 class="card-title">Bookings</h2>
-    </div>
-    <div class="profile-card-footer">
-      <span class="badge badge-info"><%= pluralize(@bookings_count, "booking") %></span>
-      <span class="profile-card-action" aria-hidden="true">→</span>
-    </div>
-  <% end %>
-</div>
-
-<div class="profile-grid">
-  <%= link_to customer_conversations_path, class: "ui-card profile-link-card" do %>
-    <div class="profile-card-head">
-      <%= nav_icon(:inbox) %>
-      <h3 class="card-title">Inbox <span class="profile-count"><%= @conversations.size %></span></h3>
-    </div>
-  <% end %>
-
-  <%= link_to notifications_path, class: "ui-card profile-link-card" do %>
-    <div class="profile-card-head">
-      <%= nav_icon(:notifications) %>
-      <h3 class="card-title">Notifications <span class="profile-count"><%= @unread_notifications_count %></span></h3>
-    </div>
-  <% end %>
-
-  <%= link_to customer_profile_path, class: "ui-card profile-link-card" do %>
-    <div class="profile-card-head">
-      <%= nav_icon(:profile) %>
-      <h3 class="card-title">Edit profile</h3>
-    </div>
-  <% end %>
-
-  <%= link_to catalog_path, class: "ui-card profile-link-card" do %>
-    <div class="profile-card-head">
-      <%= nav_icon(:catalog) %>
-      <h3 class="card-title">Lists</h3>
-    </div>
-  <% end %>
-</div>
