@@ -1,25 +1,13 @@
-<section class="ui-card marketplace-home-hero">
-  <div class="marketplace-home-hero__copy">
-    <span class="badge badge-info">Marketplace</span>
-    <h1 class="marketplace-home-hero__title">Build smarter. Shop faster.</h1>
-    <p class="marketplace-home-hero__subtitle">Materials, services, and suppliers in one marketplace.</p>
+<section class="marketplace-home-hero">
 
-    <div class="marketplace-home-hero__actions">
-      <%= link_to "Shop goods", catalog_path, class: "btn btn-primary" %>
-      <%= link_to "Find services", services_path, class: "btn btn-secondary" %>
-      <%= link_to "Browse merchants", search_path, class: "btn btn-secondary" %>
-    </div>
-
-    <div class="marketplace-home-hero__chips" aria-label="Marketplace highlights">
-      <span class="marketplace-home-chip">Goods</span>
-      <span class="marketplace-home-chip">Services</span>
-      <span class="marketplace-home-chip">Merchants</span>
-      <span class="marketplace-home-chip">Projects</span>
-    </div>
-  </div>
 
   <div class="marketplace-home-hero__visual">
+
     <article class="ui-card marketplace-home-promo">
+      <div class="marketplace-home-hero__copy">
+        <span class="badge badge-info">Marketplace</span>
+      </div>
+
       <div class="marketplace-home-promo__media">
         <% if @featured_product&.featured_image&.attached? %>
           <%= image_tag @featured_product.featured_image, alt: @featured_product.name %>
@@ -35,9 +23,7 @@
       </div>
 
       <div class="marketplace-home-promo__body">
-        <div class="marketplace-home-promo__eyebrow">Featured marketplace</div>
         <h2 class="marketplace-home-promo__title">Find trusted products, services, and suppliers in one place.</h2>
-        <p class="marketplace-home-promo__copy">Browse public listings with clear pricing and cleaner navigation.</p>
         <div class="marketplace-home-promo__stats" aria-label="Marketplace highlights">
           <span class="marketplace-home-chip">Top goods</span>
           <span class="marketplace-home-chip">Fast services</span>

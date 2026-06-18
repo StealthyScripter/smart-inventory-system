@@ -16,28 +16,22 @@
 
   <div class="card-body">
     <div class="card-meta">
-      <span class="badge <%= status_badge_class(product.marketplace_status) %>"><%= product.marketplace_status.titleize %></span>
-      <span class="badge badge-secondary"><%= product.category.name %></span>
-      <span>★ <%= number_with_precision(product.average_rating, precision: 1) %></span>
+      <div class="price">
+        <% if sale_price.present? %>
+          <span class="price-sale"><%= currency(sale_price.to_f) %></span>
+          <span class="price-compare"><%= currency(listing.public_price.to_f) %></span>
+        <% else %>
+          <%= currency((listing&.current_price || product.selling_price).to_f) %>
+        <% end %>
+      </div>
+
+      <h3 class="card-title clamp-2"><%= link_to product.name, catalog_product_path(product) %></h3>
     </div>
-
-    <h3 class="card-title clamp-2"><%= link_to product.name, catalog_product_path(product) %></h3>
-
-    <div class="price">
-      <% if sale_price.present? %>
-        <span class="price-sale"><%= currency(sale_price.to_f) %></span>
-        <span class="price-compare"><%= currency(listing.public_price.to_f) %></span>
-      <% else %>
-        <%= currency((listing&.current_price || product.selling_price).to_f) %>
-      <% end %>
-    </div>
-
     <div class="card-meta">
       <% if listing.present? %>
         <span class="badge <%= status_badge_class(listing.availability) %>"><%= listing.availability.titleize %></span>
       <% end %>
       <span class="meta-item">🏬 <%= product.supplier ? link_to(product.supplier.name, merchant_storefront_path(product.supplier)) : "Marketplace" %></span>
-      <span class="meta-item">● Public</span>
     </div>
 
     <% unless variant == :compact %>

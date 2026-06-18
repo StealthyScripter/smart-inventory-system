@@ -4,15 +4,11 @@
 <section class="marketplace-section marketplace-section--<%= variant %>">
   <div class="marketplace-section__header">
     <div>
-      <div class="marketplace-section__eyebrow"><%= section[:eyebrow].presence || "Marketplace" %></div>
       <h2 class="marketplace-section__title"><%= section[:title] %></h2>
-      <% if section[:subtitle].present? %>
-        <p class="marketplace-section__subtitle"><%= section[:subtitle] %></p>
-      <% end %>
     </div>
 
     <% if section[:cta_label].present? && section[:cta_path].present? %>
-      <%= link_to section[:cta_label], section[:cta_path], class: "btn btn-secondary" %>
+      <%= link_to section[:cta_label], section[:cta_path], class: "btn btn-tertiary" %>
     <% end %>
   </div>
 

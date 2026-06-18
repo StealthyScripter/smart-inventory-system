@@ -13,13 +13,8 @@
   </div>
 
   <div class="card-body">
-    <div class="card-meta">
-      <span class="badge <%= status_badge_class(service.status) %>"><%= service.status.titleize %></span>
-      <span class="badge badge-secondary"><%= service.service_category %></span>
-      <span>★ <%= number_with_precision(service.average_rating, precision: 1) %></span>
-    </div>
 
-    <h3 class="card-title clamp-2"><%= link_to service.name, service_path(service) %></h3>
+    <h3 class="card-title clamp-2"><%= service.service_category %></h3>
 
     <div class="price">
       <% if service.starting_price.present? %>
@@ -31,6 +26,10 @@
 
     <div class="card-meta">
       <span class="meta-item">🏬 <%= link_to service.supplier.name, merchant_storefront_path(service.supplier) %></span>
+    </div>
+
+    <div class="card-meta">
+      <span>★ <%= number_with_precision(service.average_rating, precision: 1) %></span>
     </div>
 
     <% unless variant == :compact %>
