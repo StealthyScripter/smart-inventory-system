@@ -1,6 +1,7 @@
 class ServiceListing < ApplicationRecord
   include SoftDeletable
   include ImageAttachmentValidatable
+  include MarketplaceTaggable
 
   CATEGORIES = [
     "Interior design",

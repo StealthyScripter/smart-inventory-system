@@ -10,38 +10,43 @@ class SearchService
   end
 
   def product_listings(limit: DEFAULT_LIMIT)
-    MarketplaceListing.visible
-                      .products
-                      .joins(product: [:category])
-                      .merge(Product.where(marketplace_status: "public").marketplace_available)
-                      .search(query)
-                      .for_category(params[:category_id])
-                      .for_supplier(merchant_id)
-                      .includes(product: [:category, :supplier])
-                      .order(product_listing_order)
-                      .offset(offset(limit))
-                      .limit(limit)
+    listings = MarketplaceListing.visible
+                                  .products
+                                  .joins(product: [:category])
+                                  .merge(Product.where(marketplace_status: "public").marketplace_available)
+                                  .search(query)
+                                  .for_category(params[:category_id])
+                                  .for_supplier(merchant_id)
+    listings = listings.joins(product: :tags).where(tags: { id: params[:tag_id] }) if params[:tag_id].present?
+
+    listings.includes(product: [:category, :supplier])
+            .order(product_listing_order)
+            .offset(offset(limit))
+            .limit(limit)
   end
 
   def services(limit: DEFAULT_LIMIT)
-    ServiceListing.publicly_listed
-                  .search(query)
-                  .for_category(params[:service_category])
-                  .for_supplier(merchant_id)
-                  .includes(:supplier)
-                  .catalog_sorted(sort)
-                  .offset(offset(limit))
-                  .limit(limit)
+    services = ServiceListing.publicly_listed
+                             .search(query)
+                             .for_category(params[:service_category])
+                             .for_supplier(merchant_id)
+    services = services.joins(:tags).where(tags: { id: params[:tag_id] }) if params[:tag_id].present?
+
+    services.includes(:supplier)
+            .catalog_sorted(sort)
+            .offset(offset(limit))
+            .limit(limit)
   end
 
   def merchants(limit: DEFAULT_LIMIT)
-    Supplier.where(id: discoverable_supplier_ids)
-            .search(query)
-            .left_joins(:reviews)
-            .group("suppliers.id")
-            .order(merchant_order)
-            .offset(offset(limit))
-            .limit(limit)
+    merchants = Supplier.where(id: discoverable_supplier_ids).search(query)
+    merchants = merchants.joins(:tags).where(tags: { id: params[:tag_id] }) if params[:tag_id].present?
+
+    merchants.left_joins(:reviews)
+             .group("suppliers.id")
+             .order(merchant_order)
+             .offset(offset(limit))
+             .limit(limit)
   end
 
   def categories(limit: 10)

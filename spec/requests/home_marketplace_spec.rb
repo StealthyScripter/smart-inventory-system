@@ -104,18 +104,78 @@ RSpec.describe "Home marketplace", type: :request do
   it "renders the marketplace sections" do
     get root_path
 
-    expect(response.body).to include("Discover great brands")
-    expect(response.body).to include("Popular goods")
-    expect(response.body).to include("Construction essentials")
-    expect(response.body).to include("Electrical supplies")
-    expect(response.body).to include("Plumbing products")
-    expect(response.body).to include("Paint and finishing")
-    expect(response.body).to include("Trending services")
-    expect(response.body).to include("Interior design services")
-    expect(response.body).to include("HVAC services")
-    expect(response.body).to include("Services near you")
-    expect(response.body).to include("Top merchants")
+    expect(response.body).to include("Marketplace merchants")
+    expect(response.body).not_to include("Discover great brands")
+    expect(response.body).not_to include("Top merchants")
+    expect(response.body).to include("General supplies")
+    expect(response.body).not_to include("Construction essentials")
+    expect(response.body).not_to include("Electrical supplies")
+    expect(response.body).not_to include("Plumbing products")
+    expect(response.body).not_to include("Paint and finishing")
+    expect(response.body).to include("General services")
+    expect(response.body).not_to include("Interior design services")
+    expect(response.body).not_to include("HVAC services")
+    expect(response.body).not_to include("Home and interior services")
     expect(response.body).to include("Recently added")
+  end
+
+  it "builds marketplace sections dynamically from backend tags only when they can fill a row" do
+    section_tag = Tag.create!(name: "Project essentials", context: "category")
+    underfilled_tag = Tag.create!(name: "Father's Day", context: "event")
+    building_product.tags << section_tag
+    public_product.tags << underfilled_tag
+
+    3.times do |index|
+      product = Product.create!(
+        name: "Project Board #{index + 2}",
+        sku: "PROJECT-BOARD-#{index + 2}",
+        category: secondary_category,
+        supplier: secondary_supplier,
+        selling_price: 50 + index,
+        marketplace_status: "public"
+      )
+      product.tags << section_tag
+    end
+
+    get root_path
+
+    expect(response.body).to include("Project essentials")
+    expect(response.body).to include(search_path(tag_id: section_tag.id))
+    expect(response.body).not_to include("Father's Day")
+
+    get search_path(tag_id: section_tag.id)
+
+    expect(response.body).to include(building_product.name)
+    expect(response.body).not_to include(public_product.name)
+  end
+
+  it "builds dynamic service and merchant sections from the same tag system" do
+    service_tag = Tag.create!(name: "Rapid response services", context: "condition")
+    merchant_tag = Tag.create!(name: "Local project partners", context: "supplier")
+    public_service.tags << service_tag
+    supplier.tags << merchant_tag
+    secondary_supplier.tags << merchant_tag
+
+    3.times do |index|
+      provider = Supplier.create!(
+        name: "Response Merchant #{index + 1}",
+        default_lead_time_days: 3,
+        shop_status: "public"
+      )
+      provider.tags << merchant_tag if index < 2
+      ServiceListing.create!(
+        supplier: provider,
+        name: "Rapid Service #{index + 1}",
+        service_category: "Plumbing",
+        status: "public",
+        visibility: "public"
+      ).tags << service_tag
+    end
+
+    get root_path
+
+    expect(response.body).to include("Rapid response services")
+    expect(response.body).to include("Local project partners")
   end
 
   it "hides non-public listings from the landing page" do

@@ -11,6 +11,7 @@ class DemoMarketplaceSeed
     link_supplier_users
     seed_products
     seed_services
+    seed_marketplace_tags
     seed_orders
     seed_bookings
     seed_notifications
@@ -92,6 +93,12 @@ class DemoMarketplaceSeed
     }
   end
 
+  def seed_marketplace_tags
+    assign_marketplace_tag(products.values, "category", "Project essentials", "Materials and supplies for active projects", 10)
+    assign_marketplace_tag(services.values, "service", "Project services", "Professional help for repairs and improvements", 20)
+    assign_marketplace_tag(suppliers.values, "supplier", "Trusted local merchants", "Established storefronts serving local projects", 30)
+  end
+
   def seed_orders
     completed = upsert_order("DEMO-COMPLETE-001", users[:buyer], "delivered", 89.50)
     pending = upsert_order("DEMO-PENDING-001", users[:buyer_two], "confirmed", 65.00)
@@ -139,6 +146,17 @@ class DemoMarketplaceSeed
 
   def upsert_category(name, description)
     Category.find_or_initialize_by(name: name).tap { |category| category.update!(description: description) }
+  end
+
+  def assign_marketplace_tag(records, context, name, description, position)
+    tag = Tag.find_or_initialize_by(context: context, slug: name.parameterize)
+    tag.update!(
+      name: name,
+      description: description,
+      marketplace_section: true,
+      position: position
+    )
+    records.each { |record| tag.taggings.find_or_create_by!(taggable: record) }
   end
 
   def upsert_user(email, first_name, last_name, role)

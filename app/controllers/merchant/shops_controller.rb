@@ -30,6 +30,7 @@ module Merchant
         :shop_status,
         :shop_description,
         :shop_image_url,
+        :marketplace_tag_list,
         :logo,
         :banner
       )

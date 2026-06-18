@@ -30,6 +30,12 @@
             <%= form.label :shop_description, "Description", class: "form-label" %>
             <%= form.text_area :shop_description, rows: 5, class: "form-input" %>
           </div>
+          <div class="form-group">
+            <%= form.label :marketplace_tag_list, "Backend marketplace tags", class: "form-label" %>
+            <%= form.text_area :marketplace_tag_list, rows: 2, class: "form-input",
+                               placeholder: "supplier:Local builders, condition:Same-day pickup" %>
+            <div class="form-hint">Comma-separated context:name tags. Used for marketplace grouping; not shown on merchant cards.</div>
+          </div>
         </div>
 
         <div>

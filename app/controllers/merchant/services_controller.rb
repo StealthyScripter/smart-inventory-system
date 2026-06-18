@@ -79,6 +79,7 @@ module Merchant
         :image_url,
         :status,
         :visibility,
+        :marketplace_tag_list,
         gallery_images: [],
         before_images: [],
         after_images: []

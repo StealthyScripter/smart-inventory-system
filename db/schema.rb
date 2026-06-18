@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_16_000000) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_18_000000) do
   create_table "account_memberships", force: :cascade do |t|
     t.integer "account_id", null: false
     t.boolean "active", default: true, null: false
@@ -551,6 +551,31 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_16_000000) do
     t.index ["shop_status"], name: "index_suppliers_on_shop_status"
   end
 
+  create_table "taggings", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "tag_id", null: false
+    t.integer "taggable_id", null: false
+    t.string "taggable_type", null: false
+    t.datetime "updated_at", null: false
+    t.index ["tag_id", "taggable_type", "taggable_id"], name: "index_taggings_on_tag_id_and_taggable_type_and_taggable_id", unique: true
+    t.index ["tag_id"], name: "index_taggings_on_tag_id"
+    t.index ["taggable_type", "taggable_id"], name: "index_taggings_on_taggable"
+  end
+
+  create_table "tags", force: :cascade do |t|
+    t.string "context", default: "category", null: false
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.string "display_name"
+    t.boolean "marketplace_section", default: true, null: false
+    t.string "name", null: false
+    t.integer "position", default: 100, null: false
+    t.string "slug", null: false
+    t.datetime "updated_at", null: false
+    t.index ["context", "slug"], name: "index_tags_on_context_and_slug", unique: true
+    t.index ["marketplace_section", "position"], name: "index_tags_on_marketplace_section_and_position"
+  end
+
   create_table "users", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "email", null: false
@@ -649,5 +674,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_16_000000) do
   add_foreign_key "stock_movements", "users"
   add_foreign_key "supplier_users", "suppliers"
   add_foreign_key "supplier_users", "users"
+  add_foreign_key "taggings", "tags"
   add_foreign_key "users", "locations"
 end

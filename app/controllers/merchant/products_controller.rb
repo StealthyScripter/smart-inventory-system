@@ -90,6 +90,7 @@ module Merchant
         :supplier_id,
         :marketplace_status,
         :listing_scope,
+        :marketplace_tag_list,
         :featured_image,
         images: []
       )

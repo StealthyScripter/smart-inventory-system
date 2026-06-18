@@ -1,6 +1,7 @@
 class Supplier < ApplicationRecord
   include SoftDeletable
   include ImageAttachmentValidatable
+  include MarketplaceTaggable
 
   SHOP_STATUSES = %w[draft public paused].freeze
 

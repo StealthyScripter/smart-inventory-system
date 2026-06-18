@@ -1,6 +1,7 @@
 class Product < ApplicationRecord
   include SoftDeletable
   include ImageAttachmentValidatable
+  include MarketplaceTaggable
 
   MARKETPLACE_STATUSES = %w[draft public private archived].freeze
   LISTING_SCOPES = %w[local marketplace both].freeze

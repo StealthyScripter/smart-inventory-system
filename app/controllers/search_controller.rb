@@ -15,6 +15,6 @@ class SearchController < ApplicationController
   private
 
   def search_params
-    params.permit(:q, :category_id, :service_category, :merchant_id, :supplier_id, :sort, :page)
+    params.permit(:q, :category_id, :service_category, :merchant_id, :supplier_id, :tag_id, :sort, :page)
   end
 end

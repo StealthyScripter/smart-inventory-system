@@ -7,6 +7,7 @@
 
   <div class="filter-bar">
     <%= form_with url: search_path, method: :get, local: true, class: "filter-grid" do |form| %>
+      <%= form.hidden_field :tag_id, value: params[:tag_id] if params[:tag_id].present? %>
       <div class="form-group" style="margin-bottom: 0;">
         <%= form.label :service_category, "Service", class: "form-label" %>
         <%= form.select :service_category, options_for_select(@service_categories, params[:service_category]),
