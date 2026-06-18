@@ -29,45 +29,33 @@
       </div>
       <%= form.submit "Apply to Selected", class: "btn btn-secondary" %>
     </div>
-  <table>
-    <thead>
-      <tr>
-        <th></th>
-        <th>SKU</th>
-        <th>Name</th>
-        <th>Supplier</th>
-        <th>Status</th>
-        <th>Scope</th>
-        <th>Price</th>
-        <th>Stock</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% @products.each do |product| %>
-        <tr>
-          <td><%= check_box_tag "product_ids[]", product.id, false, id: "product_ids_#{product.id}" %></td>
-          <td><%= product.sku %></td>
-          <td><strong><%= product.name %></strong></td>
-          <td><%= product.supplier&.name %></td>
-          <td><span class="badge <%= status_badge_class(product.marketplace_status) %>"><%= product.marketplace_status.titleize %></span></td>
-          <td><span class="badge <%= status_badge_class(product.listing_scope) %>"><%= product.listing_scope.titleize %></span></td>
-          <td><%= currency(product.selling_price.to_f) %></td>
-          <td><%= number_with_delimiter(product.total_stock) %></td>
-          <td>
-            <div class="action-row">
-              <%= link_to "Edit", edit_merchant_product_path(product), class: "btn btn-secondary" %>
-              <%= button_to "Duplicate", merchant_product_duplicate_path(product), method: :post, class: "btn btn-secondary" %>
+    <% if @products.any? %>
+      <div class="card-grid product-management-grid">
+        <% @products.each do |product| %>
+          <article class="ui-card product-management-card">
+            <div class="card-meta">
+              <%= check_box_tag "product_ids[]", product.id, false, id: "product_ids_#{product.id}", aria: { label: "Select #{product.name}" } %>
+              <span>SKU <strong><%= product.sku %></strong></span>
             </div>
-          </td>
-        </tr>
-      <% end %>
-      <% if @products.empty? %>
-        <tr>
-          <td colspan="9" class="empty-state">No products found.</td>
-        </tr>
-      <% end %>
-    </tbody>
-  </table>
+            <h3 class="card-title"><%= product.name %></h3>
+            <div class="card-meta">
+              <%= render "shared/status_badge", status: product.marketplace_status, label: "Listing #{product.marketplace_status.titleize}" %>
+              <%= render "shared/status_badge", status: product.listing_scope, label: product.listing_scope == "local" ? "Private / local stock" : "Marketplace" %>
+            </div>
+            <div class="card-meta">
+              <span><%= product.supplier&.name %></span>
+              <span><%= currency(product.selling_price.to_f) %></span>
+              <span>Stock <strong><%= number_with_delimiter(product.total_stock) %></strong></span>
+            </div>
+            <div class="card-actions">
+              <%= link_to "Edit", edit_merchant_product_path(product), class: "btn btn-secondary btn-compact" %>
+              <%= button_to "Duplicate", merchant_product_duplicate_path(product), method: :post, class: "btn btn-secondary btn-compact" %>
+            </div>
+          </article>
+        <% end %>
+      </div>
+    <% else %>
+      <%= render "shared/empty_state", title: "No products", message: "Add a product to get started." %>
+    <% end %>
   <% end %>
 </div>

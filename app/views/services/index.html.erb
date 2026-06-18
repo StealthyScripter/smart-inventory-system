@@ -1,8 +1,8 @@
 <% content_for :page_title, "Services" %>
 
-<div class="table-container">
+<section class="table-container marketplace-page">
   <div class="table-header">
-    <h3 class="table-title">Service Marketplace</h3>
+    <h1 class="table-title">Services</h1>
   </div>
   <div class="filter-bar">
     <%= form_with url: services_path, method: :get, local: true, class: "filter-grid compact" do |form| %>
@@ -13,6 +13,12 @@
       <%= form.submit "Apply", class: "btn btn-primary" %>
     <% end %>
   </div>
+  <nav class="category-strip" aria-label="Service categories">
+    <%= link_to "All", services_path, class: "category-chip #{params[:category].blank? ? 'is-active' : ''}" %>
+    <% @categories.each do |category| %>
+      <%= link_to category, services_path(category: category), class: "category-chip #{params[:category] == category ? 'is-active' : ''}" %>
+    <% end %>
+  </nav>
   <% if @services.any? %>
     <div class="market-grid">
       <% @services.each do |service| %>
@@ -26,4 +32,4 @@
     </div>
   <% end %>
   <%= pagination_controls(@services) %>
-</div>
+</section>

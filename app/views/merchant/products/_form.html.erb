@@ -4,7 +4,7 @@
     <%= link_to "Back to Products", merchant_products_path, class: "btn btn-secondary" %>
   </div>
 
-  <div style="padding: 2rem;">
+  <div class="form-shell">
     <%= form_with model: [:merchant, product], local: true do |form| %>
       <% if product.errors.any? %>
         <div class="alert alert-danger">
@@ -17,7 +17,14 @@
         </div>
       <% end %>
 
-      <div class="grid-2" style="gap: 2rem;">
+      <div class="section-heading">
+        <div>
+          <span class="badge badge-secondary">Private / local</span>
+          <h2 class="section-title">Inventory product</h2>
+        </div>
+      </div>
+
+      <div class="grid-2 form-grid">
         <div>
           <div class="form-group">
             <%= form.label :name, class: "form-label" %>
@@ -49,7 +56,7 @@
 
         <div>
           <div class="form-group">
-            <%= form.label :listing_scope, "Listing Scope", class: "form-label" %>
+            <%= form.label :listing_scope, "Inventory visibility", class: "form-label" %>
             <%= form.select :listing_scope,
                             options_for_select(Product::LISTING_SCOPES.map { |scope| [scope.titleize, scope] }, product.listing_scope),
                             {}, { class: "form-select" } %>
@@ -88,12 +95,15 @@
       </div>
 
       <% listing = product.marketplace_listing || product.build_marketplace_listing(title: product.name, public_description: product.description, public_price: product.selling_price, status: "draft", visibility: "private", listing_type: "product", availability: "available") %>
-      <div class="table-container" style="margin-top: 2rem;">
+      <div class="table-container form-section">
         <div class="table-header">
-          <h3 class="table-title">Marketplace Listing</h3>
+          <div>
+            <span class="badge badge-info">Customer-facing</span>
+            <h3 class="table-title">Marketplace listing</h3>
+          </div>
         </div>
-        <div style="padding: 1.5rem;">
-          <div class="grid-2" style="gap: 2rem;">
+        <div class="form-section__body">
+          <div class="grid-2 form-grid">
             <div>
               <div class="form-group">
                 <%= label_tag "marketplace_listing_title", "Public Title", class: "form-label" %>
@@ -159,7 +169,7 @@
         </div>
       </div>
 
-      <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+      <div class="action-row form-actions">
         <%= form.submit submit_label, class: "btn btn-primary" %>
         <%= link_to "Cancel", merchant_products_path, class: "btn btn-secondary" %>
       </div>

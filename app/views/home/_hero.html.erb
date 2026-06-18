@@ -1,13 +1,6 @@
 <section class="marketplace-home-hero">
-
-
   <div class="marketplace-home-hero__visual">
-
     <article class="ui-card marketplace-home-promo">
-      <div class="marketplace-home-hero__copy">
-        <span class="badge badge-info">Marketplace</span>
-      </div>
-
       <div class="marketplace-home-promo__media">
         <% if @featured_product&.featured_image&.attached? %>
           <%= image_tag @featured_product.featured_image, alt: @featured_product.name %>
@@ -23,11 +16,13 @@
       </div>
 
       <div class="marketplace-home-promo__body">
+        <span class="badge badge-info">Marketplace</span>
+        <h1 class="marketplace-home-hero__title">Build smarter. Shop faster.</h1>
         <h2 class="marketplace-home-promo__title">Find trusted products, services, and suppliers in one place.</h2>
         <div class="marketplace-home-promo__stats" aria-label="Marketplace highlights">
-          <span class="marketplace-home-chip">Top goods</span>
-          <span class="marketplace-home-chip">Fast services</span>
-          <span class="marketplace-home-chip">Trusted merchants</span>
+          <span class="marketplace-home-chip">Goods</span>
+          <span class="marketplace-home-chip">Services</span>
+          <span class="marketplace-home-chip">Merchants</span>
         </div>
       </div>
     </article>

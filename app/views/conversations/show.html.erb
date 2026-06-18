@@ -2,15 +2,18 @@
 
 <div class="table-container">
   <div class="table-header"><h3 class="table-title"><%= @conversation.subject %></h3></div>
-  <div style="padding: 1.5rem;">
+  <div class="conversation-thread">
     <% @conversation.messages.order(:created_at).each do |message| %>
-      <p><strong><%= message.sender.full_name %>:</strong> <%= message.body %></p>
+      <article class="message-card">
+        <strong><%= message.sender.full_name %></strong>
+        <p><%= message.body %></p>
+      </article>
     <% end %>
-    <%= form_with url: conversation_path(@conversation), method: :post, local: true, style: "margin-top: 1rem;" do |form| %>
+    <%= form_with url: conversation_path(@conversation), method: :post, local: true, class: "stack" do |form| %>
       <%= form.fields_for :message do |message_form| %>
         <%= message_form.text_area :body, rows: 3, class: "form-input", required: true %>
       <% end %>
-      <%= form.submit "Send", class: "btn btn-primary", style: "margin-top: 0.75rem;" %>
+      <%= form.submit "Send", class: "btn btn-primary" %>
     <% end %>
   </div>
 </div>

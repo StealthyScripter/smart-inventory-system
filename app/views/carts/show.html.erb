@@ -10,14 +10,14 @@
 <div class="table-container">
   <div class="table-header">
     <h3 class="table-title">Your Cart</h3>
-    <%= link_to "Continue Shopping", catalog_path, class: "btn btn-secondary" %>
+    <%= link_to "Keep shopping", catalog_path, class: "btn btn-secondary btn-compact" %>
   </div>
 
   <% if cart_items.empty? %>
     <div class="empty-state">
       <span class="empty-icon">🛒</span>
       <span>Your cart is empty.</span>
-      <%= link_to "Browse Catalog", catalog_path, class: "btn btn-primary" %>
+      <%= link_to "Browse products", catalog_path, class: "btn btn-primary" %>
     </div>
   <% else %>
     <div class="card-grid">
@@ -49,8 +49,8 @@
 
     <div class="summary-panel action-row" style="margin: 0 1.25rem 1.25rem; justify-content: space-between;">
       <div class="price">Total <%= currency(cart_total) %></div>
-      <%= link_to "Continue Shopping", catalog_path, class: "btn btn-secondary" %>
-      <%= link_to "Review Checkout", checkout_path, class: "btn btn-primary" %>
+      <%= link_to "Keep shopping", catalog_path, class: "btn btn-secondary" %>
+      <%= link_to "Checkout", checkout_path, class: "btn btn-primary" %>
     </div>
   <% end %>
 </div>

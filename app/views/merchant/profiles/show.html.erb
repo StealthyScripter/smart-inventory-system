@@ -21,66 +21,54 @@
     <% else %>
       <%= link_to "Edit profile", merchant_root_path, class: "btn btn-secondary" %>
     <% end %>
-    <%= link_to "Catalog / listings", merchant_catalog_path, class: "btn btn-secondary" %>
+    <%= link_to "Catalog", merchant_catalog_path, class: "btn btn-secondary", aria: { label: "Catalog / listings" } %>
     <%= button_to "Sign out", logout_path, method: :delete, form: { data: { turbo_confirm: "Are you sure you want to sign out?" } }, class: "btn btn-danger" %>
   </div>
 </section>
 
 <div class="profile-grid profile-grid--primary">
   <%= link_to merchant_orders_path, class: "ui-card profile-feature-card profile-feature-card--accent" do %>
-    <span class="profile-card-kicker">Primary</span>
     <div class="profile-card-head">
       <%= nav_icon(:orders) %>
       <h2 class="card-title">Orders</h2>
     </div>
-    <p class="profile-card-copy">Incoming purchases and fulfillment queues.</p>
     <div class="profile-card-footer">
       <span class="badge badge-info"><%= pluralize(@orders.size, "order") %></span>
-      <span class="profile-card-action">Open</span>
+      <span class="profile-card-action" aria-hidden="true">→</span>
     </div>
   <% end %>
 
   <%= link_to merchant_service_bookings_path, class: "ui-card profile-feature-card profile-feature-card--accent" do %>
-    <span class="profile-card-kicker">Primary</span>
     <div class="profile-card-head">
       <%= nav_icon(:bookings) %>
       <h2 class="card-title">Bookings</h2>
     </div>
-    <p class="profile-card-copy">Service jobs, schedules, and status updates.</p>
     <div class="profile-card-footer">
       <span class="badge badge-info"><%= pluralize(@bookings.size, "booking") %></span>
-      <span class="profile-card-action">Open</span>
+      <span class="profile-card-action" aria-hidden="true">→</span>
     </div>
   <% end %>
 </div>
 
 <div class="profile-grid">
-  <div class="ui-card profile-link-card profile-link-card--static">
+  <div class="ui-card profile-company-card">
     <div class="profile-card-head">
       <%= nav_icon(:store) %>
-      <h3 class="card-title">Company Information</h3>
+      <h3 class="card-title">Company</h3>
     </div>
-    <p class="profile-card-copy"><%= @merchant_profile&.description.presence || "Shop profile and merchant account details." %></p>
     <div class="profile-meta">
       <span class="profile-meta-item"><%= @account&.name || merchant_suppliers.map(&:name).to_sentence %></span>
       <span class="profile-meta-item"><%= @merchant_profile&.status&.titleize || "Active" %></span>
     </div>
-    <div class="summary-row"><span>Company/shop name</span><strong><%= @merchant_profile&.display_name || @primary_supplier&.name || "Not set" %></strong></div>
-    <div class="summary-row"><span>Description</span><strong><%= @merchant_profile&.description.presence || @primary_supplier&.shop_description.presence || "Not set" %></strong></div>
     <div class="summary-row"><span>Location</span><strong><%= @merchant_profile&.location.presence || @primary_supplier&.address.presence || "Not set" %></strong></div>
-    <div class="summary-row"><span>Company size</span><strong><%= @merchant_profile&.company_size.presence || "Not set" %></strong></div>
-    <div class="summary-row"><span>Contact information</span><strong><%= @merchant_profile&.contact_information.presence || [@primary_supplier&.contact_email, @primary_supplier&.contact_phone].compact_blank.to_sentence.presence || "Not set" %></strong></div>
-    <div class="summary-row"><span>Business category</span><strong><%= @merchant_profile&.business_category.presence || "Not set" %></strong></div>
-    <div class="summary-row"><span>Permits/licenses held</span><strong><%= @merchant_profile&.permits_and_licenses.presence || "Not set" %></strong></div>
-    <div class="summary-row"><span>Controlled goods indicators</span><strong><%= @merchant_profile&.controlled_goods_notes.presence || "Not set" %></strong></div>
+    <div class="summary-row"><span>Contact</span><strong><%= @merchant_profile&.contact_information.presence || [@primary_supplier&.contact_email, @primary_supplier&.contact_phone].compact_blank.to_sentence.presence || "Not set" %></strong></div>
   </div>
 
-  <%= link_to merchant_catalog_path, class: "ui-card profile-link-card" do %>
+  <%= link_to merchant_catalog_path, class: "ui-card profile-link-card", aria: { label: "Catalog / listings" } do %>
     <div class="profile-card-head">
       <%= nav_icon(:catalog) %>
-      <h3 class="card-title">Catalog / listings</h3>
+      <h3 class="card-title">Catalog</h3>
     </div>
-    <p class="profile-card-copy">View the seller-facing listing surface.</p>
   <% end %>
 
   <%= link_to merchant_products_path, class: "ui-card profile-link-card" do %>
@@ -88,7 +76,6 @@
       <%= nav_icon(:products) %>
       <h3 class="card-title">Products</h3>
     </div>
-    <p class="profile-card-copy">Manage product records and marketplace visibility.</p>
   <% end %>
 
   <%= link_to merchant_inventory_path, class: "ui-card profile-link-card" do %>
@@ -96,15 +83,13 @@
       <%= nav_icon(:inventory) %>
       <h3 class="card-title">Inventory</h3>
     </div>
-    <p class="profile-card-copy">Track stock by location and product.</p>
   <% end %>
 
   <%= link_to merchant_conversations_path, class: "ui-card profile-link-card" do %>
     <div class="profile-card-head">
       <%= nav_icon(:inbox) %>
-      <h3 class="card-title">Inbox / messages</h3>
+      <h3 class="card-title">Inbox</h3>
     </div>
-    <p class="profile-card-copy">Merchant conversations and support threads.</p>
   <% end %>
 
   <%= link_to notifications_path, class: "ui-card profile-link-card" do %>
@@ -112,7 +97,6 @@
       <%= nav_icon(:notifications) %>
       <h3 class="card-title">Notifications</h3>
     </div>
-    <p class="profile-card-copy">Unread alerts and account updates.</p>
   <% end %>
 
   <%= link_to merchant_analytics_path, class: "ui-card profile-link-card" do %>
@@ -120,7 +104,6 @@
       <%= nav_icon(:analytics) %>
       <h3 class="card-title">Analytics</h3>
     </div>
-    <p class="profile-card-copy">Performance and sales overview.</p>
   <% end %>
 
   <% if @can_manage_team %>
@@ -129,15 +112,7 @@
         <%= nav_icon(:team) %>
         <h3 class="card-title">Team / members</h3>
       </div>
-      <p class="profile-card-copy">Invite and manage account members.</p>
     <% end %>
-    <div class="ui-card profile-link-card profile-link-card--static enterprise-only">
-      <div class="profile-card-head">
-        <%= nav_icon(:team) %>
-        <h3 class="card-title">Team management</h3>
-      </div>
-      <p class="profile-card-copy">Multiple-user settings and role administration.</p>
-    </div>
   <% end %>
 
   <% if @can_manage_locations %>
@@ -146,31 +121,15 @@
         <%= nav_icon(:locations) %>
         <h3 class="card-title">Locations</h3>
       </div>
-      <p class="profile-card-copy">Account-wide location management.</p>
     <% end %>
-    <div class="ui-card profile-link-card profile-link-card--static enterprise-only">
-      <div class="profile-card-head">
-        <%= nav_icon(:locations) %>
-        <h3 class="card-title">Multiple-location settings</h3>
-      </div>
-      <p class="profile-card-copy">Site-level control for enterprise accounts.</p>
-    </div>
   <% end %>
 
   <% if @can_manage_settings %>
-    <%= link_to edit_merchant_account_settings_path, class: "ui-card profile-link-card" do %>
+    <%= link_to edit_merchant_account_settings_path, class: "ui-card profile-link-card", aria: { label: "Access control" } do %>
       <div class="profile-card-head">
         <%= nav_icon(:settings) %>
-        <h3 class="card-title">Access control</h3>
+        <h3 class="card-title">Settings</h3>
       </div>
-      <p class="profile-card-copy">Company settings and role management.</p>
     <% end %>
-    <div class="ui-card profile-link-card profile-link-card--static enterprise-only">
-      <div class="profile-card-head">
-        <%= nav_icon(:settings) %>
-        <h3 class="card-title">Multiple-user settings</h3>
-      </div>
-      <p class="profile-card-copy">Permissions and access assignments.</p>
-    </div>
   <% end %>
 </div>

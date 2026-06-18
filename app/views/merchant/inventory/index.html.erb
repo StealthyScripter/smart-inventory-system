@@ -43,8 +43,8 @@
         <article class="ui-card">
           <h3 class="card-title"><%= product.name %></h3>
           <div class="card-meta">
-            <span><%= product.marketplace_status.titleize %></span>
-            <span><%= product.listing_scope.titleize %></span>
+            <%= render "shared/status_badge", status: product.marketplace_status, label: "Listing #{product.marketplace_status.titleize}" %>
+            <%= render "shared/status_badge", status: product.listing_scope, label: product.listing_scope == "local" ? "Private / local stock" : "Marketplace" %>
           </div>
           <div class="card-actions">
             <%= button_to "List on marketplace", merchant_inventory_product_marketplace_path(product),

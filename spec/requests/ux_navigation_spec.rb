@@ -58,7 +58,6 @@ RSpec.describe "UX navigation", type: :request do
     expect(response.body).to include("Bookings")
     expect(response.body).to include("Edit profile")
     expect(response.body).to include("Manage lists")
-    expect(response.body).to include("Previous orders")
     expect(response.body).to include("Inbox")
     expect(response.body).to include("Notifications")
     expect(response.body).to include("Sign out")
@@ -79,9 +78,7 @@ RSpec.describe "UX navigation", type: :request do
     expect(response.body).to include("Team / members")
     expect(response.body).to include("Locations")
     expect(response.body).to include("Access control")
-    expect(response.body).to include("Team management")
-    expect(response.body).to include("Multiple-user settings")
-    expect(response.body).to include("Multiple-location settings")
+    expect(response.body).to include("Settings")
     expect(response.body).to include("theme-enterprise")
   end
 

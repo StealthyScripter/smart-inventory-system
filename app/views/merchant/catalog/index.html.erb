@@ -15,8 +15,10 @@
 <section class="page-section">
   <div class="section-header">
     <div>
-      <h2 class="section-title">Marketplace Preview</h2>
-      <p class="section-subtitle">How your product listings appear in the customer marketplace.</p>
+      <div>
+        <h2 class="section-title">Marketplace Preview</h2>
+        <span class="section-subtitle">Marketplace listings</span>
+      </div>
     </div>
     <%= link_to "Add Product", new_merchant_product_path, class: "btn btn-primary" %>
   </div>
@@ -43,10 +45,7 @@
 <% if @unlisted_products.any? %>
   <section class="page-section">
     <div class="section-header">
-      <div>
-        <h2 class="section-title">Products Without Marketplace Listings</h2>
-        <p class="section-subtitle">These product records remain local until listed.</p>
-      </div>
+      <h2 class="section-title">Private / local products</h2>
     </div>
     <div class="card-grid compact">
       <% @unlisted_products.each do |product| %>
@@ -54,9 +53,11 @@
           <div class="card-body">
             <div class="card-kicker"><%= product.category.name %></div>
             <h3 class="card-title"><%= product.name %></h3>
-            <div class="summary-row"><span>SKU</span><strong><%= product.sku %></strong></div>
-            <div class="summary-row"><span>Status</span><%= render "shared/status_badge", status: product.marketplace_status, label: product.marketplace_status.titleize %></div>
-            <div class="summary-row"><span>Scope</span><%= render "shared/status_badge", status: product.listing_scope, label: product.listing_scope.titleize %></div>
+            <div class="card-meta">
+              <span>SKU <strong><%= product.sku %></strong></span>
+              <%= render "shared/status_badge", status: product.marketplace_status, label: product.marketplace_status.titleize %>
+              <%= render "shared/status_badge", status: product.listing_scope, label: product.listing_scope.titleize %>
+            </div>
           </div>
           <div class="card-actions">
             <%= link_to "Create listing", edit_merchant_product_path(product), class: "btn btn-secondary" %>

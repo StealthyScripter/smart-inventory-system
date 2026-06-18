@@ -52,6 +52,10 @@ RSpec.describe "Profile navigation", type: :request do
     expect(topbar_text).not_to include("Logout")
     expect(topbar_text).to include("Cart")
 
+    primary_cards = doc.css(".profile-grid--primary .profile-feature-card")
+    expect(primary_cards.size).to eq(2)
+    expect(primary_cards.map(&:text).join(" ")).to include("Orders", "Bookings")
+
     bottom_nav = doc.at_css(".account-bottom-nav")
     expect(bottom_nav.text).to include("Home", "Shop", "Services", "Cart", "Profile")
     expect(bottom_nav.text).not_to include("Search")
@@ -73,6 +77,10 @@ RSpec.describe "Profile navigation", type: :request do
     expect(response.body).not_to include("Team / members")
     expect(response.body).not_to include("Locations")
     expect(response.body).not_to include("Access control")
+
+    primary_cards = doc.css(".profile-grid--primary .profile-feature-card")
+    expect(primary_cards.size).to eq(2)
+    expect(primary_cards.map(&:text).join(" ")).to include("Orders", "Bookings")
 
     bottom_nav = doc.at_css(".account-bottom-nav")
     expect(bottom_nav.text).to include("Dashboard", "Catalog", "Products", "Inventory", "Profile")
@@ -108,6 +116,7 @@ RSpec.describe "Profile navigation", type: :request do
     expect(response.body).to include("Access control")
     expect(response.body).to include("Edit profile")
     expect(response.body).to include("Catalog / listings")
+    expect(doc.css(".profile-grid .profile-company-card").size).to eq(1)
   end
 
   it "removes breadcrumbs and secondary search bars from marketplace pages" do

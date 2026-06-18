@@ -1,6 +1,9 @@
 <article class="ui-card order-card">
   <div class="card-body">
-    <div class="card-kicker">Order</div>
+    <div class="order-card-meta">
+      <%= render "shared/status_badge", status: order.status, label: order.status.titleize %>
+      <span><%= order.submitted_at&.strftime("%b %d, %Y") || order.created_at.strftime("%b %d, %Y") %></span>
+    </div>
     <h3 class="card-title">
       <% if local_assigns[:path].present? %>
         <%= link_to order.order_number, local_assigns[:path] %>
@@ -8,15 +11,11 @@
         <%= order.order_number %>
       <% end %>
     </h3>
-    <div class="order-card-meta">
-      <%= render "shared/status_badge", status: order.status, label: order.status.titleize %>
-      <span><%= currency(order.total_amount.to_f) %></span>
-      <span><%= order.submitted_at&.strftime("%b %d, %Y") || order.created_at.strftime("%b %d, %Y") %></span>
-    </div>
+    <div class="price"><%= currency(order.total_amount.to_f) %></div>
   </div>
   <% if local_assigns[:path].present? %>
     <div class="card-actions">
-      <%= link_to "View Order", local_assigns[:path], class: "btn btn-secondary" %>
+      <%= link_to "View order", local_assigns[:path], class: "btn btn-secondary btn-compact" %>
     </div>
   <% end %>
 </article>

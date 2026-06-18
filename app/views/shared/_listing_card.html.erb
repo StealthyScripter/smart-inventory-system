@@ -2,7 +2,7 @@
 <% merchant = product&.supplier %>
 <% review_count = product&.reviews&.published&.count.to_i %>
 
-<article class="ui-card listing-card">
+<article class="ui-card media-card listing-card marketplace-card">
   <%= link_to catalog_product_path(product), class: "card-media-link", aria: { label: "View #{listing.title}" } do %>
     <% if listing.featured_media_url.present? %>
       <img class="card-media" src="<%= listing.featured_media_url %>" alt="<%= listing.title %>">
@@ -16,15 +16,6 @@
   <% end %>
 
   <div class="card-body">
-    <div class="card-kicker"><%= product&.category&.name || "Marketplace" %></div>
-    <h3 class="card-title"><%= link_to listing.title, catalog_product_path(product) %></h3>
-    <p class="card-meta">
-      <%= merchant ? link_to(merchant.name, merchant_storefront_path(merchant)) : "Marketplace" %>
-    </p>
-    <div class="rating-row" aria-label="Rating">
-      <span><%= number_with_precision(product&.average_rating.to_f, precision: 1) %> / 5</span>
-      <span class="muted-text">(<%= pluralize(review_count, "review") %>)</span>
-    </div>
     <div class="price-row">
       <% if listing.sale_price.present? %>
         <span class="price"><%= currency(listing.sale_price) %></span>
@@ -33,13 +24,21 @@
         <span class="price"><%= currency(listing.current_price.to_f) %></span>
       <% end %>
     </div>
-    <%= render "shared/status_badge", status: listing.availability, label: listing.availability.humanize %>
+    <h3 class="card-title clamp-2"><%= link_to listing.title, catalog_product_path(product) %></h3>
+    <div class="card-meta">
+      <span><%= merchant ? link_to(merchant.name, merchant_storefront_path(merchant)) : "Marketplace" %></span>
+      <span aria-label="Rating">★ <%= number_with_precision(product&.average_rating.to_f, precision: 1) %> (<%= review_count %>)</span>
+    </div>
+    <div class="card-meta">
+      <%= render "shared/status_badge", status: listing.availability, label: listing.availability.humanize %>
+      <span><%= product&.category&.name || "Marketplace" %></span>
+    </div>
   </div>
 
   <div class="card-actions">
-    <%= link_to "View Details", catalog_product_path(product), class: "btn btn-secondary" %>
+    <%= link_to "View", catalog_product_path(product), class: "btn btn-secondary btn-compact" %>
     <% if current_user&.customer? %>
-      <%= button_to "Add to Cart", cart_path(product_id: product.id, quantity: 1), method: :post, class: "btn btn-primary" %>
+      <%= button_to "Add to cart", cart_path(product_id: product.id, quantity: 1), method: :post, class: "btn btn-primary btn-compact" %>
     <% end %>
   </div>
 </article>

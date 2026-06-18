@@ -1,0 +1,21 @@
+<article class="ui-card booking-card">
+  <div class="card-body">
+    <div class="card-meta">
+      <%= render "shared/status_badge", status: booking.status, label: booking.status.titleize %>
+      <% if booking.scheduled_date.present? %>
+        <span>📅 <%= [booking.scheduled_date, booking.scheduled_time&.strftime("%H:%M")].compact.join(" ") %></span>
+      <% end %>
+    </div>
+    <h3 class="card-title"><%= booking.service_listings.map(&:service_category).uniq.to_sentence.presence || booking.booking_number %></h3>
+    <div class="card-meta">
+      <span><%= booking.booking_number %></span>
+      <span>🏬 <%= booking.supplier.name %></span>
+      <% if local_assigns[:show_customer] %><span>👤 <%= booking.user.full_name %></span><% end %>
+    </div>
+  </div>
+  <% if local_assigns[:cancel_path].present? %>
+    <div class="card-actions">
+      <%= button_to "Cancel", cancel_path, method: :patch, class: "btn btn-danger btn-compact" %>
+    </div>
+  <% end %>
+</article>

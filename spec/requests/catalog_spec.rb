@@ -48,6 +48,10 @@ RSpec.describe "Catalog", type: :request do
       expect(response).to have_http_status(:success)
       expect(response.body).to include(public_product.name)
       expect(response.body).to include(supplier.name)
+      expect(response.body).to include("$12.50")
+      expect(response.body).not_to include(public_product.sku)
+      expect(response.body).not_to include("Unit Cost")
+      expect(response.body).not_to include("Reorder Point")
     end
 
     it "hides private and draft products from public discovery" do

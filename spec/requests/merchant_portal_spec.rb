@@ -266,7 +266,7 @@ RSpec.describe "Merchant portal", type: :request do
       get merchant_services_path
 
       expect(response).to have_http_status(:success)
-      expect(response.body).to include("Services Marketplace Preview")
+      expect(response.body).to include("Services")
       expect(response.body).to include("Alpha Install")
       expect(response.body).to include("Draft")
       expect(response.body).to include("Private")
@@ -299,11 +299,11 @@ RSpec.describe "Merchant portal", type: :request do
 
       expect(response).to have_http_status(:success)
       expect(response.body).to include("theme-individual-merchant")
-      expect(response.body).to include("Company Information")
+      expect(response.body).to include("Company")
       expect(response.body).to include("Solo Shop")
-      expect(response.body).to include("Controlled goods indicators")
-      expect(response.body).not_to include("Team management")
-      expect(response.body).not_to include("Multiple-user settings")
+      expect(response.body).to include("Brooklyn")
+      expect(response.body).not_to include("Team / members")
+      expect(response.body).not_to include("Access control")
       expect(response.body).not_to include(">Locations<")
     end
 
@@ -326,9 +326,9 @@ RSpec.describe "Merchant portal", type: :request do
 
       expect(response).to have_http_status(:success)
       expect(response.body).to include("theme-enterprise-merchant")
-      expect(response.body).to include("Team management")
-      expect(response.body).to include("Multiple-user settings")
-      expect(response.body).to include("Multiple-location settings")
+      expect(response.body).to include("Team / members")
+      expect(response.body).to include(">Locations<")
+      expect(response.body).to include("Access control")
     end
   end
 

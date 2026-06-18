@@ -13,7 +13,7 @@
             <span>📅 <%= notification.created_at.strftime("%b %d, %Y %H:%M") %></span>
           </div>
           <h3 class="card-title"><%= notification.title %></h3>
-          <p class="clamp-2" style="color: var(--muted-text);"><%= notification.body %></p>
+          <p class="card-copy clamp-2"><%= notification.body %></p>
           <div class="card-actions">
             <% unless notification.read_at? %>
               <%= button_to "Mark Read", notification_path(notification), method: :patch, class: "btn btn-secondary" %>

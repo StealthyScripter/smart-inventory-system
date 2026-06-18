@@ -77,13 +77,9 @@
 
 <div class="table-container">
   <div class="table-header"><h3 class="table-title">Categories</h3></div>
-  <table>
-    <tbody>
-      <% @categories.each do |category| %>
-        <tr>
-          <td><%= link_to category.name, catalog_path(category_id: category.id, q: params[:q]) %></td>
-        </tr>
-      <% end %>
-    </tbody>
-  </table>
+  <div class="category-grid">
+    <% @categories.each do |category| %>
+      <%= link_to category.name, catalog_path(category_id: category.id, q: params[:q]), class: "category-chip" %>
+    <% end %>
+  </div>
 </div>

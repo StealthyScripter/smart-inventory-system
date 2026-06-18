@@ -7,14 +7,7 @@
   <% if @orders.any? %>
     <div class="card-grid">
       <% @orders.each do |order| %>
-        <article class="ui-card">
-          <div class="card-meta">
-            <span class="badge <%= status_badge_class(order.status) %>"><%= order.status.titleize %></span>
-            <span>📅 <%= order.submitted_at&.strftime("%b %d, %Y") || order.created_at.strftime("%b %d, %Y") %></span>
-          </div>
-          <h3 class="card-title"><%= link_to order.order_number, customer_order_path(order) %></h3>
-          <div class="price"><%= currency(order.total_amount.to_f) %></div>
-        </article>
+        <%= render "shared/order_card", order: order, path: customer_order_path(order) %>
       <% end %>
     </div>
   <% else %>

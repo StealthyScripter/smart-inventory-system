@@ -1,9 +1,12 @@
 <% content_for :page_title, @service.name %>
 
-<div class="table-container">
+<section class="table-container marketplace-detail">
   <div class="table-header">
-    <h3 class="table-title"><%= @service.name %></h3>
-    <%= link_to "Back to Services", services_path, class: "btn btn-secondary" %>
+    <div>
+      <div class="card-kicker"><%= @service.name %></div>
+      <h1 class="table-title"><%= @service.service_category %></h1>
+    </div>
+    <%= link_to "All services", services_path, class: "btn btn-secondary btn-compact" %>
   </div>
   <div class="product-hero">
     <div class="stack">
@@ -13,20 +16,20 @@
         <div class="hero-placeholder"><%= ui_initial(@service.name) %></div>
       <% end %>
       <% if @service.gallery_images.attached? || @service.before_images.attached? || @service.after_images.attached? %>
-        <div class="market-grid" style="padding: 0; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));">
+        <div class="gallery-grid">
           <% (@service.gallery_images.to_a + @service.before_images.to_a + @service.after_images.to_a).each do |image| %>
-            <div class="card-media" style="border-radius: var(--radius-md);"><%= image_tag image, alt: @service.name %></div>
+            <div class="card-media gallery-thumb"><%= image_tag image, alt: @service.service_category %></div>
           <% end %>
         </div>
       <% end %>
-      <p style="color: var(--muted-text);"><%= @service.description %></p>
+      <% if @service.description.present? %><p class="detail-description"><%= @service.description %></p><% end %>
     </div>
 
-    <aside class="summary-panel stack">
-      <div class="price">From <%= currency(@service.starting_price.to_f) %></div>
+    <aside id="booking" class="summary-panel stack">
+      <div class="price"><%= @service.starting_price.present? ? "From #{currency(@service.starting_price.to_f)}" : "Quote required" %></div>
       <div class="card-meta">
-        <span>🛠 <%= @service.service_category %></span>
         <span>★ <%= number_with_precision(@service.average_rating, precision: 1) %></span>
+        <%= render "shared/status_badge", status: @service.status, label: "Available" %>
       </div>
       <div class="card-meta">🏬 <%= link_to @service.supplier.name, merchant_storefront_path(@service.supplier) %></div>
       <%= form_with url: service_bookings_path, method: :post, local: true, class: "stack" do |form| %>
@@ -49,25 +52,22 @@
           <%= form.label :notes, class: "form-label" %>
           <%= form.text_area :notes, rows: 3, class: "form-input" %>
         </div>
-        <%= form.submit "Request Service", class: "btn btn-primary" %>
+        <%= form.submit "Request booking", class: "btn btn-primary" %>
       <% end %>
     </aside>
   </div>
-</div>
+</section>
 
-<div class="table-container" style="margin-top: 1.5rem;">
+<section class="table-container detail-section">
   <div class="table-header">
     <h3 class="table-title">Recommended Services</h3>
   </div>
-  <div class="card-grid">
+  <div class="market-grid">
     <% @recommended_services.each do |service| %>
-      <article class="ui-card">
-        <h3 class="card-title"><%= link_to service.name, service_path(service) %></h3>
-        <div class="card-meta">🏬 <%= service.supplier.name %></div>
-      </article>
+      <%= render "home/service_card", service: service, variant: :compact %>
     <% end %>
     <% if @recommended_services.empty? %>
       <div class="empty-state"><span class="empty-icon">🛠</span><span>No recommendations yet.</span></div>
     <% end %>
   </div>
-</div>
+</section>

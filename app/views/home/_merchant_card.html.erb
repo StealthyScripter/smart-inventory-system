@@ -18,23 +18,17 @@
 
   <div class="card-body">
     <div class="card-meta">
-      <span class="badge badge-secondary">Merchant</span>
       <span>★ <%= number_with_precision(merchant.average_rating, precision: 1) %></span>
+      <% if merchant.address.present? %>
+        <span class="meta-item">📍 <%= truncate(merchant.address, length: 42) %></span>
+      <% end %>
     </div>
 
     <h3 class="card-title clamp-2"><%= link_to merchant.name, merchant_storefront_path(merchant) %></h3>
 
-    <p class="marketplace-merchant-card__copy clamp-2"><%= merchant.shop_description.presence || "Public merchant storefront" %></p>
-
-    <% if merchant.address.present? %>
-      <div class="card-meta">
-        <span class="meta-item">📍 <%= merchant.address %></span>
-      </div>
-    <% end %>
-
     <% unless variant == :compact %>
       <div class="card-actions">
-        <%= link_to "View shop", merchant_storefront_path(merchant), class: "btn btn-primary" %>
+        <%= link_to "View shop", merchant_storefront_path(merchant), class: "btn btn-secondary btn-compact" %>
       </div>
     <% end %>
   </div>

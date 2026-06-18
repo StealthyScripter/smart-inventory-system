@@ -60,6 +60,11 @@ RSpec.describe "Services marketplace", type: :request do
     get services_path, params: { q: "Emergency", category: "Plumbing" }
 
     expect(response.body).to include(public_service.name)
+    expect(response.body).to include(public_service.service_category)
+    expect(response.body).to include(supplier.name)
+    expect(response.body).to include("$75.00")
+    expect(response.body).to include("★ 0.0")
+    expect(response.body).to include("Schedule")
     expect(response.body).not_to include("Draft Plumbing")
   end
 
@@ -70,7 +75,9 @@ RSpec.describe "Services marketplace", type: :request do
 
     expect(response).to have_http_status(:success)
     expect(response.body).to include("AC Tuneup")
+    expect(response.body).to include("AC services")
     expect(response.body).to include(supplier.name)
+    expect(response.body).to include("Request booking")
   end
 
   it "shows public services on merchant storefronts" do

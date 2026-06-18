@@ -5,22 +5,9 @@
   <% if @bookings.any? %>
     <div class="card-grid">
       <% @bookings.each do |booking| %>
-        <article class="ui-card">
-          <div class="card-meta">
-            <span class="badge <%= status_badge_class(booking.status) %>"><%= booking.status.titleize %></span>
-            <span>📅 <%= [booking.scheduled_date, booking.scheduled_time&.strftime("%H:%M")].compact.join(" ") %></span>
-          </div>
-          <h3 class="card-title"><%= booking.booking_number %></h3>
-          <div class="card-meta">
-            <span>🛠 <%= booking.service_listings.map(&:name).to_sentence %></span>
-            <span>🏬 <%= booking.supplier.name %></span>
-          </div>
-          <div class="card-actions">
-            <% if ServiceBooking::TRANSITIONS.fetch(booking.status).include?("cancelled") %>
-              <%= button_to "Cancel", customer_service_booking_path(booking), method: :patch, class: "btn btn-danger" %>
-            <% end %>
-          </div>
-        </article>
+        <%= render "shared/booking_card",
+                   booking: booking,
+                   cancel_path: (customer_service_booking_path(booking) if ServiceBooking::TRANSITIONS.fetch(booking.status).include?("cancelled")) %>
       <% end %>
     </div>
   <% else %>

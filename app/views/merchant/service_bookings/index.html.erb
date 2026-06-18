@@ -4,13 +4,7 @@
   <div class="table-header"><h3 class="table-title">Booking Queue</h3></div>
   <div class="card-grid">
       <% @booking_queue.each do |booking| %>
-        <article class="ui-card">
-          <h3 class="card-title"><%= booking.booking_number %></h3>
-          <div class="card-meta">
-            <span><%= booking.user.full_name %></span>
-            <span class="badge <%= status_badge_class(booking.status) %>"><%= booking.status.titleize %></span>
-          </div>
-        </article>
+        <%= render "shared/booking_card", booking: booking, show_customer: true %>
       <% end %>
       <% if @booking_queue.empty? %>
         <div class="empty-state"><span class="empty-icon">✓</span><span>No bookings waiting for action.</span></div>
@@ -22,13 +16,7 @@
   <div class="table-header"><h3 class="table-title">Upcoming Jobs</h3></div>
   <div class="card-grid">
       <% @upcoming_jobs.each do |booking| %>
-        <article class="ui-card">
-          <h3 class="card-title"><%= booking.service_listings.map(&:name).to_sentence %></h3>
-          <div class="card-meta">
-            <span>📅 <%= booking.scheduled_date %></span>
-            <span><%= booking.scheduled_time&.strftime("%H:%M") %></span>
-          </div>
-        </article>
+        <%= render "shared/booking_card", booking: booking, show_customer: true %>
       <% end %>
       <% if @upcoming_jobs.empty? %>
         <div class="empty-state"><span class="empty-icon">📅</span><span>No upcoming jobs scheduled.</span></div>
@@ -40,7 +28,7 @@
   <div class="table-header"><h3 class="table-title">Calendar</h3></div>
   <div class="card-grid">
       <% @calendar_bookings.each do |date, bookings| %>
-        <article class="ui-card">
+        <article class="ui-card booking-card booking-card--manage">
           <h3 class="card-title"><%= date %></h3>
           <div class="card-meta">📅 <%= bookings.map(&:booking_number).to_sentence %></div>
         </article>
@@ -61,13 +49,13 @@
             <span class="badge <%= status_badge_class(booking.status) %>"><%= booking.status.titleize %></span>
             <span>📅 <%= [booking.scheduled_date, booking.scheduled_time&.strftime("%H:%M")].compact.join(" ") %></span>
           </div>
-          <h3 class="card-title"><%= booking.booking_number %></h3>
+          <h3 class="card-title"><%= booking.service_listings.map(&:service_category).uniq.to_sentence.presence || booking.booking_number %></h3>
           <div class="card-meta">
             <span><%= booking.user.full_name %></span>
-            <span>🛠 <%= booking.service_listings.map(&:name).to_sentence %></span>
+            <span><%= booking.booking_number %></span>
           </div>
           <div class="card-actions">
-            <%= link_to "Estimate PDF", estimate_merchant_service_booking_path(booking), class: "btn btn-secondary", style: "margin-bottom: 0.5rem;" %>
+            <%= link_to "Estimate PDF", estimate_merchant_service_booking_path(booking), class: "btn btn-secondary btn-compact" %>
           </div>
             <% next_statuses = ServiceBooking::TRANSITIONS.fetch(booking.status) %>
             <% if next_statuses.any? %>

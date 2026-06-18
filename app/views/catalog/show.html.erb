@@ -1,9 +1,9 @@
 <% content_for :page_title, @listing.title %>
 
-<div class="table-container">
+<section class="table-container marketplace-detail">
   <div class="table-header">
-    <h3 class="table-title"><%= @listing.title %></h3>
-    <%= link_to "Back to Catalog", catalog_path, class: "btn btn-secondary" %>
+    <h1 class="table-title"><%= @listing.title %></h1>
+    <%= link_to "All products", catalog_path, class: "btn btn-secondary btn-compact" %>
   </div>
 
   <div class="product-hero">
@@ -14,9 +14,9 @@
         <div class="hero-placeholder"><%= ui_initial(@listing.title) %></div>
       <% end %>
       <% if @product.images.attached? %>
-        <div class="market-grid" style="padding: 0; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));">
+        <div class="gallery-grid">
           <% @product.images.each do |image| %>
-            <div class="card-media" style="border-radius: var(--radius-md);"><%= image_tag image, alt: @product.name %></div>
+            <div class="card-media gallery-thumb"><%= image_tag image, alt: @listing.title %></div>
           <% end %>
         </div>
       <% end %>
@@ -38,20 +38,27 @@
             Marketplace
           <% end %>
       </div>
-      <p style="color: var(--muted-text);"><%= @listing.public_description.presence || "No description available." %></p>
+      <% if @listing.public_description.present? %>
+        <p class="detail-description"><%= @listing.public_description %></p>
+      <% end %>
       <%= form_with url: cart_path, method: :post, local: true, class: "stack" do |form| %>
         <%= form.hidden_field :product_id, value: @product.id %>
         <div class="form-group">
           <%= form.label :quantity, class: "form-label" %>
           <%= form.number_field :quantity, value: 1, min: 1, class: "form-input" %>
         </div>
-        <%= form.submit "Add to Cart", class: "btn btn-primary" %>
+        <div class="action-row">
+          <%= form.submit "Add to cart", class: "btn btn-primary" %>
+          <% if @product.supplier %>
+            <%= link_to "View merchant", merchant_storefront_path(@product.supplier), class: "btn btn-secondary" %>
+          <% end %>
+        </div>
       <% end %>
     </aside>
   </div>
-</div>
+</section>
 
-<div class="table-container" style="margin-top: 1.5rem;">
+<section class="table-container detail-section">
   <div class="table-header">
     <h3 class="table-title">Reviews</h3>
   </div>
@@ -68,21 +75,18 @@
       <div class="empty-state"><span class="empty-icon">★</span><span>No reviews yet.</span></div>
     <% end %>
   </div>
-</div>
+</section>
 
-<div class="table-container" style="margin-top: 1.5rem;">
+<section class="table-container detail-section">
   <div class="table-header">
     <h3 class="table-title">Recommended Products</h3>
   </div>
-  <div class="card-grid">
+  <div class="market-grid">
     <% @recommended_products.each do |product| %>
-      <article class="ui-card">
-        <h3 class="card-title"><%= link_to product.name, catalog_product_path(product) %></h3>
-        <div class="price"><%= currency(product.selling_price.to_f) %></div>
-      </article>
+      <%= render "home/product_card", product: product, variant: :compact %>
     <% end %>
     <% if @recommended_products.empty? %>
       <div class="empty-state"><span class="empty-icon">⌕</span><span>No recommendations yet.</span></div>
     <% end %>
   </div>
-</div>
+</section>
