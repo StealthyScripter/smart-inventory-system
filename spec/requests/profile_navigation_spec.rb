@@ -93,19 +93,24 @@ RSpec.describe "Profile navigation", type: :request do
 
     expect(response).to have_http_status(:success)
     expect(doc.at_css("body")["class"]).to include("theme-individual-merchant")
-    expect(doc.at_css(".merchant-profile-page")).to be_present
-    expect(doc.at_css(".profile-company-card")).to be_present
-    expect(response.body).to include("Orders")
-    expect(response.body).to include("Bookings")
-    expect(response.body).to include("Catalog / listings")
-    expect(response.body).not_to include("Team / members")
-    expect(response.body).not_to include("Locations")
-    expect(response.body).not_to include("Access control")
-    expect(response.body).not_to include("Business admin")
+    profile = doc.at_css(".merchant-profile-hub")
+    expect(profile).to be_present
+    expect(profile.at_css(".customer-profile__name").text.strip).to eq("Individual merchant Shop")
+    expect(profile.css(".badge")).to be_empty
+    expect(profile.text).not_to include("Individual Merchant Account")
+    expect(profile.css(".profile-subtitle")).to be_empty
 
-    primary_cards = doc.css(".profile-grid--primary .profile-feature-card")
-    expect(primary_cards.size).to eq(2)
-    expect(primary_cards.map(&:text).join(" ")).to include("Orders", "Bookings")
+    primary_actions = profile.css(".customer-profile__primary-action")
+    expect(primary_actions.map { |action| action.at_css("span").text.strip }).to eq(["Orders", "Bookings"])
+
+    list_labels = profile.css(".customer-profile__row-label").map { |label| label.text.strip }
+    expect(list_labels).to eq(
+      ["Edit profile", "Catalog", "Products", "Inventory", "Inbox", "Notifications", "Analytics", "Settings", "Help", "Contact us", "Sign out"]
+    )
+    expect(profile.text).not_to include("Team")
+    expect(profile.text).not_to include("Locations")
+    expect(profile.text).not_to include("Access control")
+    expect(profile.css(".tabs, .tab-strip, .profile-tabs")).to be_empty
 
     bottom_nav = doc.at_css(".account-bottom-nav")
     expect(bottom_nav.text).to include("Dashboard", "Catalog", "Products", "Inventory", "Profile")
@@ -136,13 +141,46 @@ RSpec.describe "Profile navigation", type: :request do
 
     expect(response).to have_http_status(:success)
     expect(doc.at_css("body")["class"]).to include("theme-enterprise-merchant")
-    expect(response.body).to include("Business admin")
-    expect(response.body).to include("Team / members")
-    expect(response.body).to include("Locations")
-    expect(response.body).to include("Access control")
-    expect(response.body).to include("Edit profile")
-    expect(response.body).to include("Catalog / listings")
-    expect(doc.css(".profile-grid .profile-company-card").size).to eq(1)
+    profile = doc.at_css(".merchant-profile-hub")
+    expect(profile).to be_present
+    expect(profile.at_css(".customer-profile__name").text.strip).to eq("Enterprise merchant Shop")
+    expect(profile.css(".badge")).to be_empty
+    expect(profile.text).not_to include("Enterprise Merchant Account")
+    expect(profile.css(".profile-subtitle")).to be_empty
+
+    list_labels = profile.css(".customer-profile__row-label").map { |label| label.text.strip }
+    expect(list_labels).to eq(
+      ["Edit company profile", "Catalog", "Products", "Inventory", "Team", "Locations", "Access control", "Inbox", "Notifications", "Analytics", "Settings", "Help", "Contact us", "Sign out"]
+    )
+    expect(profile.css(".tabs, .tab-strip, .profile-tabs")).to be_empty
+  end
+
+  it "limits the enterprise employee profile and bottom navigation to permitted links" do
+    owner = create_authenticated_user(role: "customer", email: "merchant.employee.owner@example.com")
+    employee = create_authenticated_user(role: "customer", email: "merchant.employee@example.com")
+    employee_supplier = Supplier.create!(name: "Employee Profile Supplier", default_lead_time_days: 7)
+    account = build_merchant_account(owner: owner, account_type: "enterprise_merchant", supplier_record: employee_supplier)
+    account.account_memberships.create!(user: employee, role: "employee")
+    login_as(employee)
+
+    get merchant_profile_path
+
+    expect(response).to have_http_status(:success)
+    profile = doc.at_css(".merchant-profile-hub")
+    expect(profile).to be_present
+    expect(profile.css(".customer-profile__primary-action").map { |action| action.at_css("span").text.strip }).to eq(["Orders"])
+
+    list_labels = profile.css(".customer-profile__row-label").map { |label| label.text.strip }
+    expect(list_labels).to eq(["Inventory", "Inbox", "Notifications", "Analytics", "Help", "Contact us", "Sign out"])
+    expect(profile.text).not_to include("Catalog")
+    expect(profile.text).not_to include("Products")
+    expect(profile.text).not_to include("Team")
+    expect(profile.text).not_to include("Locations")
+    expect(profile.text).not_to include("Access control")
+    expect(profile.text).not_to include("Settings")
+
+    expect(doc.at_css(".account-bottom-nav").text).to include("Dashboard", "Inventory", "Orders", "Profile")
+    expect(doc.at_css(".account-bottom-nav").text).not_to include("Catalog", "Products")
   end
 
   it "renders modern dashboard cards for individual and enterprise merchants" do

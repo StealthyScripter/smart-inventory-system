@@ -78,11 +78,13 @@ RSpec.describe "UX navigation", type: :request do
     expect(response).to have_http_status(:success)
     expect(response.body).to include("Orders")
     expect(response.body).to include("Bookings")
-    expect(response.body).to include("Team / members")
+    expect(response.body).to include("Team")
     expect(response.body).to include("Locations")
     expect(response.body).to include("Access control")
     expect(response.body).to include("Settings")
-    expect(response.body).to include("theme-enterprise")
+    expect(response.body).to include("theme-enterprise-merchant")
+    expect(response.body).to include("merchant-profile-hub")
+    expect(response.body).not_to include("Enterprise Merchant Account")
   end
 
   it "serves root as the public marketplace landing page for guests" do

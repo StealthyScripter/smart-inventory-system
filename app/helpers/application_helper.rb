@@ -192,13 +192,21 @@ module ApplicationHelper
         { label: "Profile", path: customer_profile_path, icon: :profile, active: request.path.start_with?("/customer") }
       ]
     elsif merchant_navigation?
-      [
-        { label: "Dashboard", path: merchant_root_path, icon: :dashboard, active: current_page?(merchant_root_path) },
-        { label: "Catalog", path: merchant_catalog_path, icon: :catalog, active: request.path.start_with?("/merchant/catalog") },
-        { label: "Products", path: merchant_products_path, icon: :products, active: request.path.start_with?("/merchant/products") },
-        { label: "Inventory", path: merchant_inventory_path, icon: :inventory, active: request.path.start_with?("/merchant/inventory") },
-        { label: "Profile", path: merchant_profile_path, icon: :profile, active: request.path.start_with?("/merchant/profile", "/merchant/members", "/merchant/account_settings", "/locations") }
+      items = [
+        { label: "Dashboard", path: merchant_root_path, icon: :dashboard, active: current_page?(merchant_root_path) }
       ]
+      if can_manage_merchant?(:manage_catalog)
+        items << { label: "Catalog", path: merchant_catalog_path, icon: :catalog, active: request.path.start_with?("/merchant/catalog") }
+        items << { label: "Products", path: merchant_products_path, icon: :products, active: request.path.start_with?("/merchant/products") }
+      end
+      if can_manage_merchant?(:view_inventory) || can_manage_merchant?(:manage_inventory)
+        items << { label: "Inventory", path: merchant_inventory_path, icon: :inventory, active: request.path.start_with?("/merchant/inventory") }
+      end
+      if !can_manage_merchant?(:manage_catalog) && can_manage_merchant?(:view_orders)
+        items << { label: "Orders", path: merchant_orders_path, icon: :orders, active: request.path.start_with?("/merchant/orders") }
+      end
+      items << { label: "Profile", path: merchant_profile_path, icon: :profile, active: request.path.start_with?("/merchant/profile", "/merchant/members", "/merchant/account_settings", "/locations") }
+      items
     else
       []
     end

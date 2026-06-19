@@ -299,10 +299,11 @@ RSpec.describe "Merchant portal", type: :request do
 
       expect(response).to have_http_status(:success)
       expect(response.body).to include("theme-individual-merchant")
-      expect(response.body).to include("Company")
       expect(response.body).to include("Solo Shop")
-      expect(response.body).to include("Brooklyn")
-      expect(response.body).not_to include("Team / members")
+      expect(response.body).to include("merchant-profile-hub")
+      expect(response.body).to include("Edit profile")
+      expect(response.body).not_to include("Individual Merchant Account")
+      expect(response.body).not_to include(">Team<")
       expect(response.body).not_to include("Access control")
       expect(response.body).not_to include(">Locations<")
     end
@@ -326,9 +327,11 @@ RSpec.describe "Merchant portal", type: :request do
 
       expect(response).to have_http_status(:success)
       expect(response.body).to include("theme-enterprise-merchant")
-      expect(response.body).to include("Team / members")
+      expect(response.body).to include("merchant-profile-hub")
+      expect(response.body).to include(">Team<")
       expect(response.body).to include(">Locations<")
       expect(response.body).to include("Access control")
+      expect(response.body).not_to include("Enterprise Merchant Account")
     end
   end
 

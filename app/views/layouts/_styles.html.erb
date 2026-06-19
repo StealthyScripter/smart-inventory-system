@@ -136,6 +136,7 @@
   .app-shell__body {
     display: flex;
     flex: 1 1 auto;
+    flex-direction: column;
     min-width: 0;
   }
 
@@ -193,6 +194,7 @@
   }
 
   .app-main {
+    flex: 1 1 auto;
     min-width: 0;
   }
 
@@ -2120,6 +2122,14 @@
   .customer-profile__row--signout .customer-profile__row-icon {
     background: var(--danger-bg);
     color: var(--danger);
+  }
+
+  .merchant-profile-hub__logo {
+    object-fit: cover;
+  }
+
+  .merchant-profile-hub .customer-profile__primary-actions:empty {
+    display: none;
   }
 
   .message-card {

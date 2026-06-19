@@ -10,6 +10,11 @@ module Merchant
       @orders = OrderItem.where(supplier: @merchant_suppliers).includes(:order, :product, :supplier).order(created_at: :desc).limit(5)
       @bookings = ServiceBooking.where(supplier: @merchant_suppliers).includes(:user, :service_listings).order(created_at: :desc).limit(5)
       @notifications_count = current_user.notifications.unread.count
+      @can_manage_catalog = can_manage_merchant?(:manage_catalog)
+      @can_view_inventory = can_manage_merchant?(:view_inventory) || can_manage_merchant?(:manage_inventory)
+      @can_view_orders = can_manage_merchant?(:view_orders)
+      @can_manage_bookings = can_manage_merchant?(:manage_bookings)
+      @can_edit_profile = can_manage_merchant?(:manage_account_settings)
       @can_manage_team = @merchant_account&.enterprise_merchant? && can_manage_merchant?(:manage_members)
       @can_manage_locations = @merchant_account&.enterprise_merchant? && can_manage_merchant?(:manage_locations)
       @can_manage_settings = @merchant_account&.enterprise_merchant? && can_manage_merchant?(:manage_account_settings)
