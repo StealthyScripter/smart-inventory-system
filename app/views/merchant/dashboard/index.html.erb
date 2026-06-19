@@ -1,36 +1,51 @@
 <% content_for :page_title, "Merchant Dashboard" %>
 
-<div class="action-row" style="margin-bottom: 1rem;">
-  <span class="badge badge-info"><%= merchant_suppliers.map(&:name).to_sentence %></span>
-</div>
+<section class="merchant-page merchant-dashboard">
+  <header class="merchant-page-header">
+    <div>
+      <span class="merchant-page-kicker"><%= merchant_account_label %></span>
+      <h1>Today at <%= merchant_suppliers.map(&:name).to_sentence %></h1>
+      <p>Listings, fulfillment, stock, and services at a glance.</p>
+    </div>
+    <div class="action-row">
+      <%= link_to "Add product", new_merchant_product_path, class: "btn btn-primary" if can_manage_merchant?(:manage_catalog) %>
+      <%= link_to "View orders", merchant_orders_path, class: "btn btn-secondary" if can_manage_merchant?(:view_orders) %>
+    </div>
+  </header>
 
-<div class="stats-grid">
-  <div class="stat-card">
+<div class="stats-grid merchant-metric-grid">
+  <div class="stat-card merchant-metric-card">
+    <%= nav_icon(:products) %>
     <div class="stat-header"><span class="stat-title">Listings</span></div>
     <div class="stat-value"><%= number_with_delimiter(@product_count) %></div>
   </div>
 
-  <div class="stat-card">
+  <div class="stat-card merchant-metric-card">
+    <%= nav_icon(:catalog) %>
     <div class="stat-header"><span class="stat-title">Public Listings</span></div>
     <div class="stat-value"><%= number_with_delimiter(@public_product_count) %></div>
   </div>
 
-  <div class="stat-card">
+  <div class="stat-card merchant-metric-card">
+    <%= nav_icon(:inventory) %>
     <div class="stat-header"><span class="stat-title">Draft / Private</span></div>
     <div class="stat-value"><%= number_with_delimiter(@non_public_product_count) %></div>
   </div>
 
-  <div class="stat-card">
+  <div class="stat-card merchant-metric-card">
+    <%= nav_icon(:orders) %>
     <div class="stat-header"><span class="stat-title">Pending Orders</span></div>
     <div class="stat-value"><%= number_with_delimiter(@pending_orders_count) %></div>
   </div>
 
-  <div class="stat-card">
+  <div class="stat-card merchant-metric-card">
+    <%= nav_icon(:services) %>
     <div class="stat-header"><span class="stat-title">Services</span></div>
     <div class="stat-value"><%= number_with_delimiter(@service_count) %></div>
   </div>
 
-  <div class="stat-card">
+  <div class="stat-card merchant-metric-card">
+    <%= nav_icon(:analytics) %>
     <div class="stat-header"><span class="stat-title">Sales</span></div>
     <div class="stat-value"><%= currency(@sales_summary[:sales_total].to_f) %></div>
   </div>
@@ -164,3 +179,4 @@
     </div>
   </div>
 </div>
+</section>

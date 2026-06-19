@@ -1,5 +1,6 @@
 <% content_for :page_title, "Profile" %>
 
+<section class="merchant-page merchant-profile-page">
 <section class="ui-card profile-hero profile-hero--merchant">
   <div class="profile-hero-copy">
     <span class="badge <%= enterprise_merchant_navigation? ? 'badge-info' : 'badge-secondary' %>"><%= enterprise_merchant_navigation? ? 'Enterprise Merchant' : 'Merchant' %></span>
@@ -133,3 +134,4 @@
     <% end %>
   <% end %>
 </div>
+</section>

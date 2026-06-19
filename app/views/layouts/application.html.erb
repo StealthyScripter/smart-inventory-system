@@ -28,6 +28,9 @@
                   <span class="brand-name">Smart Inventory</span>
                 <% end %>
                 <span class="topbar-title"><%= yield(:page_title).presence || "Dashboard" %></span>
+                <% if merchant_navigation? %>
+                  <span class="account-mode-badge"><%= merchant_account_label %></span>
+                <% end %>
               </div>
 
               <% unless customer_navigation? && current_page?(root_path) %>

@@ -260,6 +260,97 @@
     white-space: nowrap;
   }
 
+  .account-mode-badge {
+    background: var(--accent-soft);
+    border-radius: 999px;
+    color: var(--accent-strong);
+    font-size: 0.72rem;
+    font-weight: 800;
+    padding: 0.3rem 0.6rem;
+    white-space: nowrap;
+  }
+
+  .merchant-page {
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .merchant-page-header {
+    align-items: flex-end;
+    background: linear-gradient(135deg, var(--card-bg), color-mix(in srgb, var(--accent-soft) 42%, var(--card-bg)));
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    gap: var(--space-4);
+    justify-content: space-between;
+    padding: var(--space-5);
+  }
+
+  .merchant-page-header h1 {
+    font-size: clamp(1.45rem, 2.5vw, 2rem);
+    line-height: 1.15;
+    margin: var(--space-1) 0;
+  }
+
+  .merchant-page-header p,
+  .settings-section p {
+    color: var(--muted-text);
+  }
+
+  .merchant-page-kicker {
+    color: var(--accent-strong);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .merchant-metric-card {
+    border-top: 3px solid var(--accent);
+    min-height: 8rem;
+    position: relative;
+  }
+
+  .merchant-metric-card > .nav-icon {
+    color: var(--accent);
+    height: 1.2rem;
+    position: absolute;
+    right: var(--space-4);
+    top: var(--space-4);
+    width: 1.2rem;
+  }
+
+  .enterprise-location-grid {
+    padding: 0;
+  }
+
+  .enterprise-location-card {
+    min-height: 13rem;
+  }
+
+  .settings-card {
+    padding: var(--space-5);
+  }
+
+  .settings-section {
+    border-bottom: 1px solid var(--border-color);
+    display: grid;
+    gap: var(--space-5);
+    grid-template-columns: minmax(180px, 0.35fr) minmax(0, 1fr);
+    margin-bottom: var(--space-5);
+    padding-bottom: var(--space-5);
+  }
+
+  .settings-section h2 {
+    font-size: 1rem;
+    margin-bottom: var(--space-1);
+  }
+
+  .settings-fields {
+    min-width: 0;
+  }
+
   .top-search {
     flex: 1 1 420px;
     max-width: 560px;
@@ -2194,6 +2285,15 @@
 
     .profile-hero {
       flex-direction: column;
+    }
+
+    .merchant-page-header {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .settings-section {
+      grid-template-columns: 1fr;
     }
 
     .profile-hero-actions {

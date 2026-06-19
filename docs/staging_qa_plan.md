@@ -22,6 +22,10 @@ Use `docs/demo_user_matrix.md` for seeded accounts and credentials. Cover one
 guest, one customer, one individual merchant, one enterprise owner, one
 enterprise employee, and one admin in every full regression pass.
 
+Merchant authentication is available at `/merchants/sign_in` and merchant
+registration at `/merchants/sign_up`. Customer authentication is available at
+`/customers/sign_in`.
+
 ## Pass Criteria
 
 - Guest catalog and service browsing expose only public listings.

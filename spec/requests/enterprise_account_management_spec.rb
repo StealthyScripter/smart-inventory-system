@@ -33,6 +33,29 @@ RSpec.describe "Enterprise account management", type: :request do
     expect(account.merchant_profile.reload.default_fulfillment_days).to eq(5)
   end
 
+  it "renders enterprise team, locations, and access settings with the enterprise layout" do
+    owner = build_user("enterprise.layout.owner@example.com")
+    build_merchant_account(owner: owner)
+    Location.create!(name: "Enterprise Layout Location", address: "100 Commerce Way")
+    login_as(owner)
+
+    get merchant_members_path
+    expect(response).to have_http_status(:success)
+    expect(response.body).to include("theme-enterprise-merchant")
+    expect(response.body).to include("Manage enterprise merchant access and roles")
+
+    get locations_path
+    expect(response).to have_http_status(:success)
+    expect(response.body).to include("enterprise-management-page")
+    expect(response.body).to include("enterprise-location-card")
+
+    get edit_merchant_account_settings_path
+    expect(response).to have_http_status(:success)
+    expect(response.body).to include("enterprise-management-page")
+    expect(response.body).to include("Team access")
+    expect(response.body).to include("Catalog defaults")
+  end
+
   it "allows enterprise admins to add existing users as employee members" do
     owner = build_user("member.owner@example.com")
     employee = build_user("member.employee@example.com")

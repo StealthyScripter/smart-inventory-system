@@ -30,6 +30,18 @@ RSpec.describe "Account onboarding", type: :request do
     expect(response).to redirect_to(merchant_root_path)
   end
 
+  it "serves dedicated merchant sign-in and sign-up routes" do
+    get merchants_sign_in_path
+
+    expect(response).to have_http_status(:success)
+    expect(response.body).to include(merchants_sign_up_path)
+
+    get merchants_sign_up_path
+
+    expect(response).to have_http_status(:success)
+    expect(response.body).to include("Create Merchant Account")
+  end
+
   it "creates a customer account and profile during customer signup" do
     expect do
       post customers_sign_up_path, params: { user: user_params("signup.customer@example.com") }

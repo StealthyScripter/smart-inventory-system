@@ -4,6 +4,19 @@ Demo seeds use `DEMO_SEED_CREDENTIAL` when set. In local and staging-only demo
 environments the fallback credential is `password123`. Do not use demo
 credentials in production.
 
+## Demo Login Quick Reference
+
+| Role | Login URL | Email | Password | Expected landing page |
+| --- | --- | --- | --- | --- |
+| Individual merchant | `/merchants/sign_in` | `merchant.construction@example.com` | `password123` | `/merchant` |
+| Enterprise owner/admin | `/merchants/sign_in` | `merchant.hardware@example.com` | `password123` | `/merchant` |
+| Enterprise employee | `/merchants/sign_in` | `merchant.hardware.employee@example.com` | `password123` | `/merchant` |
+| Customer | `/customers/sign_in` | `buyer.contractor@example.com` | `password123` | `/catalog` |
+| Admin | `/login` | `admin@inventory.com` | `password123` | `/` |
+
+When `DEMO_SEED_CREDENTIAL` is set, use that value instead of the local
+fallback password shown above.
+
 ## Platform Users
 
 | Email | Type | Purpose |

@@ -1,5 +1,7 @@
 puts "\nSeeding inventory management data...\n"
 
+demo_seed_credential = ENV.fetch("DEMO_SEED_CREDENTIAL", "password123")
+
 categories = [
   { name: "Electronics", description: "Electronic devices and accessories" },
   { name: "Computing", description: "Computers and office technology" },
@@ -120,8 +122,8 @@ users = [
     last_name: attributes[:last_name],
     role: attributes[:role],
     location: attributes[:location],
-    password: "password123",
-    password_confirmation: "password123"
+    password: demo_seed_credential,
+    password_confirmation: demo_seed_credential
   )
   user
 end

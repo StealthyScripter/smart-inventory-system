@@ -25,7 +25,9 @@
       </div>
 
       <div style="margin-top: 1rem; text-align: center;">
-        <p style="color: #718096;">Don't have an account? <%= link_to "Sign up", signup_path %></p>
+        <p style="color: var(--muted-text);">Don't have an account?
+          <%= link_to "Sign up", @login_context == "merchant" ? merchants_sign_up_path : (@login_context == "customer" ? customers_sign_up_path : signup_path) %>
+        </p>
       </div>
     <% end %>
   </div>

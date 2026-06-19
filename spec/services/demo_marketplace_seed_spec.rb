@@ -15,6 +15,10 @@ RSpec.describe DemoMarketplaceSeed do
     expect(Supplier.find_by(name: "Triangle Construction Supply").merchant_account).to be_individual_merchant
     expect(Supplier.find_by(name: "Oak City Hardware").merchant_account).to be_enterprise_merchant
     expect(User.find_by(email: "merchant.hardware.employee@example.com").account_memberships.first.role).to eq("employee")
+    expect(User.find_by(email: "merchant.construction@example.com").authenticate("password123")).to be_truthy
+    expect(User.find_by(email: "merchant.hardware@example.com").authenticate("password123")).to be_truthy
+    expect(User.find_by(email: "merchant.hardware.employee@example.com").authenticate("password123")).to be_truthy
+    expect(User.find_by(email: "buyer.contractor@example.com").authenticate("password123")).to be_truthy
 
     counts = demo_counts
     described_class.call

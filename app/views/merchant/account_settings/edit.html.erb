@@ -1,12 +1,23 @@
 <% content_for :page_title, "Account Settings" %>
 
-<div class="table-container">
-  <div class="table-header">
-    <h1 class="table-title">Account Settings</h1>
-  </div>
+<section class="merchant-page enterprise-management-page">
+  <header class="merchant-page-header">
+    <div>
+      <span class="merchant-page-kicker">Business administration</span>
+      <h1>Account settings</h1>
+      <p>Company profile, listing defaults, and operating preferences.</p>
+    </div>
+    <%= link_to "Team access", merchant_members_path, class: "btn btn-secondary" %>
+  </header>
 
-  <div style="padding: 2rem;">
+  <div class="ui-card settings-card">
     <%= form_with url: merchant_account_settings_path, method: :patch, local: true do %>
+      <div class="settings-section">
+        <div>
+          <h2>Company profile</h2>
+          <p>Customer-facing identity and contact details.</p>
+        </div>
+        <div class="settings-fields">
       <div class="form-group">
         <%= label_tag "account_name", "Account name", class: "form-label" %>
         <%= text_field_tag "account[name]", @account.name, class: "form-input", required: true %>
@@ -32,7 +43,15 @@
           <%= text_field_tag "merchant_profile[company_size]", @merchant_profile.company_size, class: "form-input" %>
         </div>
       </div>
+        </div>
+      </div>
 
+      <div class="settings-section">
+        <div>
+          <h2>Catalog defaults</h2>
+          <p>Defaults applied when your team creates listings.</p>
+        </div>
+        <div class="settings-fields">
       <div class="grid-2" style="gap: 1rem;">
         <div class="form-group">
           <%= label_tag "merchant_profile_contact_information", "Contact information", class: "form-label" %>
@@ -73,8 +92,10 @@
         <%= label_tag "merchant_profile_default_fulfillment_days", "Fulfillment days", class: "form-label" %>
         <%= number_field_tag "merchant_profile[default_fulfillment_days]", @merchant_profile.default_fulfillment_days, class: "form-input", min: 1 %>
       </div>
+        </div>
+      </div>
 
       <%= submit_tag "Save Settings", class: "btn btn-primary" %>
     <% end %>
   </div>
-</div>
+</section>

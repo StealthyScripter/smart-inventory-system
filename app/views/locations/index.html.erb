@@ -1,41 +1,39 @@
 <% content_for :page_title, "Locations" %>
 
-<div class="table-container">
-  <div class="table-header">
-    <h3 class="table-title">Locations</h3>
+<section class="merchant-page enterprise-management-page">
+  <header class="merchant-page-header">
+    <div>
+      <span class="merchant-page-kicker">Enterprise operations</span>
+      <h1>Locations</h1>
+      <p>Stock coverage, managers, and operating sites.</p>
+    </div>
     <% if can_manage_locations? %>
       <%= link_to "Add Location", new_location_path, class: "btn btn-primary" %>
     <% else %>
       <span class="badge badge-secondary">Read Only</span>
     <% end %>
+  </header>
+
+  <div class="card-grid enterprise-location-grid">
+    <% @locations.each do |location| %>
+      <article class="ui-card enterprise-location-card">
+        <div class="profile-card-head">
+          <%= nav_icon(:locations) %>
+          <h2 class="card-title"><%= link_to location.name, location_path(location) %></h2>
+        </div>
+        <div class="card-meta">
+          <span>📍 <%= location.address.presence || "Address not set" %></span>
+          <span>👤 <%= location.manager&.full_name || "Unassigned" %></span>
+        </div>
+        <div class="summary-row"><span>Units on hand</span><strong><%= number_with_delimiter(location.stock_levels.sum(:current_quantity)) %></strong></div>
+        <div class="card-actions">
+          <% if can_manage_locations? %>
+            <%= link_to "Edit", edit_location_path(location), class: "btn btn-secondary btn-compact" %>
+          <% else %>
+            <%= link_to "View", location_path(location), class: "btn btn-secondary btn-compact" %>
+          <% end %>
+        </div>
+      </article>
+    <% end %>
   </div>
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Address</th>
-        <th>Location Manager</th>
-        <th>Total Units</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% @locations.each do |location| %>
-        <tr>
-          <td><%= link_to location.name, location_path(location) %></td>
-          <td><%= location.address %></td>
-          <td><%= location.manager&.full_name || "Unassigned" %></td>
-          <td><%= location.stock_levels.sum(:current_quantity) %></td>
-          <td>
-            <% if can_manage_locations? %>
-              <%= link_to "Edit", edit_location_path(location), class: "btn btn-secondary",
-                          style: "padding: 0.25rem 0.5rem; font-size: 0.875rem;" %>
-            <% else %>
-              <span style="color: #718096; font-size: 0.875rem;">View</span>
-            <% end %>
-          </td>
-        </tr>
-      <% end %>
-    </tbody>
-  </table>
-</div>
+</section>

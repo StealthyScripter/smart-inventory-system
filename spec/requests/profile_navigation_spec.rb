@@ -17,9 +17,9 @@ RSpec.describe "Profile navigation", type: :request do
     Nokogiri::HTML(response.body)
   end
 
-  def build_merchant_account(owner:, account_type:)
+  def build_merchant_account(owner:, account_type:, supplier_record: supplier)
     account = Account.create_with_owner!(creator: owner, name: "#{account_type.humanize} Account", account_type: account_type)
-    MerchantProfile.create!(account: account, supplier: supplier, display_name: "#{account_type.humanize} Shop")
+    MerchantProfile.create!(account: account, supplier: supplier_record, display_name: "#{account_type.humanize} Shop")
     account
   end
 
@@ -92,13 +92,16 @@ RSpec.describe "Profile navigation", type: :request do
     get merchant_profile_path
 
     expect(response).to have_http_status(:success)
-    expect(response.body).to include("theme-merchant")
+    expect(doc.at_css("body")["class"]).to include("theme-individual-merchant")
+    expect(doc.at_css(".merchant-profile-page")).to be_present
+    expect(doc.at_css(".profile-company-card")).to be_present
     expect(response.body).to include("Orders")
     expect(response.body).to include("Bookings")
     expect(response.body).to include("Catalog / listings")
     expect(response.body).not_to include("Team / members")
     expect(response.body).not_to include("Locations")
     expect(response.body).not_to include("Access control")
+    expect(response.body).not_to include("Business admin")
 
     primary_cards = doc.css(".profile-grid--primary .profile-feature-card")
     expect(primary_cards.size).to eq(2)
@@ -132,13 +135,42 @@ RSpec.describe "Profile navigation", type: :request do
     get merchant_profile_path
 
     expect(response).to have_http_status(:success)
-    expect(response.body).to include("theme-enterprise")
+    expect(doc.at_css("body")["class"]).to include("theme-enterprise-merchant")
+    expect(response.body).to include("Business admin")
     expect(response.body).to include("Team / members")
     expect(response.body).to include("Locations")
     expect(response.body).to include("Access control")
     expect(response.body).to include("Edit profile")
     expect(response.body).to include("Catalog / listings")
     expect(doc.css(".profile-grid .profile-company-card").size).to eq(1)
+  end
+
+  it "renders modern dashboard cards for individual and enterprise merchants" do
+    individual = create_authenticated_user(role: "supplier", email: "dashboard.individual@example.com")
+    build_merchant_account(owner: individual, account_type: "individual_merchant")
+    login_as(individual)
+
+    get merchant_root_path
+
+    expect(response).to have_http_status(:success)
+    expect(doc.at_css("body")["class"]).to include("theme-individual-merchant")
+    expect(doc.at_css(".merchant-dashboard .merchant-page-header")).to be_present
+    expect(doc.css(".merchant-metric-card").size).to eq(6)
+    expect(response.body).not_to include("Team")
+    expect(response.body).not_to include("Settings")
+
+    enterprise = create_authenticated_user(role: "customer", email: "dashboard.enterprise@example.com")
+    enterprise_supplier = Supplier.create!(name: "Dashboard Enterprise Supplier", default_lead_time_days: 7)
+    build_merchant_account(owner: enterprise, account_type: "enterprise_merchant", supplier_record: enterprise_supplier)
+    login_as(enterprise)
+
+    get merchant_root_path
+
+    expect(response).to have_http_status(:success)
+    expect(doc.at_css("body")["class"]).to include("theme-enterprise-merchant")
+    expect(doc.at_css(".merchant-dashboard .merchant-page-header")).to be_present
+    expect(response.body).to include("Team")
+    expect(response.body).to include("Settings")
   end
 
   it "removes breadcrumbs and secondary search bars from marketplace pages" do

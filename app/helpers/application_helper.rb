@@ -104,14 +104,6 @@ module ApplicationHelper
     false
   end
 
-  def account_theme_class
-    return "theme-enterprise-merchant" if current_merchant_account&.enterprise_merchant?
-    return "theme-individual-merchant" if current_merchant_account&.individual_merchant?
-    return "theme-customer" if current_user&.customer? || current_customer_account&.customer?
-
-    "theme-operator"
-  end
-
   def marketplace_home_theme_class
     return "theme-enterprise" if current_merchant_account&.enterprise_merchant?
     return "theme-merchant" if current_merchant_account.present? || current_user&.supplier_user?
@@ -179,7 +171,7 @@ module ApplicationHelper
   end
 
   def customer_navigation?
-    customer?
+    customer? && current_merchant_account.blank?
   end
 
   def merchant_navigation?
@@ -193,19 +185,19 @@ module ApplicationHelper
   def account_navigation_items
     if customer_navigation?
       [
-        { label: "Home", path: root_path, icon: :home },
-        { label: "Shop", path: catalog_path, icon: :catalog },
-        { label: "Services", path: services_path, icon: :services },
-        { label: "Cart", path: cart_path, icon: :cart },
-        { label: "Profile", path: customer_profile_path, icon: :profile }
+        { label: "Home", path: root_path, icon: :home, active: current_page?(root_path) },
+        { label: "Shop", path: catalog_path, icon: :catalog, active: request.path.start_with?("/catalog") },
+        { label: "Services", path: services_path, icon: :services, active: request.path.start_with?("/services") },
+        { label: "Cart", path: cart_path, icon: :cart, active: current_page?(cart_path) },
+        { label: "Profile", path: customer_profile_path, icon: :profile, active: request.path.start_with?("/customer") }
       ]
     elsif merchant_navigation?
       [
-        { label: "Dashboard", path: merchant_root_path, icon: :dashboard },
-        { label: "Catalog", path: merchant_catalog_path, icon: :catalog },
-        { label: "Products", path: merchant_products_path, icon: :products },
-        { label: "Inventory", path: merchant_inventory_path, icon: :inventory },
-        { label: "Profile", path: merchant_profile_path, icon: :profile }
+        { label: "Dashboard", path: merchant_root_path, icon: :dashboard, active: current_page?(merchant_root_path) },
+        { label: "Catalog", path: merchant_catalog_path, icon: :catalog, active: request.path.start_with?("/merchant/catalog") },
+        { label: "Products", path: merchant_products_path, icon: :products, active: request.path.start_with?("/merchant/products") },
+        { label: "Inventory", path: merchant_inventory_path, icon: :inventory, active: request.path.start_with?("/merchant/inventory") },
+        { label: "Profile", path: merchant_profile_path, icon: :profile, active: request.path.start_with?("/merchant/profile", "/merchant/members", "/merchant/account_settings", "/locations") }
       ]
     else
       []
@@ -251,6 +243,12 @@ module ApplicationHelper
     content_tag :svg, class: "nav-icon nav-icon--#{name}", viewBox: "0 0 24 24", aria: { hidden: true }, focusable: false do
       tag.path(d: path_data.fetch(name))
     end
+  end
+
+  def merchant_account_label
+    return "Business admin" if enterprise_merchant_navigation?
+
+    "Seller workspace"
   end
 
   def role_badge(user)

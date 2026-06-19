@@ -56,7 +56,7 @@ module Authorization
   end
 
   def can_manage_locations?
-    admin? || regional_manager?
+    admin? || regional_manager? || can_manage_merchant?(:manage_locations)
   end
 
   def can_manage_suppliers?
@@ -123,7 +123,7 @@ module Authorization
   end
 
   def require_back_office_access
-    return if can_access_back_office?
+    return if can_access_back_office? || can_manage_merchant?(:manage_locations)
 
     render plain: "You don't have permission to access inventory management.", status: :forbidden
   end

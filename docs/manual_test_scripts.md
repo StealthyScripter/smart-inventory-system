@@ -39,7 +39,8 @@
 
 ## Enterprise Merchant
 
-1. Sign in as `merchant.hardware@example.com`.
+1. Sign in at `/merchants/sign_in` as `merchant.hardware@example.com` using
+   `password123` in local demo environments.
 2. Confirm Team and Settings are visible.
 3. Add an existing user as a member and confirm default role is employee.
 4. Promote and demote a member.
@@ -50,7 +51,8 @@
 
 ## Admin
 
-1. Sign in as `admin@inventory.com`.
+1. Sign in at `/login` as `admin@inventory.com` using `password123` in local
+   demo environments.
 2. Visit `/admin/moderation`.
 3. Hide and approve a listing.
 4. Hide and approve a review.
